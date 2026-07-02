@@ -488,8 +488,15 @@ create policy "lesson_images_storage_insert" on storage.objects
     bucket_id = 'lesson-images'
     and auth.role() = 'authenticated'
     and (
-      exists (select 1 from public.projects p where p.id = ((storage.foldername(name))[1])::uuid and p.company_id = public.my_company_id())
-      or public.is_project_entrepreneur(((storage.foldername(name))[1])::uuid)
+      -- storage.objects.name must be qualified here: inside this subquery,
+      -- `name` would otherwise resolve to projects.name (also a `name` column)
+      -- instead of the uploaded file's path, silently breaking this check.
+      exists (
+        select 1 from public.projects p
+        where p.id = ((storage.foldername(storage.objects.name))[1])::uuid
+          and p.company_id = public.my_company_id()
+      )
+      or public.is_project_entrepreneur(((storage.foldername(storage.objects.name))[1])::uuid)
     )
   );
 
