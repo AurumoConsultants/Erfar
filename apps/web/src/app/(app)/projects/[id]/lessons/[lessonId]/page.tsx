@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { LESSON_TYPES } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
 import DeleteLessonButton from './DeleteLessonButton'
 
 export default async function LessonDetailPage({ params }: { params: Promise<{ id: string; lessonId: string }> }) {
@@ -17,6 +17,7 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
   if (!lesson) notFound()
 
   const typeInfo = LESSON_TYPES.find(t => t.value === lesson.type)!
+  const phaseInfo = CONSTRUCTION_PHASES.find(p => p.value === lesson.construction_phase)
   const tags = (lesson.tags ?? []).map((lt: any) => lt.tag).filter(Boolean)
   const images = lesson.images ?? []
 
@@ -56,6 +57,10 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
         </div>
 
         {lesson.description && <p className="text-gray-700 whitespace-pre-wrap">{lesson.description}</p>}
+
+        {phaseInfo && (
+          <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{phaseInfo.label}</span>
+        )}
 
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2">

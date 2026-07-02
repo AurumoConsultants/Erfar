@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
 
 const statusLabels: Record<string, string> = {
   active: 'Aktivt',
@@ -10,7 +10,6 @@ const statusLabels: Record<string, string> = {
 
 const categoryTypeLabel = (v: string) => PROJECT_CATEGORY_TYPES.find(c => c.value === v)?.label ?? v
 const categorySubtypeLabel = (v: string) => PROJECT_CATEGORY_SUBTYPES.find(c => c.value === v)?.label ?? v
-const phaseLabel = (v: string) => CONSTRUCTION_PHASES.find(c => c.value === v)?.label ?? v
 
 export default async function ProjectsPage() {
   const supabase = await createClient()
@@ -19,7 +18,7 @@ export default async function ProjectsPage() {
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('id, name, location, status, start_date, end_date, construction_phase, category_type, category_subtype')
+    .select('id, name, location, status, start_date, end_date, category_type, category_subtype')
     .order('created_at', { ascending: false })
 
   return (
@@ -43,7 +42,7 @@ export default async function ProjectsPage() {
             </div>
             {p.location && <p className="text-sm text-gray-500 mt-1">{p.location}</p>}
             <p className="text-xs text-gray-400 mt-2">
-              {phaseLabel(p.construction_phase)} · {categoryTypeLabel(p.category_type)} · {categorySubtypeLabel(p.category_subtype)}
+              {categoryTypeLabel(p.category_type)} · {categorySubtypeLabel(p.category_subtype)}
             </p>
           </Link>
         ))}

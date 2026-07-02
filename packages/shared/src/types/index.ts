@@ -32,7 +32,6 @@ export interface Project {
   start_date: string | null
   end_date: string | null
   status: ProjectStatus
-  construction_phase: ConstructionPhase
   category_type: ProjectCategoryType
   category_subtype: ProjectCategorySubtype
   created_by: string | null
@@ -88,6 +87,7 @@ export interface Lesson {
   id: string
   project_id: string
   type: LessonType
+  construction_phase: ConstructionPhase
   title: string
   description: string | null
   created_by: string

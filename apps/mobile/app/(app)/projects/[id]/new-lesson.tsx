@@ -16,8 +16,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
 import { t } from '@/lib/i18n'
-import { LESSON_TYPES, SUGGESTED_TAGS } from '@erfar/shared'
-import type { LessonType } from '@erfar/shared'
+import { LESSON_TYPES, SUGGESTED_TAGS, CONSTRUCTION_PHASES } from '@erfar/shared'
+import type { LessonType, ConstructionPhase } from '@erfar/shared'
 
 export default function NewLessonScreen() {
   const { id: projectId } = useLocalSearchParams<{ id: string }>()
@@ -26,6 +26,7 @@ export default function NewLessonScreen() {
   const router = useRouter()
 
   const [type, setType] = useState<LessonType>('challenge')
+  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(CONSTRUCTION_PHASES[0].value)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [tagInput, setTagInput] = useState('')
@@ -95,6 +96,7 @@ export default function NewLessonScreen() {
         .insert({
           project_id: projectId,
           type,
+          construction_phase: constructionPhase,
           title: title.trim(),
           description: description.trim() || null,
           created_by: profile.id,
@@ -179,6 +181,21 @@ export default function NewLessonScreen() {
           >
             <Text style={[styles.typeButtonText, type === lt.value && styles.typeButtonTextActive]}>
               {lt.icon} {tr.lesson.types[lt.value]}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Text style={styles.label}>Var i byggprocessen</Text>
+      <View style={styles.phaseRow}>
+        {CONSTRUCTION_PHASES.map((p) => (
+          <TouchableOpacity
+            key={p.value}
+            style={[styles.phaseButton, constructionPhase === p.value && styles.phaseButtonActive]}
+            onPress={() => setConstructionPhase(p.value)}
+          >
+            <Text style={[styles.phaseButtonText, constructionPhase === p.value && styles.typeButtonTextActive]}>
+              {p.label}
             </Text>
           </TouchableOpacity>
         ))}
@@ -301,6 +318,27 @@ const styles = StyleSheet.create({
   },
   typeButtonTextActive: {
     color: '#fff',
+  },
+  phaseRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  phaseButton: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  phaseButtonActive: {
+    backgroundColor: '#1d4ed8',
+    borderColor: '#1d4ed8',
+  },
+  phaseButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
   },
   tagRow: {
     flexDirection: 'row',

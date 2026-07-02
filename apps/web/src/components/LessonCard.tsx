@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LESSON_TYPES } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 
 interface LessonCardProps {
@@ -9,6 +9,7 @@ interface LessonCardProps {
 
 export default function LessonCard({ lesson, showProject }: LessonCardProps) {
   const typeInfo = LESSON_TYPES.find(t => t.value === lesson.type)!
+  const phaseInfo = CONSTRUCTION_PHASES.find(p => p.value === lesson.construction_phase)
 
   return (
     <Link
@@ -32,6 +33,9 @@ export default function LessonCard({ lesson, showProject }: LessonCardProps) {
       <div className="flex flex-wrap items-center gap-2 mt-3">
         {showProject && lesson.project && (
           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{lesson.project.name}</span>
+        )}
+        {phaseInfo && (
+          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{phaseInfo.label}</span>
         )}
         {lesson.tags?.map(tag => (
           <span key={tag.id} className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{tag.name}</span>

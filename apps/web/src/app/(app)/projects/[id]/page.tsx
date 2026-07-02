@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import LessonCard from '@/components/LessonCard'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 
 const statusLabels: Record<string, string> = {
@@ -13,7 +13,6 @@ const statusLabels: Record<string, string> = {
 
 const categoryTypeLabel = (v: string) => PROJECT_CATEGORY_TYPES.find(c => c.value === v)?.label ?? v
 const categorySubtypeLabel = (v: string) => PROJECT_CATEGORY_SUBTYPES.find(c => c.value === v)?.label ?? v
-const phaseLabel = (v: string) => CONSTRUCTION_PHASES.find(c => c.value === v)?.label ?? v
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -57,9 +56,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <div className="flex flex-wrap gap-2 mt-2">
             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
               {statusLabels[project.status] ?? project.status}
-            </span>
-            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
-              {phaseLabel(project.construction_phase)}
             </span>
             <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
               {categoryTypeLabel(project.category_type)} · {categorySubtypeLabel(project.category_subtype)}

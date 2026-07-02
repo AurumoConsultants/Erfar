@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import { lessonSchema, type LessonFormValues } from '@/lib/validations/lesson'
-import { LESSON_TYPES } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 import TagInput from './TagInput'
 import PhotoUploader from './PhotoUploader'
@@ -27,6 +27,7 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<LessonFormValues>({
     defaultValues: {
       type: lesson?.type ?? 'success',
+      construction_phase: lesson?.construction_phase ?? CONSTRUCTION_PHASES[0].value,
       title: lesson?.title ?? '',
       description: lesson?.description ?? '',
       tags: lesson?.tags?.map(t => t.name) ?? [],
@@ -34,6 +35,7 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
   })
 
   const type = watch('type')
+  const constructionPhase = watch('construction_phase')
   const tags = watch('tags')
 
   async function onSubmit(values: LessonFormValues) {
@@ -52,7 +54,12 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
       if (lessonId) {
         const { error: updateError } = await supabase
           .from('lessons')
-          .update({ type: values.type, title: values.title, description: values.description || null })
+          .update({
+            type: values.type,
+            construction_phase: values.construction_phase,
+            title: values.title,
+            description: values.description || null,
+          })
           .eq('id', lessonId)
         if (updateError) throw updateError
 
@@ -63,6 +70,7 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
           .insert({
             project_id: projectId,
             type: values.type,
+            construction_phase: values.construction_phase,
             title: values.title,
             description: values.description || null,
             created_by: user.id,
@@ -119,6 +127,26 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
               style={type === lt.value ? { backgroundColor: lt.color } : undefined}
             >
               {lt.icon} {lt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
+        <div className="grid grid-cols-5 gap-1.5">
+          {CONSTRUCTION_PHASES.map(p => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => setValue('construction_phase', p.value)}
+              className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
+                constructionPhase === p.value
+                  ? 'bg-blue-700 text-white border-blue-700'
+                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {p.label}
             </button>
           ))}
         </div>

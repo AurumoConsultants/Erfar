@@ -3,7 +3,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 import { t } from '@/lib/i18n'
-import { LESSON_TYPES } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 
 export default function LessonDetailScreen() {
@@ -60,6 +60,7 @@ export default function LessonDetailScreen() {
   }
 
   const meta = LESSON_TYPES.find((lt) => lt.value === lesson.type)
+  const phaseInfo = CONSTRUCTION_PHASES.find((p) => p.value === lesson.construction_phase)
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -74,6 +75,14 @@ export default function LessonDetailScreen() {
         <Text style={styles.metaText}>{lesson.author?.full_name ?? ''}</Text>
         <Text style={styles.metaText}>{new Date(lesson.created_at).toLocaleDateString('sv-SE')}</Text>
       </View>
+
+      {phaseInfo ? (
+        <View style={styles.tagRow}>
+          <View style={styles.tagChip}>
+            <Text style={styles.tagText}>{phaseInfo.label}</Text>
+          </View>
+        </View>
+      ) : null}
 
       {lesson.tags && lesson.tags.length > 0 ? (
         <View style={styles.tagRow}>

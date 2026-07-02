@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
-import type { ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
+import type { ProjectCategoryType, ProjectCategorySubtype } from '@erfar/shared'
 
 export default function NewProjectPage() {
   const router = useRouter()
@@ -14,7 +14,6 @@ export default function NewProjectPage() {
   const [location, setLocation] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(CONSTRUCTION_PHASES[0].value)
   const [categoryType, setCategoryType] = useState<ProjectCategoryType>(PROJECT_CATEGORY_TYPES[0].value)
   const [categorySubtype, setCategorySubtype] = useState<ProjectCategorySubtype>(PROJECT_CATEGORY_SUBTYPES[0].value)
   const [error, setError] = useState('')
@@ -38,7 +37,6 @@ export default function NewProjectPage() {
         location: location || null,
         start_date: startDate || null,
         end_date: endDate || null,
-        construction_phase: constructionPhase,
         category_type: categoryType,
         category_subtype: categorySubtype,
         created_by: user!.id,
@@ -69,25 +67,6 @@ export default function NewProjectPage() {
           <label className="block text-sm font-medium mb-1">Plats</label>
           <input value={location} onChange={e => setLocation(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
-          <div className="grid grid-cols-5 gap-1.5">
-            {CONSTRUCTION_PHASES.map(p => (
-              <button
-                key={p.value}
-                type="button"
-                onClick={() => setConstructionPhase(p.value)}
-                className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
-                  constructionPhase === p.value
-                    ? 'bg-blue-700 text-white border-blue-700'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

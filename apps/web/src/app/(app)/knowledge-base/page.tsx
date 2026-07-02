@@ -36,6 +36,7 @@ export default function KnowledgeBasePage() {
     if (query.trim()) q = q.textSearch('search_vector', query.trim(), { type: 'websearch', config: 'swedish' })
     if (type !== 'all') q = q.eq('type', type)
     if (projectId !== 'all') q = q.eq('project_id', projectId)
+    if (constructionPhase !== 'all') q = q.eq('construction_phase', constructionPhase)
 
     const { data } = await q
     let rows: Lesson[] = (data ?? []).map((l: any) => ({
@@ -45,7 +46,6 @@ export default function KnowledgeBasePage() {
     if (tag) rows = rows.filter(l => l.tags?.some(t => t.name === tag))
     if (categoryType !== 'all') rows = rows.filter(l => l.project?.category_type === categoryType)
     if (categorySubtype !== 'all') rows = rows.filter(l => l.project?.category_subtype === categorySubtype)
-    if (constructionPhase !== 'all') rows = rows.filter(l => l.project?.construction_phase === constructionPhase)
 
     setLessons(rows)
     setLoading(false)
