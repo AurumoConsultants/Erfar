@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+:root {
+  --color-challenge: #d97706;
+  --color-success: #16a34a;
+}

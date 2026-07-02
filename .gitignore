@@ -1,0 +1,15 @@
+node_modules
+.next
+.expo
+dist
+build
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+Thumbs.db
+.supabase
+.claude/settings.local.json
+87332.pdf
+Authenticator/

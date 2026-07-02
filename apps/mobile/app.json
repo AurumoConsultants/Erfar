@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Erfar",
+    "slug": "erfar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "erfar",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1d4ed8"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        { "photosPermission": "Erfar behöver åtkomst till dina foton för att bifoga bilder till återkoppling." }
+      ]
+    ],
+    "android": {
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#1d4ed8" },
+      "package": "se.erfar.app"
+    },
+    "ios": {
+      "bundleIdentifier": "se.erfar.app",
+      "supportsTablet": true
+    }
+  }
+}
