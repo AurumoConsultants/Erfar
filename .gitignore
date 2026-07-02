@@ -11,5 +11,6 @@ build
 Thumbs.db
 .supabase
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 87332.pdf
 Authenticator/

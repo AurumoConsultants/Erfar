@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useI18n } from '@/lib/i18n'
@@ -30,7 +31,9 @@ export default function Navbar({ profile }: NavbarProps) {
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
       <div className="flex items-center gap-6">
-        <Link href="/dashboard" className="text-blue-700 font-bold text-lg">Erfar</Link>
+        <Link href="/dashboard" className="flex items-center">
+          <Image src="/logo.png" alt="Erfar" width={110} height={35} className="h-8 w-auto" priority />
+        </Link>
         {links.map(l => (
           <Link key={l.href} href={l.href}
             className={`text-sm font-medium transition ${pathname.startsWith(l.href) ? 'text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}>

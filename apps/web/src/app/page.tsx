@@ -1,10 +1,13 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 to-blue-700 text-white px-4">
       <div className="max-w-2xl text-center space-y-6">
-        <h1 className="text-5xl font-bold tracking-tight">Erfar</h1>
+        <div className="inline-block bg-white rounded-2xl px-8 py-6">
+          <Image src="/logo.png" alt="Erfar" width={340} height={107} priority />
+        </div>
         <p className="text-xl text-blue-100">
           Kunskapsbank för lärdomar från byggprojekt
         </p>
