@@ -12,6 +12,7 @@
     "@erfar/shared": "workspace:*",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
+    "@vercel/analytics": "^2.0.1",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "next": "15.3.8",
