@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
-import type { Project, ProjectCategoryType, ProjectCategorySubtype } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
+import type { Project, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase } from '@erfar/shared'
 
 export default function EditProjectPage() {
   const router = useRouter()
@@ -35,6 +35,7 @@ export default function EditProjectPage() {
         start_date: project.start_date,
         end_date: project.end_date,
         status: project.status,
+        construction_phase: project.construction_phase,
         category_type: project.category_type,
         category_subtype: project.category_subtype,
       })
@@ -65,6 +66,25 @@ export default function EditProjectPage() {
           <label className="block text-sm font-medium mb-1">Plats</label>
           <input value={project.location ?? ''} onChange={e => setProject({ ...project, location: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
+          <div className="grid grid-cols-5 gap-1.5">
+            {CONSTRUCTION_PHASES.map(p => (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => setProject({ ...project, construction_phase: p.value as ConstructionPhase })}
+                className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
+                  project.construction_phase === p.value
+                    ? 'bg-blue-700 text-white border-blue-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

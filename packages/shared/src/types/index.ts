@@ -5,6 +5,7 @@ export type InviteRole = 'entrepreneur' | 'spectator_project' | 'spectator_compa
 export type MemberRole = 'entrepreneur' | 'spectator'
 export type ProjectCategoryType = 'nybyggnation' | 'renovering' | 'service'
 export type ProjectCategorySubtype = 'bostader' | 'kontor' | 'lokaler' | 'ovrigt'
+export type ConstructionPhase = 'idea_stage' | 'early_stages' | 'design' | 'execution' | 'management'
 
 export interface Company {
   id: string
@@ -31,6 +32,7 @@ export interface Project {
   start_date: string | null
   end_date: string | null
   status: ProjectStatus
+  construction_phase: ConstructionPhase
   category_type: ProjectCategoryType
   category_subtype: ProjectCategorySubtype
   created_by: string | null

@@ -45,6 +45,7 @@ export default {
     inviteEntrepreneur: 'Bjud in entreprenör',
     inviteSpectator: 'Bjud in åskådare (endast detta projekt)',
     category: 'Kategori',
+    constructionPhase: 'Var i byggprocessen',
     categoryType: 'Typ av projekt',
     categorySubtype: 'Kategori',
     statuses: {
@@ -74,6 +75,7 @@ export default {
     filterTag: 'Tagg',
     filterProject: 'Projekt',
     filterCategory: 'Kategori',
+    filterPhase: 'Var i byggprocessen',
     noResults: 'Inga lärdomar hittades',
   },
   invite: {

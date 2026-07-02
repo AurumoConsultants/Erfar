@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import SearchFilters from '@/components/SearchFilters'
 import LessonCard from '@/components/LessonCard'
-import type { Lesson, LessonType, Project, ProjectCategoryType, ProjectCategorySubtype, Tag } from '@erfar/shared'
+import type { Lesson, LessonType, Project, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase, Tag } from '@erfar/shared'
 
 export default function KnowledgeBasePage() {
   const supabase = createClient()
@@ -19,6 +19,7 @@ export default function KnowledgeBasePage() {
   const [projectId, setProjectId] = useState<string | 'all'>('all')
   const [categoryType, setCategoryType] = useState<ProjectCategoryType | 'all'>('all')
   const [categorySubtype, setCategorySubtype] = useState<ProjectCategorySubtype | 'all'>('all')
+  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase | 'all'>('all')
 
   useEffect(() => {
     supabase.from('projects').select('*').then(({ data }) => setProjects(data ?? []))
@@ -44,10 +45,11 @@ export default function KnowledgeBasePage() {
     if (tag) rows = rows.filter(l => l.tags?.some(t => t.name === tag))
     if (categoryType !== 'all') rows = rows.filter(l => l.project?.category_type === categoryType)
     if (categorySubtype !== 'all') rows = rows.filter(l => l.project?.category_subtype === categorySubtype)
+    if (constructionPhase !== 'all') rows = rows.filter(l => l.project?.construction_phase === constructionPhase)
 
     setLessons(rows)
     setLoading(false)
-  }, [query, type, projectId, tag, categoryType, categorySubtype])
+  }, [query, type, projectId, tag, categoryType, categorySubtype, constructionPhase])
 
   useEffect(() => { load() }, [load])
 
@@ -66,6 +68,7 @@ export default function KnowledgeBasePage() {
         projects={projects}
         categoryType={categoryType} onCategoryTypeChange={setCategoryType}
         categorySubtype={categorySubtype} onCategorySubtypeChange={setCategorySubtype}
+        constructionPhase={constructionPhase} onConstructionPhaseChange={setConstructionPhase}
       />
 
       <div className="space-y-3">

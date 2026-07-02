@@ -1,4 +1,4 @@
-import type { LessonType, ProjectCategoryType, ProjectCategorySubtype } from '../types'
+import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase } from '../types'
 
 export const LESSON_TYPES: {
   value: LessonType
@@ -23,6 +23,15 @@ export const SUGGESTED_TAGS = [
   'arbetsmiljö',
   'dokumentation',
 ] as const
+
+// "Var i byggprocessen" — which phase of the construction process the project is in.
+export const CONSTRUCTION_PHASES: { value: ConstructionPhase; label: string }[] = [
+  { value: 'idea_stage', label: 'Idéstadie' },
+  { value: 'early_stages', label: 'Tidiga skeden' },
+  { value: 'design', label: 'Projektering' },
+  { value: 'execution', label: 'Utförande' },
+  { value: 'management', label: 'Förvaltning' },
+]
 
 export const PROJECT_CATEGORY_TYPES: { value: ProjectCategoryType; label: string }[] = [
   { value: 'nybyggnation', label: 'Nybyggnation' },

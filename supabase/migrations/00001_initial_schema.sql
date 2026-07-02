@@ -18,6 +18,8 @@ create type public.member_role as enum ('entrepreneur', 'spectator');
 create type public.project_category_type as enum ('nybyggnation', 'renovering', 'service');
 -- Same four subtypes apply under every category_type.
 create type public.project_category_subtype as enum ('bostader', 'kontor', 'lokaler', 'ovrigt');
+-- "Var i byggprocessen" — which phase of the construction process the project is in.
+create type public.construction_phase as enum ('idea_stage', 'early_stages', 'design', 'execution', 'management');
 
 -- ============================================================
 -- COMPANIES (tenants, owned by a client)
@@ -56,6 +58,7 @@ create table public.projects (
   start_date  date,
   end_date    date,
   status      public.project_status not null default 'active',
+  construction_phase public.construction_phase not null,
   category_type    public.project_category_type not null,
   category_subtype public.project_category_subtype not null,
   created_by  uuid references public.profiles(id) on delete set null,

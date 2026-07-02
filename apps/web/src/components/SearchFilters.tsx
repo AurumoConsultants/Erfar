@@ -1,7 +1,7 @@
 'use client'
 
-import { LESSON_TYPES, PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
-import type { LessonType, Project, ProjectCategoryType, ProjectCategorySubtype } from '@erfar/shared'
+import { LESSON_TYPES, PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
+import type { LessonType, Project, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase } from '@erfar/shared'
 
 interface SearchFiltersProps {
   query: string
@@ -18,6 +18,8 @@ interface SearchFiltersProps {
   onCategoryTypeChange: (c: ProjectCategoryType | 'all') => void
   categorySubtype: ProjectCategorySubtype | 'all'
   onCategorySubtypeChange: (c: ProjectCategorySubtype | 'all') => void
+  constructionPhase: ConstructionPhase | 'all'
+  onConstructionPhaseChange: (c: ConstructionPhase | 'all') => void
 }
 
 export default function SearchFilters({
@@ -27,6 +29,7 @@ export default function SearchFilters({
   projectId, onProjectChange, projects,
   categoryType, onCategoryTypeChange,
   categorySubtype, onCategorySubtypeChange,
+  constructionPhase, onConstructionPhaseChange,
 }: SearchFiltersProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
@@ -50,6 +53,13 @@ export default function SearchFilters({
           <option value="all">Alla projekt</option>
           {projects.map(p => (
             <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        <select value={constructionPhase} onChange={e => onConstructionPhaseChange(e.target.value as ConstructionPhase | 'all')}
+          className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+          <option value="all">Var i byggprocessen (alla)</option>
+          {CONSTRUCTION_PHASES.map(p => (
+            <option key={p.value} value={p.value}>{p.label}</option>
           ))}
         </select>
         <select value={categoryType} onChange={e => onCategoryTypeChange(e.target.value as ProjectCategoryType | 'all')}
