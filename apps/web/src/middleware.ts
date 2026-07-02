@@ -7,7 +7,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isGateRoute = pathname === '/gate' || pathname.startsWith('/api/gate')
 
-  if (!isGateRoute && request.cookies.get(GATE_COOKIE)?.value !== 'granted') {
+  if (isGateRoute) {
+    return NextResponse.next()
+  }
+
+  if (request.cookies.get(GATE_COOKIE)?.value !== 'granted') {
     const url = new URL('/gate', request.url)
     url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
