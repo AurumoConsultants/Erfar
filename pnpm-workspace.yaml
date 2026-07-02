@@ -2,8 +2,6 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
-overrides:
-  '@types/react': '^18.3.12'
 allowBuilds:
   core-js: true
   sharp: true
