@@ -26,7 +26,7 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<LessonFormValues>({
     defaultValues: {
-      type: lesson?.type ?? 'success',
+      type: lesson?.type ?? 'challenge',
       construction_phase: lesson?.construction_phase ?? CONSTRUCTION_PHASES[0].value,
       title: lesson?.title ?? '',
       description: lesson?.description ?? '',
