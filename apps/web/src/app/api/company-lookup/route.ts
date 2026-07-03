@@ -24,25 +24,13 @@ export async function GET(req: Request) {
     const res = await fetch(`https://apiverket.se/v1/companies/${normalized}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     })
-    const bodyText = await res.text()
     if (!res.ok) {
-      // TEMP DEBUG: surface the real upstream response to diagnose the integration
-      return NextResponse.json({
-        configured: true,
-        name: null,
-        error: 'Företaget hittades inte. Ange namnet manuellt.',
-        debugUpstreamStatus: res.status,
-        debugUpstreamBody: bodyText.slice(0, 500),
-      })
+      return NextResponse.json({ configured: true, name: null, error: 'Företaget hittades inte. Ange namnet manuellt.' })
     }
-    const data = JSON.parse(bodyText)
-    return NextResponse.json({ configured: true, name: data?.name ?? null, debugUpstreamBody: bodyText.slice(0, 500) })
-  } catch (e) {
-    return NextResponse.json({
-      configured: true,
-      name: null,
-      error: 'Sökningen misslyckades. Ange namnet manuellt.',
-      debugError: e instanceof Error ? e.message : String(e),
-    })
+    // Response shape: { meta: {...}, data: { name, org_number, ... } }
+    const { data } = await res.json()
+    return NextResponse.json({ configured: true, name: data?.name ?? null })
+  } catch {
+    return NextResponse.json({ configured: true, name: null, error: 'Sökningen misslyckades. Ange namnet manuellt.' })
   }
 }
