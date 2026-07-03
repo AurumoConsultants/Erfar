@@ -5,7 +5,8 @@
   "scripts": {
     "start": "remotion studio",
     "build": "remotion render",
-    "upgrade": "remotion upgrade"
+    "upgrade": "remotion upgrade",
+    "narrate": "node --env-file=.env scripts/generate-narration.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.484",
