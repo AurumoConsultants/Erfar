@@ -18,12 +18,15 @@ interface LessonFormProps {
   existingWorkTypes: string[]
   existingBuildingParts: string[]
   lesson: Lesson
+  // Entrepreneurs only ever log lessons from the execution phase — no
+  // choice is shown, the value is fixed.
+  lockPhaseToExecution?: boolean
 }
 
 // Editing an existing lesson is a single page with every field visible at
 // once (unlike the step-by-step wizard used to create a new lesson).
 export default function LessonForm({
-  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lesson,
+  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lesson, lockPhaseToExecution,
 }: LessonFormProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -34,7 +37,7 @@ export default function LessonForm({
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<LessonFormValues>({
     defaultValues: {
       type: lesson.type,
-      construction_phase: lesson.construction_phase,
+      construction_phase: lockPhaseToExecution ? 'execution' : lesson.construction_phase,
       title: lesson.title,
       description: lesson.description ?? '',
       tags: lesson.tags?.map(t => t.name) ?? [],
@@ -154,22 +157,28 @@ export default function LessonForm({
 
       <div>
         <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
-        <div className="grid grid-cols-5 gap-1.5">
-          {CONSTRUCTION_PHASES.map(p => (
-            <button
-              key={p.value}
-              type="button"
-              onClick={() => setValue('construction_phase', p.value)}
-              className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
-                constructionPhase === p.value
-                  ? 'bg-blue-700 text-white border-blue-700'
-                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+        {lockPhaseToExecution ? (
+          <span className="inline-block bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded-lg">
+            {CONSTRUCTION_PHASES.find(p => p.value === 'execution')?.label}
+          </span>
+        ) : (
+          <div className="grid grid-cols-5 gap-1.5">
+            {CONSTRUCTION_PHASES.map(p => (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => setValue('construction_phase', p.value)}
+                className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
+                  constructionPhase === p.value
+                    ? 'bg-blue-700 text-white border-blue-700'
+                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <CategoryPicker

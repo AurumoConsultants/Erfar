@@ -10,6 +10,9 @@ export default async function EditLessonPage({ params }: { params: Promise<{ id:
   const { data: project } = await supabase.from('projects').select('id, company_id').eq('id', id).single()
   if (!project) notFound()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user!.id).single()
+
   const { data: lessonRaw } = await supabase
     .from('lessons')
     .select('*, tags:lesson_tags(tag:tags(*)), work_type:tags!work_type_id(*), building_part:tags!building_part_id(*)')
@@ -32,6 +35,7 @@ export default async function EditLessonPage({ params }: { params: Promise<{ id:
         existingWorkTypes={byKind('work_type')}
         existingBuildingParts={byKind('building_part')}
         lesson={lesson}
+        lockPhaseToExecution={profile?.role === 'entrepreneur'}
       />
     </div>
   )

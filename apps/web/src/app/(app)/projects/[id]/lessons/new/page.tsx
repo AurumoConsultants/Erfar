@@ -9,6 +9,9 @@ export default async function NewLessonPage({ params }: { params: Promise<{ id: 
   const { data: project } = await supabase.from('projects').select('id, company_id').eq('id', id).single()
   if (!project) notFound()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user!.id).single()
+
   const { data: tags } = await supabase.from('tags').select('kind, name').eq('company_id', project.company_id)
 
   const byKind = (kind: string) => (tags ?? []).filter(t => t.kind === kind).map(t => t.name)
@@ -22,6 +25,7 @@ export default async function NewLessonPage({ params }: { params: Promise<{ id: 
         existingTagNames={byKind('tag')}
         existingWorkTypes={byKind('work_type')}
         existingBuildingParts={byKind('building_part')}
+        lockPhaseToExecution={profile?.role === 'entrepreneur'}
       />
     </div>
   )

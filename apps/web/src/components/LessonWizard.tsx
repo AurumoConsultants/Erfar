@@ -18,6 +18,9 @@ interface LessonWizardProps {
   existingTagNames: string[]
   existingWorkTypes: string[]
   existingBuildingParts: string[]
+  // Entrepreneurs only ever log lessons from the execution phase — no
+  // choice is shown, the value is fixed.
+  lockPhaseToExecution?: boolean
 }
 
 const TOTAL_STEPS = 5
@@ -27,14 +30,16 @@ function capitalize(s: string) {
 }
 
 export default function LessonWizard({
-  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts,
+  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lockPhaseToExecution,
 }: LessonWizardProps) {
   const router = useRouter()
   const supabase = createClient()
 
   const [step, setStep] = useState(1)
   const [type, setType] = useState<LessonType>('challenge')
-  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(CONSTRUCTION_PHASES[0].value)
+  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(
+    lockPhaseToExecution ? 'execution' : CONSTRUCTION_PHASES[0].value
+  )
   const [workType, setWorkType] = useState('')
   const [buildingPart, setBuildingPart] = useState('')
   const [media, setMedia] = useState<File[]>([])
@@ -198,22 +203,28 @@ export default function LessonWizard({
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
-            <div className="grid grid-cols-5 gap-1.5">
-              {CONSTRUCTION_PHASES.map(p => (
-                <button
-                  key={p.value}
-                  type="button"
-                  onClick={() => setConstructionPhase(p.value)}
-                  className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
-                    constructionPhase === p.value
-                      ? 'bg-blue-700 text-white border-blue-700'
-                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+            {lockPhaseToExecution ? (
+              <span className="inline-block bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded-lg">
+                {CONSTRUCTION_PHASES.find(p => p.value === 'execution')?.label}
+              </span>
+            ) : (
+              <div className="grid grid-cols-5 gap-1.5">
+                {CONSTRUCTION_PHASES.map(p => (
+                  <button
+                    key={p.value}
+                    type="button"
+                    onClick={() => setConstructionPhase(p.value)}
+                    className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
+                      constructionPhase === p.value
+                        ? 'bg-blue-700 text-white border-blue-700'
+                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
