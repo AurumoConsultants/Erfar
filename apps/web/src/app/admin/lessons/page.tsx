@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { LESSON_TYPES } from '@erfar/shared'
 import AdminDeleteButton from '@/components/AdminDeleteButton'
@@ -44,10 +45,16 @@ export default async function AdminLessonsPage() {
                   <td className="px-4 py-3 text-gray-500">{project?.company?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-500">{author?.full_name ?? '—'}</td>
                   <td className="px-4 py-3">
-                    <AdminDeleteButton
-                      url={`/api/admin/lessons/${l.id}`}
-                      confirmMessage={`Ta bort lärdomen "${l.title}" permanent?`}
-                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <Link href={`/admin/lessons/${l.id}/edit`}
+                        className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+                        Redigera
+                      </Link>
+                      <AdminDeleteButton
+                        url={`/api/admin/lessons/${l.id}`}
+                        confirmMessage={`Ta bort lärdomen "${l.title}" permanent?`}
+                      />
+                    </div>
                   </td>
                 </tr>
               )

@@ -11,13 +11,22 @@ interface UserRow {
   email: string
   role: UserRole
   is_admin: boolean
+  company_id: string | null
   company_name: string | null
 }
 
-export default function UsersTable({ users, currentUserId }: { users: UserRow[]; currentUserId: string }) {
+interface CompanyOption { id: string; name: string }
+
+export default function UsersTable({ users, companies, currentUserId }: {
+  users: UserRow[]
+  companies: CompanyOption[]
+  currentUserId: string
+}) {
   const router = useRouter()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [fullNameDrafts, setFullNameDrafts] = useState<Record<string, string>>({})
+  const [emailDrafts, setEmailDrafts] = useState<Record<string, string>>({})
 
   async function patch(id: string, body: Record<string, unknown>) {
     setBusyId(id)
@@ -61,9 +70,35 @@ export default function UsersTable({ users, currentUserId }: { users: UserRow[];
         <tbody>
           {users.map(u => (
             <tr key={u.id} className="border-b border-gray-100 last:border-0">
-              <td className="px-4 py-3">{u.full_name}</td>
-              <td className="px-4 py-3 text-gray-500">{u.email}</td>
-              <td className="px-4 py-3 text-gray-500">{u.company_name ?? 'Inget företag'}</td>
+              <td className="px-4 py-3">
+                <input
+                  value={fullNameDrafts[u.id] ?? u.full_name}
+                  disabled={busyId === u.id}
+                  onChange={e => setFullNameDrafts(d => ({ ...d, [u.id]: e.target.value }))}
+                  onBlur={e => { if (e.target.value !== u.full_name) patch(u.id, { full_name: e.target.value }) }}
+                  className="border border-transparent hover:border-gray-200 focus:border-gray-300 rounded-lg px-2 py-1 text-sm w-full focus:outline-none"
+                />
+              </td>
+              <td className="px-4 py-3">
+                <input
+                  value={emailDrafts[u.id] ?? u.email}
+                  disabled={busyId === u.id}
+                  onChange={e => setEmailDrafts(d => ({ ...d, [u.id]: e.target.value }))}
+                  onBlur={e => { if (e.target.value !== u.email) patch(u.id, { email: e.target.value }) }}
+                  className="border border-transparent hover:border-gray-200 focus:border-gray-300 rounded-lg px-2 py-1 text-sm w-full text-gray-500 focus:outline-none"
+                />
+              </td>
+              <td className="px-4 py-3">
+                <select
+                  value={u.company_id ?? ''}
+                  disabled={busyId === u.id}
+                  onChange={e => patch(u.id, { company_id: e.target.value || null })}
+                  className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                >
+                  <option value="">Inget företag</option>
+                  {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </td>
               <td className="px-4 py-3">
                 <select
                   value={u.role}

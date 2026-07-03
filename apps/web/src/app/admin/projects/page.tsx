@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PROJECT_CATEGORY_TYPES } from '@erfar/shared'
 import AdminDeleteButton from '@/components/AdminDeleteButton'
@@ -42,10 +43,16 @@ export default async function AdminProjectsPage() {
                 <td className="px-4 py-3 text-gray-500">{categoryLabel(p.category_type)}</td>
                 <td className="px-4 py-3 text-gray-500">{(p.lessons as unknown as { count: number }[])?.[0]?.count ?? 0}</td>
                 <td className="px-4 py-3">
-                  <AdminDeleteButton
-                    url={`/api/admin/projects/${p.id}`}
-                    confirmMessage={`Ta bort projektet "${p.name}" och alla dess lärdomar permanent?`}
-                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <Link href={`/admin/projects/${p.id}/edit`}
+                      className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+                      Redigera
+                    </Link>
+                    <AdminDeleteButton
+                      url={`/api/admin/projects/${p.id}`}
+                      confirmMessage={`Ta bort projektet "${p.name}" och alla dess lärdomar permanent?`}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import AdminDeleteButton from '@/components/AdminDeleteButton'
 
@@ -33,10 +34,16 @@ export default async function AdminCompaniesPage() {
                 <td className="px-4 py-3 text-gray-500">{c.org_number ?? '—'}</td>
                 <td className="px-4 py-3 text-gray-500">{(c.projects as unknown as { count: number }[])?.[0]?.count ?? 0}</td>
                 <td className="px-4 py-3">
-                  <AdminDeleteButton
-                    url={`/api/admin/companies/${c.id}`}
-                    confirmMessage={`Ta bort "${c.name}" och alla dess projekt och lärdomar permanent?`}
-                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <Link href={`/admin/companies/${c.id}/edit`}
+                      className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+                      Redigera
+                    </Link>
+                    <AdminDeleteButton
+                      url={`/api/admin/companies/${c.id}`}
+                      confirmMessage={`Ta bort "${c.name}" och alla dess projekt och lärdomar permanent?`}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

@@ -17,8 +17,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
     updates.is_admin = body.is_admin
   }
+  if (typeof body.full_name === 'string') updates.full_name = body.full_name
+  if ('company_id' in body) updates.company_id = body.company_id || null
 
   const supabase = createAdminClient()
+
+  // Email lives in both auth.users (login identity) and profiles (denormalized
+  // for display/joins) — keep them in sync rather than only updating one.
+  if (typeof body.email === 'string' && body.email) {
+    const { error: authError } = await supabase.auth.admin.updateUserById(id, { email: body.email })
+    if (authError) return NextResponse.json({ error: authError.message }, { status: 400 })
+    updates.email = body.email
+  }
+
   const { error } = await supabase.from('profiles').update(updates).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.json({ ok: true })
