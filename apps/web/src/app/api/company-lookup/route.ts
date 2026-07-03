@@ -33,11 +33,9 @@ export async function GET(req: Request) {
         return NextResponse.json({ configured: true, results: [], error: 'Inga företag hittades. Ange uppgifterna manuellt.' })
       }
       const json = await res.json()
-      // Defensive parsing: the exact response shape for the search endpoint
-      // isn't nailed down, so accept a few plausible shapes rather than
-      // crashing on a mismatch.
-      const raw: any[] = Array.isArray(json?.data) ? json.data
-        : Array.isArray(json?.data?.results) ? json.data.results
+      // Confirmed shape: { meta: {...}, data: { total, query, companies: [...] } }
+      const raw: any[] = Array.isArray(json?.data?.companies) ? json.data.companies
+        : Array.isArray(json?.data) ? json.data
         : Array.isArray(json?.results) ? json.results
         : Array.isArray(json) ? json
         : []
