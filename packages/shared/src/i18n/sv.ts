@@ -17,7 +17,7 @@ export default {
     signup: 'Registrera',
     email: 'E-post',
     password: 'Lösenord',
-    fullName: 'Fullständigt namn',
+    fullName: 'Kontaktperson',
     companyName: 'Företagsnamn',
     orgNumber: 'Organisationsnummer',
     forgotPassword: 'Glömt lösenord?',
