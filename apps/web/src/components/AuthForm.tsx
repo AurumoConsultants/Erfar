@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useI18n } from '@/lib/i18n'
 import { SWEDISH_KOMMUNER } from '@erfar/shared'
@@ -139,7 +140,9 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <p className="text-blue-700 font-bold text-2xl mb-6 text-center">Erfar</p>
+        <div className="flex justify-center mb-6">
+          <Image src="/logo.png" alt="Erfar" width={170} height={54} priority />
+        </div>
 
         <div className="flex mb-6 border border-gray-200 rounded-lg overflow-hidden">
           <button
