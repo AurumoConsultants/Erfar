@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "web", "dev"],
       "port": 3000
+    },
+    {
+      "name": "videos",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "videos", "start", "--", "--port=3010"],
+      "port": 3010
     }
   ]
 }
