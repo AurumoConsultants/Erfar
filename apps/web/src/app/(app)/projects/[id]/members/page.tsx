@@ -15,6 +15,8 @@ export default function ProjectMembersPage() {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<'entrepreneur' | 'spectator_project'>('entrepreneur')
   const [inviteUrl, setInviteUrl] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
+  const [emailError, setEmailError] = useState('')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
 
@@ -40,6 +42,8 @@ export default function ProjectMembersPage() {
     setSending(true)
     setError('')
     setInviteUrl('')
+    setEmailSent(false)
+    setEmailError('')
 
     const res = await fetch('/api/invite', {
       method: 'POST',
@@ -50,6 +54,8 @@ export default function ProjectMembersPage() {
     if (!res.ok) { setError(json.error); setSending(false); return }
 
     setInviteUrl(json.inviteUrl)
+    setEmailSent(!!json.emailSent)
+    setEmailError(json.emailSent ? '' : json.emailError ?? '')
     setEmail('')
     setSending(false)
     load()
@@ -93,9 +99,16 @@ export default function ProjectMembersPage() {
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           {inviteUrl && (
-            <p className="text-green-700 text-sm break-all bg-green-50 rounded-lg p-2">
-              Inbjudningslänk: {inviteUrl}
-            </p>
+            <div className="text-sm bg-green-50 rounded-lg p-2 space-y-1">
+              {emailSent ? (
+                <p className="text-green-700">✓ Inbjudan skickad via e-post.</p>
+              ) : (
+                <p className="text-amber-700">
+                  Kunde inte skicka e-post{emailError ? ` (${emailError})` : ''}. Dela länken manuellt istället:
+                </p>
+              )}
+              <p className="text-green-700 break-all">{inviteUrl}</p>
+            </div>
           )}
           <button type="submit" disabled={sending}
             className="w-full bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">

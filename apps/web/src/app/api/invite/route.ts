@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { sendInviteEmail } from '@/lib/email/sendInviteEmail'
 
 const adminClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
 
   const { data: profile } = await adminClient
     .from('profiles')
-    .select('id, role, company_id')
+    .select('id, role, company_id, full_name')
     .eq('id', user.id)
     .single()
 
@@ -30,15 +31,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Åtkomst nekad' }, { status: 403 })
   }
 
+  let projectName: string | null = null
   if (projectId) {
     const { data: project } = await adminClient
       .from('projects')
-      .select('id, company_id')
+      .select('id, name, company_id')
       .eq('id', projectId)
       .single()
     if (!project || project.company_id !== profile.company_id) {
       return NextResponse.json({ error: 'Åtkomst nekad' }, { status: 403 })
     }
+    projectName = project.name
   }
 
   const { data: invitation, error } = await adminClient
@@ -58,5 +61,20 @@ export async function POST(req: Request) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   const inviteUrl = `${baseUrl}/invite/${invitation.token}`
 
-  return NextResponse.json({ inviteUrl, token: invitation.token })
+  const { data: company } = await adminClient
+    .from('companies')
+    .select('name')
+    .eq('id', profile.company_id)
+    .single()
+
+  const { sent, error: emailError } = await sendInviteEmail({
+    to: email,
+    inviterName: profile.full_name,
+    companyName: company?.name ?? '',
+    projectName: role === 'spectator_company' ? null : projectName,
+    role,
+    inviteUrl,
+  })
+
+  return NextResponse.json({ inviteUrl, token: invitation.token, emailSent: sent, emailError })
 }
