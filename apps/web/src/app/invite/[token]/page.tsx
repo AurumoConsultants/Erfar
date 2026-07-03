@@ -7,7 +7,7 @@ import { useI18n } from '@/lib/i18n'
 
 interface InvitationInfo {
   email: string
-  role: 'entrepreneur' | 'spectator_project' | 'spectator_company'
+  role: 'entrepreneur' | 'spectator_project' | 'spectator_company' | 'konsult'
   company: { id: string; name: string } | null
   project: { id: string; name: string; location: string | null } | null
 }
@@ -16,6 +16,7 @@ const roleLabelKey = {
   entrepreneur: 'roleEntrepreneur',
   spectator_project: 'roleSpectatorProject',
   spectator_company: 'roleSpectatorCompany',
+  konsult: 'roleKonsult',
 } as const
 
 export default function InvitePage() {

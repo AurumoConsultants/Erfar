@@ -35,7 +35,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   }))
 
   const isClientOwner = profile?.role === 'client' && profile.company_id === project.company_id
-  let isEntrepreneur = false
+  let isContributor = false
   if (!isClientOwner) {
     const { data: membership } = await supabase
       .from('project_members')
@@ -43,9 +43,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       .eq('project_id', id)
       .eq('profile_id', user!.id)
       .maybeSingle()
-    isEntrepreneur = membership?.role === 'entrepreneur'
+    isContributor = membership?.role === 'entrepreneur' || membership?.role === 'konsult'
   }
-  const canLogLesson = isClientOwner || isEntrepreneur
+  const canLogLesson = isClientOwner || isContributor
 
   return (
     <div className="space-y-6">

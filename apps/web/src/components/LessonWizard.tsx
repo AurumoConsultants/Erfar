@@ -18,9 +18,10 @@ interface LessonWizardProps {
   existingTagNames: string[]
   existingWorkTypes: string[]
   existingBuildingParts: string[]
-  // Entrepreneurs only ever log lessons from the execution phase — no
-  // choice is shown, the value is fixed.
-  lockPhaseToExecution?: boolean
+  // Some roles only ever log lessons for a subset of construction phases
+  // (entrepreneurs: execution only; konsult: idea_stage/early_stages/design).
+  // Undefined/omitted means all phases are selectable.
+  allowedPhases?: ConstructionPhase[]
 }
 
 const TOTAL_STEPS = 5
@@ -30,16 +31,17 @@ function capitalize(s: string) {
 }
 
 export default function LessonWizard({
-  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lockPhaseToExecution,
+  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, allowedPhases,
 }: LessonWizardProps) {
   const router = useRouter()
   const supabase = createClient()
 
+  const visiblePhases = CONSTRUCTION_PHASES.filter(p => !allowedPhases || allowedPhases.includes(p.value))
+  const phaseGridColsClass = visiblePhases.length >= 5 ? 'grid-cols-5' : 'grid-cols-3'
+
   const [step, setStep] = useState(1)
   const [type, setType] = useState<LessonType>('challenge')
-  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(
-    lockPhaseToExecution ? 'execution' : CONSTRUCTION_PHASES[0].value
-  )
+  const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(visiblePhases[0].value)
   const [workType, setWorkType] = useState('')
   const [buildingPart, setBuildingPart] = useState('')
   const [media, setMedia] = useState<File[]>([])
@@ -203,13 +205,13 @@ export default function LessonWizard({
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
-            {lockPhaseToExecution ? (
+            {visiblePhases.length === 1 ? (
               <span className="inline-block bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded-lg">
-                {CONSTRUCTION_PHASES.find(p => p.value === 'execution')?.label}
+                {visiblePhases[0].label}
               </span>
             ) : (
-              <div className="grid grid-cols-5 gap-1.5">
-                {CONSTRUCTION_PHASES.map(p => (
+              <div className={`grid ${phaseGridColsClass} gap-1.5`}>
+                {visiblePhases.map(p => (
                   <button
                     key={p.value}
                     type="button"

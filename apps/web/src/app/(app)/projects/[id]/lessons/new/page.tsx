@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import LessonWizard from '@/components/LessonWizard'
+import { allowedPhasesForRole } from '@erfar/shared'
 
 export default async function NewLessonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -25,7 +26,7 @@ export default async function NewLessonPage({ params }: { params: Promise<{ id: 
         existingTagNames={byKind('tag')}
         existingWorkTypes={byKind('work_type')}
         existingBuildingParts={byKind('building_part')}
-        lockPhaseToExecution={profile?.role === 'entrepreneur'}
+        allowedPhases={allowedPhasesForRole(profile?.role)}
       />
     </div>
   )

@@ -10,11 +10,11 @@ create extension if not exists "pgcrypto";
 -- ============================================================
 -- ENUMS
 -- ============================================================
-create type public.user_role as enum ('client', 'entrepreneur', 'spectator');
+create type public.user_role as enum ('client', 'entrepreneur', 'spectator', 'konsult');
 create type public.project_status as enum ('active', 'completed', 'archived');
 create type public.lesson_type as enum ('challenge', 'success');
-create type public.invite_role as enum ('entrepreneur', 'spectator_project', 'spectator_company');
-create type public.member_role as enum ('entrepreneur', 'spectator');
+create type public.invite_role as enum ('entrepreneur', 'spectator_project', 'spectator_company', 'konsult');
+create type public.member_role as enum ('entrepreneur', 'spectator', 'konsult');
 create type public.project_category_type as enum ('nybyggnation', 'renovering', 'service');
 -- Same four subtypes apply under every category_type.
 create type public.project_category_subtype as enum ('bostader', 'kontor', 'lokaler', 'ovrigt');
@@ -116,7 +116,7 @@ create table public.invitations (
   created_at  timestamptz not null default now(),
   constraint invitations_project_role_check check (
     (role = 'spectator_company' and project_id is null)
-    or (role in ('entrepreneur', 'spectator_project') and project_id is not null)
+    or (role in ('entrepreneur', 'spectator_project', 'konsult') and project_id is not null)
   )
 );
 
@@ -282,6 +282,17 @@ returns boolean language sql stable security definer as $$
   );
 $$;
 
+-- does the current user have lesson-logging write access on this project?
+-- (entrepreneur or konsult — both can log lessons; konsult is additionally
+-- restricted client-side to early-phase "Var i byggprocessen" values)
+create or replace function public.is_project_contributor(p_project_id uuid)
+returns boolean language sql stable security definer as $$
+  select exists (
+    select 1 from public.project_members
+    where project_id = p_project_id and profile_id = auth.uid() and role in ('entrepreneur', 'konsult')
+  );
+$$;
+
 -- does the current user have company-wide viewer access to this company?
 create or replace function public.is_company_viewer(p_company_id uuid)
 returns boolean language sql stable security definer as $$
@@ -430,7 +441,7 @@ create policy "lessons_insert" on public.lessons
     created_by = auth.uid()
     and (
       exists (select 1 from public.projects p where p.id = project_id and p.company_id = public.my_company_id())
-      or public.is_project_entrepreneur(project_id)
+      or public.is_project_contributor(project_id)
     )
   ); -- spectators have no insert path
 
@@ -458,9 +469,9 @@ create policy "tags_insert" on public.tags
     or exists (
       select 1 from public.project_members pm
       join public.projects p on p.id = pm.project_id
-      where p.company_id = tags.company_id and pm.profile_id = auth.uid() and pm.role = 'entrepreneur'
+      where p.company_id = tags.company_id and pm.profile_id = auth.uid() and pm.role in ('entrepreneur', 'konsult')
     )
-  ); -- clients and entrepreneurs can introduce new freeform tags; spectators cannot
+  ); -- clients, entrepreneurs and konsults can introduce new freeform tags; spectators cannot
 
 -- ------------------------------------------------------------
 -- LESSON_TAGS
@@ -525,7 +536,7 @@ create policy "lesson_images_storage_insert" on storage.objects
         where p.id = ((storage.foldername(storage.objects.name))[1])::uuid
           and p.company_id = public.my_company_id()
       )
-      or public.is_project_entrepreneur(((storage.foldername(storage.objects.name))[1])::uuid)
+      or public.is_project_contributor(((storage.foldername(storage.objects.name))[1])::uuid)
     )
   );
 

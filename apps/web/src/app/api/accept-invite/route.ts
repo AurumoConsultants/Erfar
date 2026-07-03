@@ -6,8 +6,10 @@ const adminClient = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-function profileRoleFor(inviteRole: string): 'entrepreneur' | 'spectator' {
-  return inviteRole === 'entrepreneur' ? 'entrepreneur' : 'spectator'
+function profileRoleFor(inviteRole: string): 'entrepreneur' | 'spectator' | 'konsult' {
+  if (inviteRole === 'entrepreneur') return 'entrepreneur'
+  if (inviteRole === 'konsult') return 'konsult'
+  return 'spectator'
 }
 
 export async function POST(req: Request) {
@@ -63,7 +65,7 @@ export async function POST(req: Request) {
     await adminClient
       .from('project_members')
       .upsert(
-        { project_id: invitation.project_id, profile_id: userId, role: invitation.role === 'entrepreneur' ? 'entrepreneur' : 'spectator' },
+        { project_id: invitation.project_id, profile_id: userId, role: profileRoleFor(invitation.role) },
         { onConflict: 'project_id,profile_id' }
       )
   }

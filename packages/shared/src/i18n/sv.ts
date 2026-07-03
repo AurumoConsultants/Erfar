@@ -122,6 +122,7 @@ export default {
     roleEntrepreneur: 'entreprenör',
     roleSpectatorProject: 'åskådare (detta projekt)',
     roleSpectatorCompany: 'åskådare (hela företaget)',
+    roleKonsult: 'konsult',
     invalidOrUsed: 'Inbjudan är ogiltig, har gått ut eller har redan använts.',
     accept: 'Acceptera inbjudan',
   },

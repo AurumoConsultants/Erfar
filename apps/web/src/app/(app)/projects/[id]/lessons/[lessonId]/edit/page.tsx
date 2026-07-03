@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import LessonForm from '@/components/LessonForm'
+import { allowedPhasesForRole } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 
 export default async function EditLessonPage({ params }: { params: Promise<{ id: string; lessonId: string }> }) {
@@ -35,7 +36,7 @@ export default async function EditLessonPage({ params }: { params: Promise<{ id:
         existingWorkTypes={byKind('work_type')}
         existingBuildingParts={byKind('building_part')}
         lesson={lesson}
-        lockPhaseToExecution={profile?.role === 'entrepreneur'}
+        allowedPhases={allowedPhasesForRole(profile?.role)}
       />
     </div>
   )

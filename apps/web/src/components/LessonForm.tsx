@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import { lessonSchema, type LessonFormValues } from '@/lib/validations/lesson'
 import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES, BUILDING_PARTS } from '@erfar/shared'
-import type { Lesson } from '@erfar/shared'
+import type { Lesson, ConstructionPhase } from '@erfar/shared'
 import TagInput from './TagInput'
 import MediaUploader from './MediaUploader'
 import CategoryPicker from './CategoryPicker'
@@ -18,15 +18,16 @@ interface LessonFormProps {
   existingWorkTypes: string[]
   existingBuildingParts: string[]
   lesson: Lesson
-  // Entrepreneurs only ever log lessons from the execution phase — no
-  // choice is shown, the value is fixed.
-  lockPhaseToExecution?: boolean
+  // Some roles only ever log lessons for a subset of construction phases
+  // (entrepreneurs: execution only; konsult: idea_stage/early_stages/design).
+  // Undefined/omitted means all phases are selectable.
+  allowedPhases?: ConstructionPhase[]
 }
 
 // Editing an existing lesson is a single page with every field visible at
 // once (unlike the step-by-step wizard used to create a new lesson).
 export default function LessonForm({
-  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lesson, lockPhaseToExecution,
+  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lesson, allowedPhases,
 }: LessonFormProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -34,10 +35,16 @@ export default function LessonForm({
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const visiblePhases = CONSTRUCTION_PHASES.filter(p => !allowedPhases || allowedPhases.includes(p.value))
+  const phaseGridColsClass = visiblePhases.length >= 5 ? 'grid-cols-5' : 'grid-cols-3'
+  const defaultPhase = allowedPhases && !allowedPhases.includes(lesson.construction_phase)
+    ? (visiblePhases[0]?.value ?? lesson.construction_phase)
+    : lesson.construction_phase
+
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<LessonFormValues>({
     defaultValues: {
       type: lesson.type,
-      construction_phase: lockPhaseToExecution ? 'execution' : lesson.construction_phase,
+      construction_phase: defaultPhase,
       title: lesson.title,
       description: lesson.description ?? '',
       tags: lesson.tags?.map(t => t.name) ?? [],
@@ -157,13 +164,13 @@ export default function LessonForm({
 
       <div>
         <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
-        {lockPhaseToExecution ? (
+        {visiblePhases.length === 1 ? (
           <span className="inline-block bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded-lg">
-            {CONSTRUCTION_PHASES.find(p => p.value === 'execution')?.label}
+            {visiblePhases[0].label}
           </span>
         ) : (
-          <div className="grid grid-cols-5 gap-1.5">
-            {CONSTRUCTION_PHASES.map(p => (
+          <div className={`grid ${phaseGridColsClass} gap-1.5`}>
+            {visiblePhases.map(p => (
               <button
                 key={p.value}
                 type="button"

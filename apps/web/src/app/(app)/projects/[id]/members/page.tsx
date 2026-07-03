@@ -13,7 +13,7 @@ export default function ProjectMembersPage() {
   const [members, setMembers] = useState<ProjectMember[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState<'entrepreneur' | 'spectator_project'>('entrepreneur')
+  const [role, setRole] = useState<'entrepreneur' | 'konsult' | 'spectator_project'>('entrepreneur')
   const [inviteUrl, setInviteUrl] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [emailError, setEmailError] = useState('')
@@ -94,6 +94,7 @@ export default function ProjectMembersPage() {
             <select value={role} onChange={e => setRole(e.target.value as typeof role)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="entrepreneur">Entreprenör</option>
+              <option value="konsult">Konsult</option>
               <option value="spectator_project">Åskådare (endast detta projekt)</option>
             </select>
           </div>

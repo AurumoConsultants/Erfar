@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { projectId, email, role } = await req.json()
-  if (!['entrepreneur', 'spectator_project', 'spectator_company'].includes(role)) {
+  if (!['entrepreneur', 'spectator_project', 'spectator_company', 'konsult'].includes(role)) {
     return NextResponse.json({ error: 'Ogiltig roll' }, { status: 400 })
   }
   if (role !== 'spectator_company' && !projectId) {
