@@ -43,6 +43,11 @@ export default function Navbar({ profile, companyName }: NavbarProps) {
         ))}
       </div>
       <div className="flex items-center gap-4">
+        {profile.is_admin && (
+          <Link href="/admin" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">
+            {t.admin.title}
+          </Link>
+        )}
         <span className="text-sm text-gray-500">{companyName ?? profile.full_name}</span>
         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">{ROLE_LABELS[profile.role]}</span>
         <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-900 transition">

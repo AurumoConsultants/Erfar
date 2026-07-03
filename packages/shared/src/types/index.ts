@@ -23,6 +23,7 @@ export interface Profile {
   full_name: string
   email: string
   role: UserRole
+  is_admin: boolean
   created_at: string
 }
 

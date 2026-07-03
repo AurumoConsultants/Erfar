@@ -49,6 +49,9 @@ create table public.profiles (
   full_name   text not null,
   email       text not null,
   role        public.user_role not null default 'client',
+  -- Orthogonal to `role`: grants access to /admin regardless of company/role.
+  -- Admin accounts have no company and bypass RLS via the service-role client.
+  is_admin    boolean not null default false,
   created_at  timestamptz not null default now()
 );
 
