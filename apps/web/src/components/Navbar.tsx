@@ -7,9 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useI18n } from '@/lib/i18n'
 import type { Profile } from '@erfar/shared'
 
-interface NavbarProps { profile: Profile }
+interface NavbarProps { profile: Profile; companyName?: string | null }
 
-export default function Navbar({ profile }: NavbarProps) {
+export default function Navbar({ profile, companyName }: NavbarProps) {
   const { t } = useI18n()
   const router = useRouter()
   const pathname = usePathname()
@@ -42,7 +42,7 @@ export default function Navbar({ profile }: NavbarProps) {
         ))}
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-500">{profile.full_name}</span>
+        <span className="text-sm text-gray-500">{companyName ?? profile.full_name}</span>
         <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium capitalize">{profile.role}</span>
         <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-900 transition">
           {t.common.logout}

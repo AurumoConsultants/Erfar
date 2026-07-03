@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('*, company:companies(name)')
     .eq('id', user.id)
     .single()
 
@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar profile={profile} />
+      <Navbar profile={profile} companyName={profile.company?.name ?? null} />
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         {children}
       </main>
