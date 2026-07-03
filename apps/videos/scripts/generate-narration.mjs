@@ -1,6 +1,8 @@
-// Generates the Swedish narration audio via ElevenLabs.
+// Generates the Swedish narration audio via ElevenLabs, using the
+// with-timestamps endpoint so scene durations can be synced exactly to the
+// real recorded speech instead of an estimated words-per-second guess.
 // Requires ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID in apps/videos/.env
-import { writeFile, readFile } from 'fs/promises'
+import { writeFile } from 'fs/promises'
 import path from 'path'
 
 const apiKey = process.env.ELEVENLABS_API_KEY
@@ -11,7 +13,8 @@ if (!apiKey || !voiceId) {
   process.exit(1)
 }
 
-const script = [
+// Each entry is one video scene's narration line.
+const lines = [
   'Varje byggprojekt ger nya lärdomar.',
   'Men hur ofta går den kunskapen förlorad mellan projekten?',
   'Möt Erfar — en ny digital plattform för erfarenhetsåterföring i byggbranschen.',
@@ -20,17 +23,18 @@ const script = [
   'Sök i en växande kunskapsbank när nästa projekt planeras.',
   'Klienter, entreprenörer och åskådare — alla på samma plattform.',
   'Bygg smartare. Lär er tillsammans. Välkommen till Erfar.',
-].join(' ')
+]
+const fullText = lines.join(' ')
 
 async function main() {
-  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps`, {
     method: 'POST',
     headers: {
       'xi-api-key': apiKey,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      text: script,
+      text: fullText,
       model_id: 'eleven_multilingual_v2',
       voice_settings: { stability: 0.5, similarity_boost: 0.75 },
     }),
@@ -42,10 +46,34 @@ async function main() {
     process.exit(1)
   }
 
-  const buffer = Buffer.from(await res.arrayBuffer())
-  const outPath = path.join(process.cwd(), 'public', 'narration.mp3')
-  await writeFile(outPath, buffer)
-  console.log(`Saved narration to ${outPath} (${buffer.length} bytes)`)
+  const data = await res.json()
+  const audioBuffer = Buffer.from(data.audio_base64, 'base64')
+  const audioPath = path.join(process.cwd(), 'public', 'narration.mp3')
+  await writeFile(audioPath, audioBuffer)
+  console.log(`Saved narration to ${audioPath} (${audioBuffer.length} bytes)`)
+
+  // Map each line to its [start, end] time in the full audio by locating its
+  // characters in the alignment data.
+  const chars = data.alignment.characters
+  const starts = data.alignment.character_start_times_seconds
+  const ends = data.alignment.character_end_times_seconds
+
+  let cursor = 0
+  const timings = []
+  for (const line of lines) {
+    const lineStartIdx = fullText.indexOf(line, cursor)
+    const lineEndIdx = lineStartIdx + line.length - 1
+    timings.push({
+      text: line,
+      startSeconds: starts[lineStartIdx],
+      endSeconds: ends[lineEndIdx],
+    })
+    cursor = lineEndIdx + 1
+  }
+
+  const timingPath = path.join(process.cwd(), 'src', 'narration-timing.json')
+  await writeFile(timingPath, JSON.stringify({ totalDuration: ends[ends.length - 1], lines: timings }, null, 2))
+  console.log(`Saved timing to ${timingPath}`)
 }
 
 main().catch(e => { console.error(e); process.exit(1) })

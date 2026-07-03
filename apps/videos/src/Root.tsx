@@ -1,6 +1,6 @@
 import { Composition } from 'remotion'
 import { IntroTutorial } from './IntroTutorial'
-import { IntroVideo } from './IntroVideo'
+import { IntroVideo, totalIntroVideoFrames } from './IntroVideo'
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -8,7 +8,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="IntroVideo"
         component={IntroVideo}
-        durationInFrames={1035}
+        durationInFrames={totalIntroVideoFrames}
         fps={30}
         width={1920}
         height={1080}

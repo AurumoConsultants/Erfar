@@ -1,6 +1,6 @@
 # Erfar — Introduktionsvideo (manus)
 
-Kvinnlig speaker, säljande men lugn ton. ~35–40 sekunder.
+Manlig speaker, säljande men lugn ton. ~35–40 sekunder.
 
 1. Varje byggprojekt ger nya lärdomar.
 2. Men hur ofta går den kunskapen förlorad mellan projekten?
