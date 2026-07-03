@@ -1,23 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export function HomeIntro() {
   const [showForm, setShowForm] = useState(false)
+  const [muted, setMuted] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const unmute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false
+    }
+    setMuted(false)
+  }
 
   if (!showForm) {
     return (
       <main className="relative w-screen h-screen bg-black">
         <video
+          ref={videoRef}
           className="w-full h-full object-contain"
           src="/videos/erfar-intro.mp4"
           autoPlay
-          muted
+          muted={muted}
           playsInline
           onEnded={() => setShowForm(true)}
         />
+        {muted && (
+          <button
+            onClick={unmute}
+            className="absolute bottom-6 left-6 px-4 py-2 bg-white/90 text-blue-900 text-sm font-semibold rounded-lg hover:bg-white transition"
+          >
+            🔊 Slå på ljud
+          </button>
+        )}
         <button
           onClick={() => setShowForm(true)}
           className="absolute bottom-6 right-6 px-4 py-2 bg-white/90 text-blue-900 text-sm font-semibold rounded-lg hover:bg-white transition"
