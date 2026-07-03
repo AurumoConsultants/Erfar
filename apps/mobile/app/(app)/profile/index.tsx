@@ -3,13 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
 import { t } from '@/lib/i18n'
-import type { UserRole } from '@erfar/shared'
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  client: 'Kund',
-  entrepreneur: 'Entreprenör',
-  spectator: 'Åskådare',
-}
+import { ROLE_LABELS } from '@erfar/shared'
 
 export default function ProfileScreen() {
   const { profile } = useAuth()

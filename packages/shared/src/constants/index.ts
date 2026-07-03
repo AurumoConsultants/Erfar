@@ -1,6 +1,12 @@
-import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase } from '../types'
+import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase, UserRole } from '../types'
 
 export { SWEDISH_KOMMUNER, type SwedishKommun } from './kommuner'
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  client: 'Klient',
+  entrepreneur: 'Entreprenör',
+  spectator: 'Åskådare',
+}
 
 export const LESSON_TYPES: {
   value: LessonType
