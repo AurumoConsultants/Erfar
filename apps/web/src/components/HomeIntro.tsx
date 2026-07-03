@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -8,6 +8,15 @@ export function HomeIntro() {
   const [showForm, setShowForm] = useState(false)
   const [muted, setMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  // React doesn't reliably apply the `muted` prop to the DOM node on hydration
+  // (server-rendered <video> markup omits the attribute), so autoplay can
+  // start unmuted before our JSX prop takes effect. Force it explicitly.
+  useLayoutEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true
+    }
+  }, [])
 
   const unmute = () => {
     if (videoRef.current) {
