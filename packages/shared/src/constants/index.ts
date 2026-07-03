@@ -32,6 +32,31 @@ export const SUGGESTED_TAGS = [
   'dokumentation',
 ] as const
 
+// Preset "byggmoment" options for the lesson-logging wizard's category step.
+// Stored as public.tags rows (kind='work_type') — a company can add more,
+// which then show up here too via the tags table, same as SUGGESTED_TAGS.
+export const WORK_TYPES = [
+  'rivning',
+  'demontering',
+  'montage',
+  'renovering',
+] as const
+
+// Preset "byggdel" options for the lesson-logging wizard's category step
+// (kind='building_part').
+export const BUILDING_PARTS = [
+  'tak',
+  'fasad',
+  'fönster',
+  'fönsterdörr',
+  'balkong',
+  'sockel',
+  'entréparti',
+  'golv',
+  'innertak',
+  'innervägg',
+] as const
+
 // "Var i byggprocessen" — which phase of the construction process the project is in.
 export const CONSTRUCTION_PHASES: { value: ConstructionPhase; label: string }[] = [
   { value: 'idea_stage', label: 'Idéstadie' },

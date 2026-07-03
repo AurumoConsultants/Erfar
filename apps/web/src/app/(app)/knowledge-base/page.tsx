@@ -23,7 +23,9 @@ export default function KnowledgeBasePage() {
 
   useEffect(() => {
     supabase.from('projects').select('*').then(({ data }) => setProjects(data ?? []))
-    supabase.from('tags').select('*').then(({ data }) => setAllTags(data ?? []))
+    // Only freeform tags — work_type/building_part categories share this same
+    // table (different `kind`) but have their own dedicated filter/display.
+    supabase.from('tags').select('*').eq('kind', 'tag').then(({ data }) => setAllTags(data ?? []))
   }, [])
 
   const load = useCallback(async () => {

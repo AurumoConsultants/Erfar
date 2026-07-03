@@ -7,6 +7,8 @@ export type ProjectCategoryType = 'nybyggnation' | 'renovering' | 'service'
 export type ProjectCategorySubtype = 'bostader' | 'kontor' | 'lokaler' | 'ovrigt'
 export type ConstructionPhase = 'idea_stage' | 'early_stages' | 'design' | 'execution' | 'management'
 export type AccountType = 'private_company' | 'kommun'
+export type TagKind = 'tag' | 'work_type' | 'building_part'
+export type MediaType = 'image' | 'video'
 
 export interface Company {
   id: string
@@ -83,6 +85,7 @@ export interface Invitation {
 export interface Tag {
   id: string
   company_id: string
+  kind: TagKind
   name: string
   created_at: string
 }
@@ -94,6 +97,10 @@ export interface Lesson {
   construction_phase: ConstructionPhase
   title: string
   description: string | null
+  work_type_id: string | null
+  building_part_id: string | null
+  contact_phone: string | null
+  contact_email: string | null
   created_by: string
   created_at: string
   updated_at: string
@@ -102,11 +109,14 @@ export interface Lesson {
   author?: Profile
   tags?: Tag[]
   images?: LessonImage[]
+  work_type?: Tag
+  building_part?: Tag
 }
 
 export interface LessonImage {
   id: string
   lesson_id: string
   storage_path: string
+  media_type: MediaType
   created_at: string
 }

@@ -5,38 +5,51 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { createClient } from '@/lib/supabase/client'
 import { lessonSchema, type LessonFormValues } from '@/lib/validations/lesson'
-import { LESSON_TYPES, CONSTRUCTION_PHASES } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES, BUILDING_PARTS } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 import TagInput from './TagInput'
-import PhotoUploader from './PhotoUploader'
+import MediaUploader from './MediaUploader'
+import CategoryPicker from './CategoryPicker'
 
 interface LessonFormProps {
   projectId: string
   companyId: string
   existingTagNames: string[]
-  lesson?: Lesson
+  existingWorkTypes: string[]
+  existingBuildingParts: string[]
+  lesson: Lesson
 }
 
-export default function LessonForm({ projectId, companyId, existingTagNames, lesson }: LessonFormProps) {
+// Editing an existing lesson is a single page with every field visible at
+// once (unlike the step-by-step wizard used to create a new lesson).
+export default function LessonForm({
+  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lesson,
+}: LessonFormProps) {
   const router = useRouter()
   const supabase = createClient()
-  const [photos, setPhotos] = useState<File[]>([])
+  const [media, setMedia] = useState<File[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<LessonFormValues>({
     defaultValues: {
-      type: lesson?.type ?? 'challenge',
-      construction_phase: lesson?.construction_phase ?? CONSTRUCTION_PHASES[0].value,
-      title: lesson?.title ?? '',
-      description: lesson?.description ?? '',
-      tags: lesson?.tags?.map(t => t.name) ?? [],
+      type: lesson.type,
+      construction_phase: lesson.construction_phase,
+      title: lesson.title,
+      description: lesson.description ?? '',
+      tags: lesson.tags?.map(t => t.name) ?? [],
+      work_type: lesson.work_type?.name ?? '',
+      building_part: lesson.building_part?.name ?? '',
+      contact_phone: lesson.contact_phone ?? '',
+      contact_email: lesson.contact_email ?? '',
     },
   })
 
   const type = watch('type')
   const constructionPhase = watch('construction_phase')
   const tags = watch('tags')
+  const workType = watch('work_type') ?? ''
+  const buildingPart = watch('building_part') ?? ''
 
   async function onSubmit(values: LessonFormValues) {
     const parsed = lessonSchema.safeParse(values)
@@ -47,44 +60,47 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
     setSaving(true)
     setError('')
     try {
-      let lessonId = lesson?.id
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Inte inloggad')
+      const lessonId = lesson.id
 
-      if (lessonId) {
-        const { error: updateError } = await supabase
-          .from('lessons')
-          .update({
-            type: values.type,
-            construction_phase: values.construction_phase,
-            title: values.title,
-            description: values.description || null,
-          })
-          .eq('id', lessonId)
-        if (updateError) throw updateError
-
-        await supabase.from('lesson_tags').delete().eq('lesson_id', lessonId)
-      } else {
-        const { data: inserted, error: insertError } = await supabase
-          .from('lessons')
-          .insert({
-            project_id: projectId,
-            type: values.type,
-            construction_phase: values.construction_phase,
-            title: values.title,
-            description: values.description || null,
-            created_by: user.id,
-          })
+      let workTypeId: string | null = null
+      if (values.work_type) {
+        const { data } = await supabase
+          .from('tags')
+          .upsert({ company_id: companyId, kind: 'work_type', name: values.work_type }, { onConflict: 'company_id,kind,name' })
           .select()
           .single()
-        if (insertError) throw insertError
-        lessonId = inserted.id
+        workTypeId = data?.id ?? null
+      }
+      let buildingPartId: string | null = null
+      if (values.building_part) {
+        const { data } = await supabase
+          .from('tags')
+          .upsert({ company_id: companyId, kind: 'building_part', name: values.building_part }, { onConflict: 'company_id,kind,name' })
+          .select()
+          .single()
+        buildingPartId = data?.id ?? null
       }
 
+      const { error: updateError } = await supabase
+        .from('lessons')
+        .update({
+          type: values.type,
+          construction_phase: values.construction_phase,
+          title: values.title,
+          description: values.description || null,
+          work_type_id: workTypeId,
+          building_part_id: buildingPartId,
+          contact_phone: values.contact_phone || null,
+          contact_email: values.contact_email || null,
+        })
+        .eq('id', lessonId)
+      if (updateError) throw updateError
+
+      await supabase.from('lesson_tags').delete().eq('lesson_id', lessonId)
       for (const tagName of values.tags) {
         const { data: tagRow } = await supabase
           .from('tags')
-          .upsert({ company_id: companyId, name: tagName }, { onConflict: 'company_id,name' })
+          .upsert({ company_id: companyId, kind: 'tag', name: tagName }, { onConflict: 'company_id,kind,name' })
           .select()
           .single()
         if (tagRow) {
@@ -95,11 +111,15 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
         }
       }
 
-      for (const file of photos) {
+      for (const file of media) {
         const path = `${projectId}/${lessonId}/${crypto.randomUUID()}-${file.name}`
         const { error: uploadError } = await supabase.storage.from('lesson-images').upload(path, file)
         if (!uploadError) {
-          await supabase.from('lesson_images').insert({ lesson_id: lessonId, storage_path: path })
+          await supabase.from('lesson_images').insert({
+            lesson_id: lessonId,
+            storage_path: path,
+            media_type: file.type.startsWith('video/') ? 'video' : 'image',
+          })
         }
       }
 
@@ -152,6 +172,28 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
         </div>
       </div>
 
+      <CategoryPicker
+        label="Vad har gjorts?"
+        kind="work_type"
+        companyId={companyId}
+        value={workType}
+        onChange={v => setValue('work_type', v)}
+        presets={WORK_TYPES}
+        existing={existingWorkTypes}
+        addCustomLabel="Lägg till egen..."
+      />
+
+      <CategoryPicker
+        label="Vilken byggdel?"
+        kind="building_part"
+        companyId={companyId}
+        value={buildingPart}
+        onChange={v => setValue('building_part', v)}
+        presets={BUILDING_PARTS}
+        existing={existingBuildingParts}
+        addCustomLabel="Lägg till egen..."
+      />
+
       <div>
         <label className="block text-sm font-medium mb-1">Rubrik</label>
         <input
@@ -176,8 +218,33 @@ export default function LessonForm({ projectId, companyId, existingTagNames, les
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Foton</label>
-        <PhotoUploader files={photos} onChange={setPhotos} />
+        <label className="block text-sm font-medium mb-1">Lägg till nya foton eller videor</label>
+        <MediaUploader
+          files={media}
+          onChange={setMedia}
+          addLabel="Lägg till foto eller video"
+          gdprNotice="Se till att inga personer syns i bilden eller videon, med hänsyn till GDPR."
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Mobilnummer</label>
+          <input
+            type="tel"
+            {...register('contact_phone')}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">E-post</label>
+          <input
+            type="email"
+            {...register('contact_email')}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {errors.contact_email && <p className="text-red-600 text-sm mt-1">{errors.contact_email.message}</p>}
+        </div>
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}

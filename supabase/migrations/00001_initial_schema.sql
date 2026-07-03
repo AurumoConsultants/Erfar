@@ -130,6 +130,9 @@ create table public.lessons (
   construction_phase public.construction_phase not null,
   title       text not null,
   description text,
+  -- Optional contact info so a future reader of the lesson can follow up.
+  contact_phone text,
+  contact_email text,
   created_by  uuid not null references public.profiles(id) on delete set null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -147,15 +150,29 @@ alter table public.lessons add column search_vector tsvector
 create index lessons_search_idx on public.lessons using gin(search_vector);
 
 -- ============================================================
--- TAGS — freeform, namespaced per company
+-- TAGS — freeform, namespaced per company.
+-- `kind` distinguishes plain freeform tags from the two structured
+-- lesson-logging taxonomies (byggmoment / byggdel), which reuse this same
+-- extensible-per-company table rather than duplicating it three times.
 -- ============================================================
+create type public.tag_kind as enum ('tag', 'work_type', 'building_part');
+
 create table public.tags (
   id          uuid primary key default gen_random_uuid(),
   company_id  uuid not null references public.companies(id) on delete cascade,
+  kind        public.tag_kind not null default 'tag',
   name        text not null,
   created_at  timestamptz not null default now(),
-  unique (company_id, name)
+  unique (company_id, kind, name)
 );
+
+-- Structured 2-level category (byggmoment / byggdel) for a lesson, each a
+-- public.tags row with the matching `kind`. Added here (after `tags` exists)
+-- rather than inline on the lessons table above, to avoid a forward
+-- reference on fresh installs. Nullable so the simpler mobile-app logging
+-- flow (which doesn't collect these) keeps working.
+alter table public.lessons add column work_type_id uuid references public.tags(id) on delete set null;
+alter table public.lessons add column building_part_id uuid references public.tags(id) on delete set null;
 
 create table public.lesson_tags (
   lesson_id   uuid not null references public.lessons(id) on delete cascade,
@@ -165,12 +182,15 @@ create table public.lesson_tags (
 create index lesson_tags_tag_id_idx on public.lesson_tags(tag_id);
 
 -- ============================================================
--- LESSON IMAGES
+-- LESSON IMAGES (photos and videos — name kept for historical continuity
+-- with the storage bucket / RLS policies below, which are path-based and
+-- agnostic to file type)
 -- ============================================================
 create table public.lesson_images (
   id            uuid primary key default gen_random_uuid(),
   lesson_id     uuid not null references public.lessons(id) on delete cascade,
   storage_path  text not null,
+  media_type    text not null default 'image' check (media_type in ('image', 'video')),
   created_at    timestamptz not null default now()
 );
 

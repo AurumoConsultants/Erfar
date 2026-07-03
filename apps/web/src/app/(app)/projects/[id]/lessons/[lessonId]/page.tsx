@@ -11,7 +11,7 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
 
   const { data: lesson } = await supabase
     .from('lessons')
-    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles(*)')
+    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles(*), work_type:tags!work_type_id(*), building_part:tags!building_part_id(*)')
     .eq('id', lessonId)
     .single()
   if (!lesson) notFound()
@@ -21,10 +21,10 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
   const tags = (lesson.tags ?? []).map((lt: any) => lt.tag).filter(Boolean)
   const images = lesson.images ?? []
 
-  const imageUrls = await Promise.all(
-    images.map(async (img: { storage_path: string }) => {
+  const mediaUrls = await Promise.all(
+    images.map(async (img: { storage_path: string; media_type: 'image' | 'video' }) => {
       const { data } = await supabase.storage.from('lesson-images').createSignedUrl(img.storage_path, 3600)
-      return data?.signedUrl
+      return { url: data?.signedUrl, media_type: img.media_type }
     })
   )
 
@@ -58,9 +58,17 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
 
         {lesson.description && <p className="text-gray-700 whitespace-pre-wrap">{lesson.description}</p>}
 
-        {phaseInfo && (
-          <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{phaseInfo.label}</span>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {phaseInfo && (
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{phaseInfo.label}</span>
+          )}
+          {lesson.work_type && (
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full capitalize">{lesson.work_type.name}</span>
+          )}
+          {lesson.building_part && (
+            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full capitalize">{lesson.building_part.name}</span>
+          )}
+        </div>
 
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -70,12 +78,24 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
           </div>
         )}
 
-        {imageUrls.filter(Boolean).length > 0 && (
+        {mediaUrls.filter(m => m.url).length > 0 && (
           <div className="grid grid-cols-3 gap-2">
-            {imageUrls.filter(Boolean).map((url, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-lg border border-gray-200" />
+            {mediaUrls.filter(m => m.url).map((m, i) => (
+              m.media_type === 'video' ? (
+                <video key={i} src={m.url} controls className="w-full aspect-square object-cover rounded-lg border border-gray-200 bg-black" />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={m.url} alt="" className="w-full aspect-square object-cover rounded-lg border border-gray-200" />
+              )
             ))}
+          </div>
+        )}
+
+        {(lesson.contact_phone || lesson.contact_email) && (
+          <div className="border-t border-gray-100 pt-4 text-sm">
+            <p className="text-gray-400 mb-1">Kontakt</p>
+            {lesson.contact_phone && <p className="text-gray-700">{lesson.contact_phone}</p>}
+            {lesson.contact_email && <p className="text-gray-700">{lesson.contact_email}</p>}
           </div>
         )}
       </div>
