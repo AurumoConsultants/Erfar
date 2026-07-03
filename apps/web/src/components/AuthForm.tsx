@@ -28,6 +28,11 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
   const [searching, setSearching] = useState(false)
   const [lookupMessage, setLookupMessage] = useState('')
 
+  const [companyQuery, setCompanyQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<{ name: string; orgNumber: string }[]>([])
+  const [searchingByName, setSearchingByName] = useState(false)
+  const [nameSearchMessage, setNameSearchMessage] = useState('')
+
   function switchMode(next: Mode) {
     setMode(next)
     setError('')
@@ -74,6 +79,37 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
     } finally {
       setSearching(false)
     }
+  }
+
+  async function handleSearchCompanyByName() {
+    setSearchingByName(true)
+    setNameSearchMessage('')
+    setSearchResults([])
+    try {
+      const res = await fetch(`/api/company-lookup?name=${encodeURIComponent(companyQuery)}`)
+      const json = await res.json()
+      if (!res.ok) {
+        setNameSearchMessage(json.error ?? t.auth.companySearchNoResults)
+      } else if (!json.configured) {
+        setNameSearchMessage(t.auth.lookupNotConfigured)
+      } else if (json.results?.length) {
+        setSearchResults(json.results)
+      } else {
+        setNameSearchMessage(json.error ?? t.auth.companySearchNoResults)
+      }
+    } catch {
+      setNameSearchMessage(t.auth.companySearchNoResults)
+    } finally {
+      setSearchingByName(false)
+    }
+  }
+
+  function selectSearchResult(result: { name: string; orgNumber: string }) {
+    setBolagName(result.name)
+    setBolagOrgNumber(result.orgNumber)
+    setSearchResults([])
+    setCompanyQuery('')
+    setNameSearchMessage('')
   }
 
   async function handleSignup(e: React.FormEvent, accountType: 'private_company' | 'kommun') {
@@ -221,6 +257,31 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
                   {SWEDISH_KOMMUNER.map(k => <option key={k} value={k}>{k}</option>)}
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">{t.auth.searchCompanyByName}</label>
+                <div className="flex gap-2">
+                  <input type="text" value={companyQuery} onChange={e => setCompanyQuery(e.target.value)}
+                    placeholder={t.auth.companyNamePlaceholder}
+                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <button type="button" onClick={handleSearchCompanyByName} disabled={!companyQuery || searchingByName}
+                    className="border border-gray-300 rounded-lg px-4 text-sm font-semibold hover:bg-gray-50 disabled:opacity-50 transition">
+                    {searchingByName ? t.auth.searchingCompany : t.auth.searchCompany}
+                  </button>
+                </div>
+                {searchResults.length > 0 && (
+                  <div className="mt-2 border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-hidden">
+                    {searchResults.map(r => (
+                      <button key={r.orgNumber} type="button" onClick={() => selectSearchResult(r)}
+                        className="w-full text-left px-3 py-2 hover:bg-gray-50 transition text-sm flex items-center justify-between gap-2">
+                        <span className="font-medium">{r.name}</span>
+                        <span className="text-gray-400 text-xs shrink-0">{r.orgNumber}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {nameSearchMessage && <p className="text-amber-600 text-xs mt-1">{nameSearchMessage}</p>}
+              </div>
+              <p className="text-center text-xs text-gray-400">{t.auth.orSeparator}</p>
               <div>
                 <label className="block text-sm font-medium mb-1">{t.auth.kommunalBolagOrgNumber}</label>
                 <div className="flex gap-2">

@@ -32,6 +32,10 @@ export default {
     searchingCompany: 'Söker...',
     companyNotFound: 'Företaget hittades inte. Ange namnet manuellt.',
     lookupNotConfigured: 'Automatisk sökning är inte tillgänglig. Ange namnet manuellt.',
+    searchCompanyByName: 'Sök företag på namn',
+    companyNamePlaceholder: 'T.ex. Exempel Kommunala Bolag AB',
+    companySearchNoResults: 'Inga företag hittades. Ange uppgifterna manuellt.',
+    orSeparator: 'eller',
   },
   nav: {
     dashboard: 'Översikt',
