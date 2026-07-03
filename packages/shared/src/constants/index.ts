@@ -1,5 +1,7 @@
 import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase } from '../types'
 
+export { SWEDISH_KOMMUNER, type SwedishKommun } from './kommuner'
+
 export const LESSON_TYPES: {
   value: LessonType
   label: string

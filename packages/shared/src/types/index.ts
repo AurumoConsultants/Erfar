@@ -6,11 +6,14 @@ export type MemberRole = 'entrepreneur' | 'spectator'
 export type ProjectCategoryType = 'nybyggnation' | 'renovering' | 'service'
 export type ProjectCategorySubtype = 'bostader' | 'kontor' | 'lokaler' | 'ovrigt'
 export type ConstructionPhase = 'idea_stage' | 'early_stages' | 'design' | 'execution' | 'management'
+export type AccountType = 'private_company' | 'kommun'
 
 export interface Company {
   id: string
   name: string
   org_number: string | null
+  account_type: AccountType
+  kommun: string | null
   created_at: string
 }
 

@@ -20,15 +20,21 @@ create type public.project_category_type as enum ('nybyggnation', 'renovering', 
 create type public.project_category_subtype as enum ('bostader', 'kontor', 'lokaler', 'ovrigt');
 -- "Var i byggprocessen" — which phase of the construction process a lesson relates to.
 create type public.construction_phase as enum ('idea_stage', 'early_stages', 'design', 'execution', 'management');
+create type public.account_type as enum ('private_company', 'kommun');
 
 -- ============================================================
 -- COMPANIES (tenants, owned by a client)
+-- For account_type 'kommun', `name`/`org_number` describe the kommunala
+-- bolaget being registered, and `kommun` records which municipality it
+-- belongs to.
 -- ============================================================
 create table public.companies (
-  id          uuid primary key default gen_random_uuid(),
-  name        text not null,
-  org_number  text,
-  created_at  timestamptz not null default now()
+  id           uuid primary key default gen_random_uuid(),
+  name         text not null,
+  org_number   text,
+  account_type public.account_type not null default 'private_company',
+  kommun       text,
+  created_at   timestamptz not null default now()
 );
 
 -- ============================================================
