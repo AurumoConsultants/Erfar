@@ -31,7 +31,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
 
   const { data: lessonsRaw } = await supabase
     .from('lessons')
-    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles(*)')
+    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles!created_by(*)')
     .eq('project_id', id)
     .is('reviewed_at', null)
     .order('created_at', { ascending: true })

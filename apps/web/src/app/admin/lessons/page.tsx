@@ -8,7 +8,7 @@ export default async function AdminLessonsPage() {
 
   const { data: lessons } = await supabase
     .from('lessons')
-    .select('id, title, type, created_at, project:projects(name, company:companies(name)), author:profiles(full_name)')
+    .select('id, title, type, created_at, project:projects(name, company:companies(name)), author:profiles!created_by(full_name)')
     .order('created_at', { ascending: false })
     .limit(200)
 

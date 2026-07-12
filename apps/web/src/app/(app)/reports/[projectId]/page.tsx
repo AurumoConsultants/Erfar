@@ -12,7 +12,7 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
 
   const { data: lessonsRaw } = await supabase
     .from('lessons')
-    .select('*, tags:lesson_tags(tag:tags(*)), author:profiles(*)')
+    .select('*, tags:lesson_tags(tag:tags(*)), author:profiles!created_by(*)')
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
 

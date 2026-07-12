@@ -11,7 +11,7 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
 
   const { data: lesson } = await supabase
     .from('lessons')
-    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles(*), reviewer:profiles!reviewed_by(*), work_type:tags!work_type_id(*), building_part:tags!building_part_id(*)')
+    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles!created_by(*), reviewer:profiles!reviewed_by(*), work_type:tags!work_type_id(*), building_part:tags!building_part_id(*)')
     .eq('id', lessonId)
     .single()
   if (!lesson) notFound()
