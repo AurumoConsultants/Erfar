@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import LessonCard from '@/components/LessonCard'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 
 const statusLabels: Record<string, string> = {
@@ -13,6 +13,8 @@ const statusLabels: Record<string, string> = {
 
 const categoryTypeLabel = (v: string) => PROJECT_CATEGORY_TYPES.find(c => c.value === v)?.label ?? v
 const categorySubtypeLabel = (v: string) => PROJECT_CATEGORY_SUBTYPES.find(c => c.value === v)?.label ?? v
+const procurementFormLabel = (v: string) => PROCUREMENT_FORMS.find(c => c.value === v)?.label ?? v
+const contractFormLabel = (v: string) => CONTRACT_FORMS.find(c => c.value === v)?.label ?? v
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -36,6 +38,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const isClientOwner = profile?.role === 'client' && profile.company_id === project.company_id
   let isContributor = false
+  let isEntrepreneur = false
   if (!isClientOwner) {
     const { data: membership } = await supabase
       .from('project_members')
@@ -43,9 +46,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       .eq('project_id', id)
       .eq('profile_id', user!.id)
       .maybeSingle()
-    isContributor = membership?.role === 'entrepreneur' || membership?.role === 'konsult'
+    isEntrepreneur = membership?.role === 'entrepreneur'
+    isContributor = isEntrepreneur || membership?.role === 'konsult'
   }
   const canLogLesson = isClientOwner || isContributor
+  // Client and entrepreneur team members run the review meeting — konsult and
+  // spectators don't (matches public.can_review_project in the DB).
+  const canReview = isClientOwner || isEntrepreneur
+  const pendingReviewCount = lessons.filter(l => !l.reviewed_at).length
 
   return (
     <div className="space-y-6">
@@ -60,6 +68,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
               {categoryTypeLabel(project.category_type)} · {categorySubtypeLabel(project.category_subtype)}
             </span>
+            <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
+              {procurementFormLabel(project.procurement_form)} · {contractFormLabel(project.contract_form)}
+            </span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -67,6 +78,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <Link href={`/projects/${id}/lessons/new`}
               className="bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 transition">
               Logga en lärdom
+            </Link>
+          )}
+          {canReview && (
+            <Link href={`/projects/${id}/review`}
+              className="border border-gray-300 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-50 transition inline-flex items-center gap-2">
+              Granska lärdomar
+              {pendingReviewCount > 0 && (
+                <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                  {pendingReviewCount}
+                </span>
+              )}
             </Link>
           )}
           {isClientOwner && (

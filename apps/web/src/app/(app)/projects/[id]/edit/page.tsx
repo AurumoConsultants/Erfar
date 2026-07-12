@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
-import type { Project, ProjectCategoryType, ProjectCategorySubtype } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
+import type { Project, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm } from '@erfar/shared'
 
 export default function EditProjectPage() {
   const router = useRouter()
@@ -37,6 +37,8 @@ export default function EditProjectPage() {
         status: project.status,
         category_type: project.category_type,
         category_subtype: project.category_subtype,
+        procurement_form: project.procurement_form,
+        contract_form: project.contract_form,
       })
       .eq('id', id)
 
@@ -79,6 +81,22 @@ export default function EditProjectPage() {
             <select required value={project.category_subtype} onChange={e => setProject({ ...project, category_subtype: e.target.value as ProjectCategorySubtype })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
               {PROJECT_CATEGORY_SUBTYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Upphandlingsform</label>
+            <select required value={project.procurement_form} onChange={e => setProject({ ...project, procurement_form: e.target.value as ProcurementForm })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              {PROCUREMENT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Entreprenadform</label>
+            <select required value={project.contract_form} onChange={e => setProject({ ...project, contract_form: e.target.value as ContractForm })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              {CONTRACT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </div>
         </div>

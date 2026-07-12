@@ -5,6 +5,8 @@ export type InviteRole = 'entrepreneur' | 'spectator_project' | 'spectator_compa
 export type MemberRole = 'entrepreneur' | 'spectator' | 'konsult'
 export type ProjectCategoryType = 'nybyggnation' | 'renovering' | 'service'
 export type ProjectCategorySubtype = 'bostader' | 'kontor' | 'lokaler' | 'ovrigt'
+export type ProcurementForm = 'abt06' | 'ab04' | 'service' | 'partnering'
+export type ContractForm = 'totalentreprenad' | 'delad_entreprenad'
 export type ConstructionPhase = 'idea_stage' | 'early_stages' | 'design' | 'execution' | 'management'
 export type AccountType = 'private_company' | 'kommun'
 export type TagKind = 'tag' | 'work_type' | 'building_part'
@@ -40,6 +42,8 @@ export interface Project {
   status: ProjectStatus
   category_type: ProjectCategoryType
   category_subtype: ProjectCategorySubtype
+  procurement_form: ProcurementForm
+  contract_form: ContractForm
   created_by: string | null
   created_at: string
   updated_at: string
@@ -102,11 +106,16 @@ export interface Lesson {
   contact_phone: string | null
   contact_email: string | null
   created_by: string
+  reviewed_at: string | null
+  reviewed_by: string | null
+  review_notes: string | null
+  solution: string | null
   created_at: string
   updated_at: string
   // joined
   project?: Project
   author?: Profile
+  reviewer?: Profile
   tags?: Tag[]
   images?: LessonImage[]
   work_type?: Tag

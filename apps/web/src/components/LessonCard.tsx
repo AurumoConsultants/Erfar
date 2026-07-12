@@ -31,6 +31,9 @@ export default function LessonCard({ lesson, showProject }: LessonCardProps) {
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-2 mt-3">
+        {!lesson.reviewed_at && (
+          <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">Utkast</span>
+        )}
         {showProject && lesson.project && (
           <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{lesson.project.name}</span>
         )}

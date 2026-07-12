@@ -11,7 +11,7 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
 
   const { data: lesson } = await supabase
     .from('lessons')
-    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles(*), work_type:tags!work_type_id(*), building_part:tags!building_part_id(*)')
+    .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*), author:profiles(*), reviewer:profiles!reviewed_by(*), work_type:tags!work_type_id(*), building_part:tags!building_part_id(*)')
     .eq('id', lessonId)
     .single()
   if (!lesson) notFound()
@@ -45,15 +45,22 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
               </p>
             </div>
           </div>
-          {isAuthor && (
-            <div className="flex gap-2">
-              <Link href={`/projects/${id}/lessons/${lessonId}/edit`}
-                className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
-                Redigera
-              </Link>
-              <DeleteLessonButton lessonId={lessonId} projectId={id} />
-            </div>
-          )}
+          <div className="flex items-start gap-2">
+            {lesson.reviewed_at && (
+              <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full whitespace-nowrap">
+                Officiell
+              </span>
+            )}
+            {isAuthor && (
+              <div className="flex gap-2">
+                <Link href={`/projects/${id}/lessons/${lessonId}/edit`}
+                  className="text-sm border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+                  Redigera
+                </Link>
+                <DeleteLessonButton lessonId={lessonId} projectId={id} />
+              </div>
+            )}
+          </div>
         </div>
 
         {lesson.description && <p className="text-gray-700 whitespace-pre-wrap">{lesson.description}</p>}
@@ -96,6 +103,26 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
             <p className="text-gray-400 mb-1">Kontakt</p>
             {lesson.contact_phone && <p className="text-gray-700">{lesson.contact_phone}</p>}
             {lesson.contact_email && <p className="text-gray-700">{lesson.contact_email}</p>}
+          </div>
+        )}
+
+        {lesson.reviewed_at && (lesson.review_notes || lesson.solution) && (
+          <div className="border-t border-gray-100 pt-4 text-sm space-y-3">
+            <p className="text-gray-400">
+              Gjord officiell av {lesson.reviewer?.full_name ?? 'okänd'} · {new Date(lesson.reviewed_at).toLocaleDateString('sv-SE')}
+            </p>
+            {lesson.review_notes && (
+              <div>
+                <p className="text-gray-400 mb-1">Ytterligare information</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{lesson.review_notes}</p>
+              </div>
+            )}
+            {lesson.solution && (
+              <div>
+                <p className="text-gray-400 mb-1">Lösning</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{lesson.solution}</p>
+              </div>
+            )}
           </div>
         )}
       </div>

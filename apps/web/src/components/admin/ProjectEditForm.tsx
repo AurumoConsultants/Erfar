@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
-import type { Project, ProjectCategoryType, ProjectCategorySubtype, ProjectStatus } from '@erfar/shared'
+import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
+import type { Project, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm, ProjectStatus } from '@erfar/shared'
 
 interface CompanyOption { id: string; name: string }
 
@@ -23,6 +23,8 @@ export default function ProjectEditForm({ project, companies }: { project: Proje
   const [status, setStatus] = useState<ProjectStatus>(project.status)
   const [categoryType, setCategoryType] = useState<ProjectCategoryType>(project.category_type)
   const [categorySubtype, setCategorySubtype] = useState<ProjectCategorySubtype>(project.category_subtype)
+  const [procurementForm, setProcurementForm] = useState<ProcurementForm>(project.procurement_form)
+  const [contractForm, setContractForm] = useState<ContractForm>(project.contract_form)
   const [companyId, setCompanyId] = useState(project.company_id)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -43,6 +45,8 @@ export default function ProjectEditForm({ project, companies }: { project: Proje
         status,
         category_type: categoryType,
         category_subtype: categorySubtype,
+        procurement_form: procurementForm,
+        contract_form: contractForm,
         company_id: companyId,
       }),
     })
@@ -89,6 +93,22 @@ export default function ProjectEditForm({ project, companies }: { project: Proje
           <select value={categorySubtype} onChange={e => setCategorySubtype(e.target.value as ProjectCategorySubtype)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             {PROJECT_CATEGORY_SUBTYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Upphandlingsform</label>
+          <select value={procurementForm} onChange={e => setProcurementForm(e.target.value as ProcurementForm)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            {PROCUREMENT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Entreprenadform</label>
+          <select value={contractForm} onChange={e => setContractForm(e.target.value as ContractForm)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            {CONTRACT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ConstructionPhase, UserRole } from '../types'
+import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm, ConstructionPhase, UserRole } from '../types'
 
 export { SWEDISH_KOMMUNER, type SwedishKommun } from './kommuner'
 
@@ -88,6 +88,20 @@ export const PROJECT_CATEGORY_SUBTYPES: { value: ProjectCategorySubtype; label: 
   { value: 'kontor', label: 'Kontor' },
   { value: 'lokaler', label: 'Lokaler' },
   { value: 'ovrigt', label: 'Övrigt' },
+]
+
+// "Upphandlingsform" — which standard contract the procurement is run under.
+export const PROCUREMENT_FORMS: { value: ProcurementForm; label: string }[] = [
+  { value: 'abt06', label: 'ABT 06' },
+  { value: 'ab04', label: 'AB 04' },
+  { value: 'service', label: 'Serviceprojekt' },
+  { value: 'partnering', label: 'Partnering' },
+]
+
+// "Entreprenadform" — how the contract work is split between entrepreneurs.
+export const CONTRACT_FORMS: { value: ContractForm; label: string }[] = [
+  { value: 'totalentreprenad', label: 'Totalentreprenad' },
+  { value: 'delad_entreprenad', label: 'Delad entreprenad' },
 ]
 
 export const SUPPORTED_LOCALES = ['sv'] as const

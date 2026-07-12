@@ -33,6 +33,9 @@ export default function KnowledgeBasePage() {
     let q = supabase
       .from('lessons')
       .select('*, project:projects(*), tags:lesson_tags(tag:tags(*)), images:lesson_images(*)')
+      // Only lessons that came out of a review meeting are "official" — drafts
+      // stay visible on their own project page but don't surface here.
+      .not('reviewed_at', 'is', null)
       .order('created_at', { ascending: false })
 
     if (query.trim()) q = q.textSearch('search_vector', query.trim(), { type: 'websearch', config: 'swedish' })

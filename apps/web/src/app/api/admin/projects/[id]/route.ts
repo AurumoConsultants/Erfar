@@ -18,6 +18,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (typeof body.status === 'string') updates.status = body.status
   if (typeof body.category_type === 'string') updates.category_type = body.category_type
   if (typeof body.category_subtype === 'string') updates.category_subtype = body.category_subtype
+  if (typeof body.procurement_form === 'string') updates.procurement_form = body.procurement_form
+  if (typeof body.contract_form === 'string') updates.contract_form = body.contract_form
   if (typeof body.company_id === 'string') updates.company_id = body.company_id
 
   const supabase = createAdminClient()

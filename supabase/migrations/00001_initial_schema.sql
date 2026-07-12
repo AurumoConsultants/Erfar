@@ -18,6 +18,10 @@ create type public.member_role as enum ('entrepreneur', 'spectator', 'konsult');
 create type public.project_category_type as enum ('nybyggnation', 'renovering', 'service');
 -- Same four subtypes apply under every category_type.
 create type public.project_category_subtype as enum ('bostader', 'kontor', 'lokaler', 'ovrigt');
+-- "Upphandlingsform" — which standard contract the procurement is run under.
+create type public.procurement_form as enum ('abt06', 'ab04', 'service', 'partnering');
+-- "Entreprenadform" — how the contract work is split between entrepreneurs.
+create type public.contract_form as enum ('totalentreprenad', 'delad_entreprenad');
 -- "Var i byggprocessen" — which phase of the construction process a lesson relates to.
 create type public.construction_phase as enum ('idea_stage', 'early_stages', 'design', 'execution', 'management');
 create type public.account_type as enum ('private_company', 'kommun');
@@ -69,6 +73,8 @@ create table public.projects (
   status      public.project_status not null default 'active',
   category_type    public.project_category_type not null,
   category_subtype public.project_category_subtype not null,
+  procurement_form public.procurement_form not null,
+  contract_form    public.contract_form not null,
   created_by  uuid references public.profiles(id) on delete set null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -134,6 +140,13 @@ create table public.lessons (
   contact_phone text,
   contact_email text,
   created_by  uuid not null references public.profiles(id) on delete set null,
+  -- Set together, only via public.submit_lesson_review() — filled in during the
+  -- periodic review meeting, not at logging time. `solution` is only meaningful
+  -- for type='challenge' lessons; left null for 'success'.
+  reviewed_at   timestamptz,
+  reviewed_by   uuid references public.profiles(id) on delete set null,
+  review_notes  text,
+  solution      text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -302,6 +315,16 @@ returns boolean language sql stable security definer as $$
   );
 $$;
 
+-- can the current user run the review meeting for this project? Either the
+-- client who owns it, or one of its entrepreneur team members — matches who
+-- would actually be in the room (konsult and spectators cannot review).
+create or replace function public.can_review_project(p_project_id uuid)
+returns boolean language sql stable security definer as $$
+  select exists (
+    select 1 from public.projects p where p.id = p_project_id and p.company_id = public.my_company_id()
+  ) or public.is_project_entrepreneur(p_project_id);
+$$;
+
 -- unified: can the current user read this project at all (any access path)?
 -- Composed here once and reused by every downstream policy (lessons,
 -- lesson_tags, lesson_images) instead of repeating the union per table.
@@ -453,6 +476,37 @@ create policy "lessons_delete" on public.lessons
     created_by = auth.uid()
     or exists (select 1 from public.projects p where p.id = project_id and p.company_id = public.my_company_id())
   );
+
+-- Records the outcome of the periodic review meeting for one lesson. A
+-- dedicated RPC (rather than an RLS update policy) so reviewers — who did not
+-- necessarily write the lesson — can only ever touch these four review
+-- columns, never the original title/description/etc.
+create or replace function public.submit_lesson_review(
+  p_lesson_id uuid,
+  p_review_notes text,
+  p_solution text
+)
+returns void language plpgsql security definer as $$
+declare
+  v_project_id uuid;
+begin
+  select project_id into v_project_id from public.lessons where id = p_lesson_id;
+  if v_project_id is null then
+    raise exception 'Lesson not found';
+  end if;
+
+  if not public.can_review_project(v_project_id) then
+    raise exception 'Not authorized to review this lesson';
+  end if;
+
+  update public.lessons
+  set reviewed_at = now(),
+      reviewed_by = auth.uid(),
+      review_notes = p_review_notes,
+      solution = p_solution
+  where id = p_lesson_id;
+end;
+$$;
 
 -- ------------------------------------------------------------
 -- TAGS
