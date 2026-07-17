@@ -83,7 +83,7 @@ export default function SearchFilters({
             <button key={t} type="button"
               onClick={() => onTagChange(tag === t ? null : t)}
               className={`text-xs px-2 py-1 rounded-full border transition ${
-                tag === t ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                tag === t ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}>
               {t}
             </button>

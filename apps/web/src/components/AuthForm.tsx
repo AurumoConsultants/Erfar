@@ -148,14 +148,14 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
           <button
             type="button"
             onClick={() => switchMode('login')}
-            className={`flex-1 py-2 text-sm font-semibold transition ${mode === 'login' ? 'bg-blue-700 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            className={`flex-1 py-2 text-sm font-semibold transition ${mode === 'login' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
           >
             {t.auth.login}
           </button>
           <button
             type="button"
             onClick={() => switchMode('signup')}
-            className={`flex-1 py-2 text-sm font-semibold transition ${mode === 'signup' ? 'bg-blue-700 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            className={`flex-1 py-2 text-sm font-semibold transition ${mode === 'signup' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
           >
             {t.auth.signup}
           </button>
@@ -180,7 +180,7 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
             {error && <p className="text-red-600 text-sm">{error}</p>}
             <button
               type="submit" disabled={loading}
-              className="w-full bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition"
+              className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition"
             >
               {loading ? t.common.loading : t.auth.login}
             </button>
@@ -236,7 +236,7 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
               </div>
               {error && <p className="text-red-600 text-sm">{error}</p>}
               <button type="submit" disabled={loading}
-                className="w-full bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">
+                className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
                 {loading ? t.common.loading : t.auth.signup}
               </button>
               <button type="button" onClick={() => setSignupStep('choose')} className="w-full text-sm text-gray-500 hover:underline">
@@ -319,7 +319,7 @@ export default function AuthForm({ initialMode }: { initialMode: Mode }) {
               </div>
               {error && <p className="text-red-600 text-sm">{error}</p>}
               <button type="submit" disabled={loading}
-                className="w-full bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">
+                className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
                 {loading ? t.common.loading : t.auth.signup}
               </button>
               <button type="button" onClick={() => setSignupStep('choose')} className="w-full text-sm text-gray-500 hover:underline">

@@ -1,6 +1,42 @@
 @import "tailwindcss";
 
+/*
+ * Brand palette, sampled from Logo/erfar-logo.png: navy (#233C53) is the
+ * dominant wordmark/shape color, orange (#D3663F) is its accent flourish.
+ * Overriding Tailwind's built-in `blue` and `orange` scales here means every
+ * existing bg-blue-700 / text-blue-500 / focus:ring-blue-500 / etc. utility
+ * across the app picks up the brand colors automatically, with no per-file
+ * class changes needed.
+ */
+@theme {
+  --color-blue-50: #f4f7fa;
+  --color-blue-100: #e6edf4;
+  --color-blue-200: #c9d9e8;
+  --color-blue-300: #a2bed8;
+  --color-blue-400: #6f9ac3;
+  --color-blue-500: #4577a5;
+  --color-blue-600: #325577;
+  --color-blue-700: #233b53;
+  --color-blue-800: #1b2f41;
+  --color-blue-900: #152432;
+  --color-blue-950: #0e1720;
+
+  --color-orange-50: #fcf5f3;
+  --color-orange-100: #f9ebe6;
+  --color-orange-200: #f3d4c9;
+  --color-orange-300: #eab6a4;
+  --color-orange-400: #e1957a;
+  --color-orange-500: #da7e5d;
+  --color-orange-600: #d46740;
+  --color-orange-700: #bb512a;
+  --color-orange-800: #9a4323;
+  --color-orange-900: #7d361c;
+  --color-orange-950: #532413;
+}
+
 :root {
-  --color-challenge: #d97706;
+  /* Nudged from the generic amber default to the exact brand orange, tying
+     the challenge (⚠️) accent color to the logo's own accent hue. */
+  --color-challenge: #d3663f;
   --color-success: #16a34a;
 }

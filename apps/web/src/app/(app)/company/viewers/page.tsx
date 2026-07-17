@@ -106,7 +106,7 @@ export default function CompanyViewersPage() {
             </div>
           )}
           <button type="submit" disabled={sending}
-            className="w-full bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">
+            className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
             {sending ? 'Skickar...' : 'Skicka inbjudan'}
           </button>
         </form>

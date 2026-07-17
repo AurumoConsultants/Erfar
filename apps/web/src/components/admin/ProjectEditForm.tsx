@@ -136,7 +136,7 @@ export default function ProjectEditForm({ project, companies }: { project: Proje
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div className="flex gap-3">
         <button type="submit" disabled={saving}
-          className="bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">
+          className="bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
           {saving ? 'Sparar...' : 'Spara'}
         </button>
         <button type="button" onClick={() => router.push('/admin/projects')}

@@ -178,7 +178,7 @@ export default function LessonWizard({
     <div className="space-y-5">
       <div className="flex items-center gap-2">
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-          <div key={i} className={`h-1.5 flex-1 rounded-full ${i + 1 <= step ? 'bg-blue-700' : 'bg-gray-200'}`} />
+          <div key={i} className={`h-1.5 flex-1 rounded-full ${i + 1 <= step ? 'bg-orange-600' : 'bg-gray-200'}`} />
         ))}
       </div>
       <p className="text-xs text-gray-400">Steg {step} av {TOTAL_STEPS}</p>
@@ -206,7 +206,7 @@ export default function LessonWizard({
           <div>
             <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
             {visiblePhases.length === 1 ? (
-              <span className="inline-block bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded-lg">
+              <span className="inline-block bg-orange-600 text-white text-xs font-semibold py-2 px-3 rounded-lg">
                 {visiblePhases[0].label}
               </span>
             ) : (
@@ -218,7 +218,7 @@ export default function LessonWizard({
                     onClick={() => setConstructionPhase(p.value)}
                     className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
                       constructionPhase === p.value
-                        ? 'bg-blue-700 text-white border-blue-700'
+                        ? 'bg-orange-600 text-white border-orange-600'
                         : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                     }`}
                   >
@@ -341,12 +341,12 @@ export default function LessonWizard({
         )}
         {step < TOTAL_STEPS ? (
           <button type="button" onClick={goNext}
-            className="flex-1 bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 transition">
+            className="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 transition">
             Nästa
           </button>
         ) : (
           <button type="button" onClick={handleFinish} disabled={saving}
-            className="flex-1 bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">
+            className="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
             {saving ? 'Sparar...' : 'Spara lärdom'}
           </button>
         )}

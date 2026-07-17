@@ -76,7 +76,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         <div className="flex gap-2">
           {canLogLesson && (
             <Link href={`/projects/${id}/lessons/new`}
-              className="bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+              className="bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-orange-700 transition">
               Logga en lärdom
             </Link>
           )}

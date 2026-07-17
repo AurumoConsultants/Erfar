@@ -124,11 +124,11 @@ export default function InvitePage() {
 
         <div className="flex gap-2 mb-5">
           <button onClick={() => setIsNewUser(true)}
-            className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${isNewUser ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${isNewUser ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
             Skapa konto
           </button>
           <button onClick={() => setIsNewUser(false)}
-            className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${!isNewUser ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+            className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${!isNewUser ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
             Logga in
           </button>
         </div>
@@ -148,7 +148,7 @@ export default function InvitePage() {
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
           <button type="submit" disabled={saving}
-            className="w-full bg-blue-700 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 disabled:opacity-50 transition">
+            className="w-full bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 disabled:opacity-50 transition">
             {saving ? 'Bearbetar...' : t.invite.accept}
           </button>
         </form>

@@ -165,7 +165,7 @@ export default function LessonForm({
       <div>
         <label className="block text-sm font-medium mb-2">Var i byggprocessen</label>
         {visiblePhases.length === 1 ? (
-          <span className="inline-block bg-blue-700 text-white text-xs font-semibold py-2 px-3 rounded-lg">
+          <span className="inline-block bg-orange-600 text-white text-xs font-semibold py-2 px-3 rounded-lg">
             {visiblePhases[0].label}
           </span>
         ) : (
@@ -177,7 +177,7 @@ export default function LessonForm({
                 onClick={() => setValue('construction_phase', p.value)}
                 className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
                   constructionPhase === p.value
-                    ? 'bg-blue-700 text-white border-blue-700'
+                    ? 'bg-orange-600 text-white border-orange-600'
                     : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
               >
@@ -268,7 +268,7 @@ export default function LessonForm({
       <button
         type="submit"
         disabled={saving}
-        className="w-full bg-blue-700 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition"
+        className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition"
       >
         {saving ? 'Sparar...' : 'Spara lärdom'}
       </button>

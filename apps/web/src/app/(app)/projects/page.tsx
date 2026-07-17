@@ -26,7 +26,7 @@ export default async function ProjectsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Projekt</h1>
         {profile?.role === 'client' && (
-          <Link href="/projects/new" className="bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 transition">
+          <Link href="/projects/new" className="bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-orange-700 transition">
             Nytt projekt
           </Link>
         )}

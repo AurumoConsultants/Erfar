@@ -78,7 +78,7 @@ export default function LessonEditForm({ lesson, projects }: { lesson: Lesson; p
           {CONSTRUCTION_PHASES.map(p => (
             <button key={p.value} type="button" onClick={() => setConstructionPhase(p.value)}
               className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
-                constructionPhase === p.value ? 'bg-blue-700 text-white border-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                constructionPhase === p.value ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}>
               {p.label}
             </button>
@@ -105,7 +105,7 @@ export default function LessonEditForm({ lesson, projects }: { lesson: Lesson; p
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div className="flex gap-3">
         <button type="submit" disabled={saving}
-          className="bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 disabled:opacity-50 transition">
+          className="bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
           {saving ? 'Sparar...' : 'Spara'}
         </button>
         <button type="button" onClick={() => router.push('/admin/lessons')}
