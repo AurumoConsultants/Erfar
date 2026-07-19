@@ -349,7 +349,10 @@ returns table (
   created_at timestamptz,
   relevance int,
   is_own_company boolean,
-  company_name text
+  company_name text,
+  review_notes text,
+  solution text,
+  tags text[]
 )
 language sql stable security definer as $$
   select
@@ -363,7 +366,12 @@ language sql stable security definer as $$
     (case when p.category_type = p_category_type then 1 else 0 end
       + case when p.category_subtype = p_category_subtype then 1 else 0 end) as relevance,
     p.company_id = public.my_company_id() as is_own_company,
-    case when p.company_id = public.my_company_id() then c.name else null end as company_name
+    case when p.company_id = public.my_company_id() then c.name else null end as company_name,
+    l.review_notes,
+    l.solution,
+    (select array_agg(t.name order by t.name)
+       from public.lesson_tags lt join public.tags t on t.id = lt.tag_id
+       where lt.lesson_id = l.id) as tags
   from public.lessons l
   join public.projects p on p.id = l.project_id
   join public.companies c on c.id = p.company_id

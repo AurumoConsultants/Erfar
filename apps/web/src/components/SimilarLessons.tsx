@@ -20,6 +20,9 @@ interface Match {
   relevance: number
   is_own_company: boolean
   company_name: string | null
+  review_notes: string | null
+  solution: string | null
+  tags: string[] | null
 }
 
 export default function SimilarLessons({
@@ -41,6 +44,7 @@ export default function SimilarLessons({
   const [error, setError] = useState('')
   const [visibleTypes, setVisibleTypes] = useState<Set<LessonType>>(new Set(['challenge', 'success']))
   const [highlight, setHighlight] = useState(!!justCreated)
+  const [selected, setSelected] = useState<Match | null>(null)
 
   const load = useCallback(async (s: Scope) => {
     setLoading(true)
@@ -68,6 +72,13 @@ export default function SimilarLessons({
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (!selected) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelected(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selected])
 
   function toggleType(t: LessonType) {
     setHighlight(false)
@@ -158,38 +169,104 @@ export default function SimilarLessons({
         {visibleMatches.map(m => {
           const typeInfo = LESSON_TYPES.find(t => t.value === m.type)!
           const phaseInfo = CONSTRUCTION_PHASES.find(p => p.value === m.construction_phase)
-          const content = (
-            <div className="flex items-start gap-2">
-              <span className="text-base leading-none mt-0.5">{typeInfo.icon}</span>
-              <div className="min-w-0">
-                <p className="font-medium text-gray-900 truncate">{m.title}</p>
-                {m.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{m.description}</p>}
-                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                  {phaseInfo && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{phaseInfo.label}</span>
-                  )}
-                  <span className="text-xs text-gray-400">
-                    {m.is_own_company ? m.company_name : 'Annat företag'}
-                  </span>
+          return (
+            <button
+              key={m.lesson_id}
+              type="button"
+              onClick={() => setSelected(m)}
+              className="w-full text-left block border border-gray-100 rounded-lg p-3 hover:border-orange-300 transition"
+            >
+              <div className="flex items-start gap-2">
+                <span className="text-base leading-none mt-0.5">{typeInfo.icon}</span>
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 truncate">{m.title}</p>
+                  {m.description && <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{m.description}</p>}
+                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                    {phaseInfo && (
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{phaseInfo.label}</span>
+                    )}
+                    <span className="text-xs text-gray-400">
+                      {m.is_own_company ? m.company_name : 'Annat företag'}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )
-          return m.is_own_company ? (
-            <Link
-              key={m.lesson_id}
-              href={`/projects/${m.project_id}/lessons/${m.lesson_id}`}
-              className="block border border-gray-100 rounded-lg p-3 hover:border-orange-300 transition"
-            >
-              {content}
-            </Link>
-          ) : (
-            <div key={m.lesson_id} className="border border-gray-100 rounded-lg p-3">
-              {content}
-            </div>
+            </button>
           )
         })}
       </div>
+
+      {selected && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="bg-white rounded-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6 space-y-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2">
+                <span className="text-xl leading-none">{LESSON_TYPES.find(t => t.value === selected.type)!.icon}</span>
+                <h3 className="text-lg font-bold">{selected.title}</h3>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                aria-label="Stäng"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {CONSTRUCTION_PHASES.find(p => p.value === selected.construction_phase) && (
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                  {CONSTRUCTION_PHASES.find(p => p.value === selected.construction_phase)!.label}
+                </span>
+              )}
+              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                {selected.is_own_company ? selected.company_name : 'Annat företag'}
+              </span>
+            </div>
+
+            {selected.description && (
+              <p className="text-gray-700 whitespace-pre-wrap">{selected.description}</p>
+            )}
+
+            {selected.tags && selected.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selected.tags.map(tag => (
+                  <span key={tag} className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{tag}</span>
+                ))}
+              </div>
+            )}
+
+            {selected.review_notes && (
+              <div>
+                <p className="text-gray-400 text-sm mb-1">Ytterligare information</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{selected.review_notes}</p>
+              </div>
+            )}
+
+            {selected.solution && (
+              <div>
+                <p className="text-gray-400 text-sm mb-1">Lösning</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{selected.solution}</p>
+              </div>
+            )}
+
+            {selected.is_own_company && (
+              <Link
+                href={`/projects/${selected.project_id}/lessons/${selected.lesson_id}`}
+                className="inline-block text-sm text-orange-700 font-semibold hover:underline"
+              >
+                Öppna i projektet →
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
