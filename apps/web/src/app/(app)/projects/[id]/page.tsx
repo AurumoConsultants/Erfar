@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import LessonCard from '@/components/LessonCard'
+import SimilarLessons from '@/components/SimilarLessons'
 import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
 import type { Lesson } from '@erfar/shared'
 
@@ -107,6 +108,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {project.description && <p className="text-gray-600">{project.description}</p>}
+
+      {isClientOwner && (
+        <SimilarLessons
+          projectId={id}
+          categoryType={project.category_type}
+          categorySubtype={project.category_subtype}
+        />
+      )}
 
       <div>
         <h2 className="font-semibold text-lg mb-3">Lärdomar</h2>
