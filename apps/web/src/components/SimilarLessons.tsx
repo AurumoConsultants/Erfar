@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { LESSON_TYPES, CONSTRUCTION_PHASES, PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
-import type { ProjectCategoryType, ProjectCategorySubtype } from '@erfar/shared'
+import type { ProjectCategoryType, ProjectCategorySubtype, LessonType } from '@erfar/shared'
 
 type Scope = 'internal' | 'national'
 
 interface Match {
   lesson_id: string
   project_id: string
-  type: 'challenge' | 'success'
+  type: LessonType
   title: string
   description: string | null
   construction_phase: string
@@ -25,16 +26,21 @@ export default function SimilarLessons({
   projectId,
   categoryType,
   categorySubtype,
+  justCreated,
 }: {
   projectId: string
   categoryType: ProjectCategoryType
   categorySubtype: ProjectCategorySubtype
+  justCreated?: boolean
 }) {
   const supabase = createClient()
+  const router = useRouter()
   const [scope, setScope] = useState<Scope>('internal')
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [visibleTypes, setVisibleTypes] = useState<Set<LessonType>>(new Set(['challenge', 'success']))
+  const [highlight, setHighlight] = useState(!!justCreated)
 
   const load = useCallback(async (s: Scope) => {
     setLoading(true)
@@ -52,27 +58,62 @@ export default function SimilarLessons({
 
   useEffect(() => { load(scope) }, [scope, load])
 
+  // First visit right after creating the project: strip ?new=1 from the URL
+  // immediately (so a refresh doesn't re-trigger it) and fade the highlight
+  // out on its own after a few seconds.
+  useEffect(() => {
+    if (!justCreated) return
+    router.replace(`/projects/${projectId}`, { scroll: false })
+    const timer = setTimeout(() => setHighlight(false), 4000)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function toggleType(t: LessonType) {
+    setHighlight(false)
+    setVisibleTypes(prev => {
+      const next = new Set(prev)
+      if (next.has(t)) {
+        if (next.size > 1) next.delete(t) // keep at least one type visible
+      } else {
+        next.add(t)
+      }
+      return next
+    })
+  }
+
+  const visibleMatches = useMemo(
+    () => matches.filter(m => visibleTypes.has(m.type)),
+    [matches, visibleTypes]
+  )
+
   const categoryTypeLabel = PROJECT_CATEGORY_TYPES.find(c => c.value === categoryType)?.label ?? categoryType
   const categorySubtypeLabel = PROJECT_CATEGORY_SUBTYPES.find(c => c.value === categorySubtype)?.label ?? categorySubtype
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+    <div
+      className={`bg-white border rounded-xl p-5 space-y-4 transition-all duration-700 ${
+        highlight ? 'border-orange-400 ring-4 ring-orange-100' : 'border-gray-200'
+      }`}
+    >
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="font-semibold text-lg">Liknande lärdomar</h2>
           <p className="text-sm text-gray-400 mt-0.5">
-            Baserat på {categoryTypeLabel} · {categorySubtypeLabel}
+            {highlight
+              ? 'Nytt projekt startat — här är vad andra har lärt sig om liknande projekt.'
+              : `Baserat på ${categoryTypeLabel} · ${categorySubtypeLabel}`}
           </p>
         </div>
         <div className="flex border border-gray-200 rounded-lg overflow-hidden text-sm">
           <button
-            onClick={() => setScope('internal')}
+            onClick={() => { setHighlight(false); setScope('internal') }}
             className={`px-3 py-1.5 font-medium transition ${scope === 'internal' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
           >
             Internt
           </button>
           <button
-            onClick={() => setScope('national')}
+            onClick={() => { setHighlight(false); setScope('national') }}
             className={`px-3 py-1.5 font-medium transition ${scope === 'national' ? 'bg-orange-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
           >
             Nationellt
@@ -80,19 +121,41 @@ export default function SimilarLessons({
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {LESSON_TYPES.map(t => {
+          const active = visibleTypes.has(t.value)
+          return (
+            <button
+              key={t.value}
+              onClick={() => toggleType(t.value)}
+              aria-pressed={active}
+              className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition ${
+                active
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'bg-white text-gray-400 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {t.icon} {t.label}
+            </button>
+          )
+        })}
+      </div>
+
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {loading && <p className="text-gray-400 text-sm">Söker...</p>}
 
-      {!loading && matches.length === 0 && (
+      {!loading && visibleMatches.length === 0 && (
         <p className="text-gray-400 text-sm">
-          {scope === 'internal'
-            ? 'Inga liknande lärdomar hittades i era egna projekt än.'
-            : 'Inga liknande lärdomar hittades nationellt än.'}
+          {matches.length > 0
+            ? 'Inga lärdomar av den valda typen bland träffarna.'
+            : scope === 'internal'
+              ? 'Inga liknande lärdomar hittades i era egna projekt än.'
+              : 'Inga liknande lärdomar hittades nationellt än.'}
         </p>
       )}
 
       <div className="space-y-2">
-        {matches.map(m => {
+        {visibleMatches.map(m => {
           const typeInfo = LESSON_TYPES.find(t => t.value === m.type)!
           const phaseInfo = CONSTRUCTION_PHASES.find(p => p.value === m.construction_phase)
           const content = (

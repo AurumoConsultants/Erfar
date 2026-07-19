@@ -49,7 +49,7 @@ export default function NewProjectForm() {
       .single()
 
     if (insertError) { setError(insertError.message); setSaving(false); return }
-    router.push(`/projects/${project.id}`)
+    router.push(`/projects/${project.id}?new=1`)
     router.refresh()
   }
 
