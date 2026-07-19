@@ -1,45 +1,45 @@
 {
-  "totalDuration": 38.286,
+  "totalDuration": 40.217,
   "lines": [
     {
       "text": "Varje byggprojekt ger nya lärdomar.",
       "startSeconds": 0,
-      "endSeconds": 2.601
+      "endSeconds": 2.74
     },
     {
       "text": "Men hur ofta går den kunskapen förlorad mellan projekten?",
       "startSeconds": 3.146,
-      "endSeconds": 6.591
+      "endSeconds": 6.339
     },
     {
       "text": "Möt Erfar — en ny digital plattform för erfarenhetsåterföring i byggbranschen.",
-      "startSeconds": 7.230,
-      "endSeconds": 13.313
+      "startSeconds": 6.908,
+      "endSeconds": 12.597
     },
     {
       "text": "Samla utmaningar och framgångar direkt i projektet.",
-      "startSeconds": 13.859,
-      "endSeconds": 17.887
+      "startSeconds": 13.154,
+      "endSeconds": 17.45
     },
     {
       "text": "Logga en lärdom på sekunder, med bilder, taggar och rätt kategori.",
-      "startSeconds": 18.224,
-      "endSeconds": 23.065
+      "startSeconds": 18.007,
+      "endSeconds": 23.417
     },
     {
       "text": "Sök i en växande kunskapsbank när nästa projekt planeras.",
-      "startSeconds": 23.507,
-      "endSeconds": 27.744
+      "startSeconds": 24.021,
+      "endSeconds": 28.444
     },
     {
       "text": "Klienter, entreprenörer och åskådare — alla på samma plattform.",
-      "startSeconds": 28.255,
-      "endSeconds": 33.027
+      "startSeconds": 28.827,
+      "endSeconds": 33.901
     },
     {
       "text": "Bygg smartare. Lär er tillsammans. Välkommen till Erfar.",
-      "startSeconds": 33.271,
-      "endSeconds": 38.286
+      "startSeconds": 34.412,
+      "endSeconds": 40.217
     }
   ]
 }
