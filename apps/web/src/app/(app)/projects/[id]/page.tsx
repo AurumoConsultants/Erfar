@@ -17,8 +17,15 @@ const categorySubtypeLabel = (v: string) => PROJECT_CATEGORY_SUBTYPES.find(c => 
 const procurementFormLabel = (v: string) => PROCUREMENT_FORMS.find(c => c.value === v)?.label ?? v
 const contractFormLabel = (v: string) => CONTRACT_FORMS.find(c => c.value === v)?.label ?? v
 
-export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ new?: string }>
+}) {
   const { id } = await params
+  const { new: justCreatedParam } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user!.id).single()
@@ -114,6 +121,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           projectId={id}
           categoryType={project.category_type}
           categorySubtype={project.category_subtype}
+          justCreated={justCreatedParam === '1'}
         />
       )}
 
