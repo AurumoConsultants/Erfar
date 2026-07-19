@@ -18,10 +18,10 @@ create type public.member_role as enum ('entrepreneur', 'spectator', 'konsult');
 create type public.project_category_type as enum ('nybyggnation', 'renovering', 'service');
 -- Same four subtypes apply under every category_type.
 create type public.project_category_subtype as enum ('bostader', 'kontor', 'lokaler', 'ovrigt');
--- "Upphandlingsform" — which standard contract the procurement is run under.
-create type public.procurement_form as enum ('abt06', 'ab04', 'service', 'partnering');
--- "Entreprenadform" — how the contract work is split between entrepreneurs.
-create type public.contract_form as enum ('totalentreprenad', 'delad_entreprenad');
+-- "Upphandlingsform" — how the contract work is split between entrepreneurs.
+create type public.procurement_form as enum ('generalentreprenad', 'delad_entreprenad');
+-- "Entreprenadform" — which standard contract the project is run under.
+create type public.contract_form as enum ('totalentreprenad_abt06', 'utforandeentreprenad_ab04', 'partnering');
 -- "Var i byggprocessen" — which phase of the construction process a lesson relates to.
 create type public.construction_phase as enum ('idea_stage', 'early_stages', 'design', 'execution', 'management');
 create type public.account_type as enum ('private_company', 'kommun');

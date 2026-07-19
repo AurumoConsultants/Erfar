@@ -90,18 +90,17 @@ export const PROJECT_CATEGORY_SUBTYPES: { value: ProjectCategorySubtype; label: 
   { value: 'ovrigt', label: 'Övrigt' },
 ]
 
-// "Upphandlingsform" — which standard contract the procurement is run under.
+// "Upphandlingsform" — how the contract work is split between entrepreneurs.
 export const PROCUREMENT_FORMS: { value: ProcurementForm; label: string }[] = [
-  { value: 'abt06', label: 'ABT 06' },
-  { value: 'ab04', label: 'AB 04' },
-  { value: 'service', label: 'Serviceprojekt' },
-  { value: 'partnering', label: 'Partnering' },
+  { value: 'generalentreprenad', label: 'Generalentreprenad' },
+  { value: 'delad_entreprenad', label: 'Delad entreprenad' },
 ]
 
-// "Entreprenadform" — how the contract work is split between entrepreneurs.
+// "Entreprenadform" — which standard contract the project is run under.
 export const CONTRACT_FORMS: { value: ContractForm; label: string }[] = [
-  { value: 'totalentreprenad', label: 'Totalentreprenad' },
-  { value: 'delad_entreprenad', label: 'Delad entreprenad' },
+  { value: 'totalentreprenad_abt06', label: 'Totalentreprenad ABT06' },
+  { value: 'utforandeentreprenad_ab04', label: 'Utförandeentreprenad AB04' },
+  { value: 'partnering', label: 'Partnering' },
 ]
 
 export const SUPPORTED_LOCALES = ['sv'] as const
