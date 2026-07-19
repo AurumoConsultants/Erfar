@@ -1,7 +1,60 @@
+'use client'
+
+import { useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export function HomeIntro() {
+  const [showForm, setShowForm] = useState(false)
+  const [muted, setMuted] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  // React doesn't reliably apply the `muted` prop to the DOM node on hydration
+  // (server-rendered <video> markup omits the attribute), so autoplay can
+  // start unmuted before our JSX prop takes effect. Force it explicitly.
+  useLayoutEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true
+    }
+  }, [])
+
+  const unmute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false
+    }
+    setMuted(false)
+  }
+
+  if (!showForm) {
+    return (
+      <main className="relative w-screen h-screen bg-black">
+        <video
+          ref={videoRef}
+          className="w-full h-full object-contain"
+          src="/videos/erfar-intro.mp4"
+          autoPlay
+          muted={muted}
+          playsInline
+          onEnded={() => setShowForm(true)}
+        />
+        {muted && (
+          <button
+            onClick={unmute}
+            className="absolute bottom-6 left-6 px-4 py-2 bg-white/90 text-blue-900 text-sm font-semibold rounded-lg hover:bg-white transition"
+          >
+            🔊 Slå på ljud
+          </button>
+        )}
+        <button
+          onClick={() => setShowForm(true)}
+          className="absolute bottom-6 right-6 px-4 py-2 bg-white/90 text-blue-900 text-sm font-semibold rounded-lg hover:bg-white transition"
+        >
+          Hoppa över
+        </button>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 to-blue-700 text-white px-4">
       <div className="max-w-2xl text-center space-y-6">
