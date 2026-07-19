@@ -325,6 +325,56 @@ returns boolean language sql stable security definer as $$
   ) or public.is_project_entrepreneur(p_project_id);
 $$;
 
+-- Surfaces official lessons from projects with matching category_type /
+-- category_subtype, so a client sees relevant past experience right after
+-- starting a new project. p_scope = 'internal' restricts to the caller's own
+-- company (like the existing knowledge base); 'national' searches every
+-- company's official lessons. For national results from a company other than
+-- the caller's own, company identity is withheld — this is a first cut at
+-- cross-company knowledge sharing, ahead of any subscription/consent model,
+-- so results outside the caller's own company stay anonymous.
+create or replace function public.search_lessons_for_project(
+  p_category_type public.project_category_type,
+  p_category_subtype public.project_category_subtype,
+  p_scope text,
+  p_exclude_project_id uuid
+)
+returns table (
+  lesson_id uuid,
+  project_id uuid,
+  type public.lesson_type,
+  title text,
+  description text,
+  construction_phase public.construction_phase,
+  created_at timestamptz,
+  relevance int,
+  is_own_company boolean,
+  company_name text
+)
+language sql stable security definer as $$
+  select
+    l.id,
+    l.project_id,
+    l.type,
+    l.title,
+    l.description,
+    l.construction_phase,
+    l.created_at,
+    (case when p.category_type = p_category_type then 1 else 0 end
+      + case when p.category_subtype = p_category_subtype then 1 else 0 end) as relevance,
+    p.company_id = public.my_company_id() as is_own_company,
+    case when p.company_id = public.my_company_id() then c.name else null end as company_name
+  from public.lessons l
+  join public.projects p on p.id = l.project_id
+  join public.companies c on c.id = p.company_id
+  where l.reviewed_at is not null
+    and l.project_id <> p_exclude_project_id
+    and (p.category_type = p_category_type or p.category_subtype = p_category_subtype)
+    and (p_scope = 'national' or p.company_id = public.my_company_id())
+  order by relevance desc, l.created_at desc
+  limit 30;
+$$;
+
 -- unified: can the current user read this project at all (any access path)?
 -- Composed here once and reused by every downstream policy (lessons,
 -- lesson_tags, lesson_images) instead of repeating the union per table.
