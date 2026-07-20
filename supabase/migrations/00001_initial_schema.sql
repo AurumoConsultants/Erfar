@@ -606,6 +606,20 @@ create policy "tags_insert" on public.tags
     )
   ); -- clients, entrepreneurs and konsults can introduce new freeform tags; spectators cannot
 
+-- Needed for upsert(..., {onConflict: 'company_id,kind,name'}) to work once a
+-- tag already exists — that path is an UPDATE, which has no effect on the
+-- row's actual values but still requires a matching RLS policy to execute.
+-- Mirrors tags_insert exactly.
+create policy "tags_update" on public.tags
+  for update using (
+    company_id = public.my_company_id()
+    or exists (
+      select 1 from public.project_members pm
+      join public.projects p on p.id = pm.project_id
+      where p.company_id = tags.company_id and pm.profile_id = auth.uid() and pm.role in ('entrepreneur', 'konsult')
+    )
+  );
+
 -- ------------------------------------------------------------
 -- LESSON_TAGS
 -- ------------------------------------------------------------
@@ -624,6 +638,13 @@ create policy "lesson_tags_delete" on public.lesson_tags
     exists (select 1 from public.lessons l where l.id = lesson_id and l.created_by = auth.uid())
   );
 
+-- Same reasoning as tags_update: upsert(..., {onConflict: 'lesson_id,tag_id'})
+-- takes the UPDATE path once the pair already exists.
+create policy "lesson_tags_update" on public.lesson_tags
+  for update using (
+    exists (select 1 from public.lessons l where l.id = lesson_id and l.created_by = auth.uid())
+  );
+
 -- ------------------------------------------------------------
 -- PROJECT_TAGS
 -- ------------------------------------------------------------
@@ -637,6 +658,13 @@ create policy "project_tags_insert" on public.project_tags
 
 create policy "project_tags_delete" on public.project_tags
   for delete using (
+    exists (select 1 from public.projects p where p.id = project_id and p.company_id = public.my_company_id())
+  );
+
+-- Same reasoning as tags_update: upsert(..., {onConflict: 'project_id,tag_id'})
+-- takes the UPDATE path once the pair already exists.
+create policy "project_tags_update" on public.project_tags
+  for update using (
     exists (select 1 from public.projects p where p.id = project_id and p.company_id = public.my_company_id())
   );
 
