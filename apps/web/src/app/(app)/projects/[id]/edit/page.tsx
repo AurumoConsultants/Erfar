@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
 import type { Project, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm } from '@erfar/shared'
-import TagInput from '@/components/TagInput'
+import TagWizard from '@/components/TagWizard'
+import TagTree from '@/components/TagTree'
 
 export default function EditProjectPage() {
   const router = useRouter()
@@ -15,7 +16,7 @@ export default function EditProjectPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [tags, setTags] = useState<string[]>([])
-  const [existingTagNames, setExistingTagNames] = useState<string[]>([])
+  const [wizardStarted, setWizardStarted] = useState(false)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -28,10 +29,15 @@ export default function EditProjectPage() {
         .select('tag:tags(name)')
         .eq('project_id', id)
       setTags((projectTagRows ?? []).map((r: any) => r.tag?.name).filter(Boolean))
-      const { data: companyTags } = await supabase.from('tags').select('name').eq('company_id', data.company_id).eq('kind', 'tag')
-      setExistingTagNames((companyTags ?? []).map(t => t.name))
     })
   }, [id])
+
+  function addTag(tagName: string) {
+    setTags(prev => prev.includes(tagName) ? prev : [...prev, tagName])
+  }
+  function removeTag(tagName: string) {
+    setTags(prev => prev.filter(t => t !== tagName))
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -81,90 +87,104 @@ export default function EditProjectPage() {
   if (!project) return <p className="text-gray-400 text-sm">Laddar...</p>
 
   return (
-    <div className="max-w-lg">
-      <h1 className="text-2xl font-bold mb-6">Redigera projekt</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Projektnamn</label>
-          <input required value={project.name} onChange={e => setProject({ ...project, name: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Beskrivning</label>
-          <textarea value={project.description ?? ''} onChange={e => setProject({ ...project, description: e.target.value })} rows={3}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Plats</label>
-          <input value={project.location ?? ''} onChange={e => setProject({ ...project, location: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Taggar</label>
-          <p className="text-xs text-gray-400 mb-2">
-            Avgör vilka lärdomar som visas som &quot;Liknande lärdomar&quot; för projektet.
-          </p>
-          <TagInput value={tags} onChange={setTags} suggestions={existingTagNames} allowCreate={false} />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+      <div className="max-w-lg">
+        <h1 className="text-2xl font-bold mb-6">Redigera projekt</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Typ av projekt</label>
-            <select required value={project.category_type} onChange={e => setProject({ ...project, category_type: e.target.value as ProjectCategoryType })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              {PROJECT_CATEGORY_TYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Kategori</label>
-            <select required value={project.category_subtype} onChange={e => setProject({ ...project, category_subtype: e.target.value as ProjectCategorySubtype })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              {PROJECT_CATEGORY_SUBTYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Upphandlingsform</label>
-            <select required value={project.procurement_form} onChange={e => setProject({ ...project, procurement_form: e.target.value as ProcurementForm })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              {PROCUREMENT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Entreprenadform</label>
-            <select required value={project.contract_form} onChange={e => setProject({ ...project, contract_form: e.target.value as ContractForm })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              {CONTRACT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Startdatum</label>
-            <input type="date" value={project.start_date ?? ''} onChange={e => setProject({ ...project, start_date: e.target.value })}
+            <label className="block text-sm font-medium mb-1">Projektnamn</label>
+            <input required value={project.name} onChange={e => setProject({ ...project, name: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Slutdatum</label>
-            <input type="date" value={project.end_date ?? ''} onChange={e => setProject({ ...project, end_date: e.target.value })}
+            <label className="block text-sm font-medium mb-1">Beskrivning</label>
+            <textarea value={project.description ?? ''} onChange={e => setProject({ ...project, description: e.target.value })} rows={3}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Status</label>
-          <select value={project.status} onChange={e => setProject({ ...project, status: e.target.value as Project['status'] })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="active">Aktivt</option>
-            <option value="completed">Avslutat</option>
-            <option value="archived">Arkiverat</option>
-          </select>
-        </div>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button type="submit" disabled={saving}
-          className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
-          {saving ? 'Sparar...' : 'Spara ändringar'}
-        </button>
-      </form>
+          <div>
+            <label className="block text-sm font-medium mb-1">Plats</label>
+            <input value={project.location ?? ''} onChange={e => setProject({ ...project, location: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Taggar</label>
+            <p className="text-xs text-gray-400 mb-2">
+              Avgör vilka lärdomar som visas som &quot;Liknande lärdomar&quot; för projektet.
+            </p>
+            {!wizardStarted ? (
+              <button
+                type="button"
+                onClick={() => setWizardStarted(true)}
+                className="border border-orange-300 text-orange-700 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-orange-50 transition"
+              >
+                Starta Tag-guide för detta projekt
+              </button>
+            ) : (
+              <TagWizard selected={tags} onAdd={addTag} />
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Typ av projekt</label>
+              <select required value={project.category_type} onChange={e => setProject({ ...project, category_type: e.target.value as ProjectCategoryType })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {PROJECT_CATEGORY_TYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Kategori</label>
+              <select required value={project.category_subtype} onChange={e => setProject({ ...project, category_subtype: e.target.value as ProjectCategorySubtype })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {PROJECT_CATEGORY_SUBTYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Upphandlingsform</label>
+              <select required value={project.procurement_form} onChange={e => setProject({ ...project, procurement_form: e.target.value as ProcurementForm })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {PROCUREMENT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Entreprenadform</label>
+              <select required value={project.contract_form} onChange={e => setProject({ ...project, contract_form: e.target.value as ContractForm })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {CONTRACT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Startdatum</label>
+              <input type="date" value={project.start_date ?? ''} onChange={e => setProject({ ...project, start_date: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Slutdatum</label>
+              <input type="date" value={project.end_date ?? ''} onChange={e => setProject({ ...project, end_date: e.target.value })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Status</label>
+            <select value={project.status} onChange={e => setProject({ ...project, status: e.target.value as Project['status'] })}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="active">Aktivt</option>
+              <option value="completed">Avslutat</option>
+              <option value="archived">Arkiverat</option>
+            </select>
+          </div>
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <button type="submit" disabled={saving}
+            className="w-full bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
+            {saving ? 'Sparar...' : 'Spara ändringar'}
+          </button>
+        </form>
+      </div>
+
+      <TagTree tags={tags} onRemove={removeTag} />
     </div>
   )
 }
