@@ -1,6 +1,7 @@
 import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm, ConstructionPhase, UserRole } from '../types'
 
 export { SWEDISH_KOMMUNER, type SwedishKommun } from './kommuner'
+export { BUILDING_TAG_TAXONOMY, type TaxonomyNode } from './buildingTaxonomy'
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   client: 'Klient',
