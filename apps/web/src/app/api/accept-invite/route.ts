@@ -6,14 +6,15 @@ const adminClient = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-function profileRoleFor(inviteRole: string): 'entrepreneur' | 'spectator' | 'konsult' {
+function profileRoleFor(inviteRole: string): 'entrepreneur' | 'spectator' | 'konsult' | 'mobil_anvandare' {
   if (inviteRole === 'entrepreneur') return 'entrepreneur'
   if (inviteRole === 'konsult') return 'konsult'
+  if (inviteRole === 'mobil_anvandare') return 'mobil_anvandare'
   return 'spectator'
 }
 
 export async function POST(req: Request) {
-  const { token, email, password, fullName, isNewUser } = await req.json()
+  const { token, email, password, fullName, isNewUser, companyName } = await req.json()
 
   const { data: invitation, error: invErr } = await adminClient
     .from('invitations')
@@ -37,6 +38,24 @@ export async function POST(req: Request) {
     userId = existingUser.id
     await adminClient.from('profiles').update({ role }).eq('id', userId)
   } else if (isNewUser) {
+    // An 'entrepreneur' invite creates a persistent, reusable entreprenör
+    // organization the first time — later invites (from the same or other
+    // clients) reuse it via the existingUser branch above. A
+    // 'mobil_anvandare' invite instead joins the inviter's own company_id
+    // directly (client org or entreprenör org, whichever sent the invite).
+    let companyId: string | null = null
+    if (invitation.role === 'entrepreneur') {
+      const { data: company, error: companyErr } = await adminClient
+        .from('companies')
+        .insert({ name: companyName || fullName, account_type: 'entreprenor' })
+        .select('id')
+        .single()
+      if (companyErr) return NextResponse.json({ error: companyErr.message }, { status: 400 })
+      companyId = company.id
+    } else if (invitation.role === 'mobil_anvandare') {
+      companyId = invitation.company_id
+    }
+
     const { data, error } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -51,7 +70,7 @@ export async function POST(req: Request) {
       email,
       full_name: fullName,
       role,
-      company_id: null,
+      company_id: companyId,
     }, { onConflict: 'id' })
   } else {
     return NextResponse.json({ error: 'Kontot hittades inte.' }, { status: 400 })
@@ -61,7 +80,9 @@ export async function POST(req: Request) {
     await adminClient
       .from('company_viewers')
       .upsert({ company_id: invitation.company_id, profile_id: userId }, { onConflict: 'company_id,profile_id' })
-  } else {
+  } else if (invitation.role !== 'mobil_anvandare') {
+    // mobil_anvandare gets no project_members/company_viewers row — access
+    // derives purely from sharing company_id with their org's entrepreneur.
     await adminClient
       .from('project_members')
       .upsert(

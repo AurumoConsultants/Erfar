@@ -7,6 +7,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   entrepreneur: 'Entreprenör',
   spectator: 'Åskådare',
   konsult: 'Konsult',
+  mobil_anvandare: 'Mobil användare',
 }
 
 export const LESSON_TYPES: {
@@ -71,7 +72,7 @@ export const CONSTRUCTION_PHASES: { value: ConstructionPhase; label: string }[] 
 // Undefined means all phases are selectable (clients, spectators can't log
 // at all so this doesn't apply to them).
 export function allowedPhasesForRole(role: UserRole | undefined): ConstructionPhase[] | undefined {
-  if (role === 'entrepreneur') return ['execution']
+  if (role === 'entrepreneur' || role === 'mobil_anvandare') return ['execution']
   if (role === 'konsult') return ['idea_stage', 'early_stages', 'design']
   return undefined
 }

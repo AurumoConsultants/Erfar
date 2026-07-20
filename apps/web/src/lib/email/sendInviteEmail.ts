@@ -5,6 +5,7 @@ const ROLE_LABELS: Record<string, string> = {
   spectator_project: 'åskådare (för ett projekt)',
   spectator_company: 'åskådare (för hela företaget)',
   konsult: 'konsult',
+  mobil_anvandare: 'mobil användare',
 }
 
 interface SendInviteEmailParams {
