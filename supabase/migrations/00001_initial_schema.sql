@@ -194,6 +194,17 @@ create table public.lesson_tags (
 );
 create index lesson_tags_tag_id_idx on public.lesson_tags(tag_id);
 
+-- Freeform tags describing what a project is about (set at creation, editable
+-- after). This — not category_type/category_subtype/procurement_form/
+-- contract_form — is the primary matching key for "Liknande lärdomar"; those
+-- other fields are general information, only used to filter results.
+create table public.project_tags (
+  project_id  uuid not null references public.projects(id) on delete cascade,
+  tag_id      uuid not null references public.tags(id) on delete cascade,
+  primary key (project_id, tag_id)
+);
+create index project_tags_tag_id_idx on public.project_tags(tag_id);
+
 -- ============================================================
 -- LESSON IMAGES (photos and videos — name kept for historical continuity
 -- with the storage bucket / RLS policies below, which are path-based and
@@ -325,19 +336,20 @@ returns boolean language sql stable security definer as $$
   ) or public.is_project_entrepreneur(p_project_id);
 $$;
 
--- Surfaces official lessons from projects with matching category_type /
--- category_subtype, so a client sees relevant past experience right after
--- starting a new project. p_scope = 'internal' restricts to the caller's own
--- company (like the existing knowledge base); 'national' searches every
--- company's official lessons. For national results from a company other than
--- the caller's own, company identity is withheld — this is a first cut at
--- cross-company knowledge sharing, ahead of any subscription/consent model,
--- so results outside the caller's own company stay anonymous.
+-- Surfaces official lessons from OTHER projects that share at least one tag
+-- with p_project_id — tags are the sole matching key. category_type /
+-- category_subtype / procurement_form / contract_form are deliberately NOT
+-- part of the match; they're general information the client can filter the
+-- result list by afterward (returned here for exactly that purpose).
+-- p_scope = 'internal' restricts to the caller's own company (like the
+-- existing knowledge base); 'national' searches every company's official
+-- lessons. For national results from a company other than the caller's own,
+-- company identity is withheld — this is a first cut at cross-company
+-- knowledge sharing, ahead of any subscription/consent model, so results
+-- outside the caller's own company stay anonymous.
 create or replace function public.search_lessons_for_project(
-  p_category_type public.project_category_type,
-  p_category_subtype public.project_category_subtype,
-  p_scope text,
-  p_exclude_project_id uuid
+  p_project_id uuid,
+  p_scope text
 )
 returns table (
   lesson_id uuid,
@@ -352,7 +364,11 @@ returns table (
   company_name text,
   review_notes text,
   solution text,
-  tags text[]
+  tags text[],
+  category_type public.project_category_type,
+  category_subtype public.project_category_subtype,
+  procurement_form public.procurement_form,
+  contract_form public.contract_form
 )
 language sql stable security definer as $$
   select
@@ -363,22 +379,27 @@ language sql stable security definer as $$
     l.description,
     l.construction_phase,
     l.created_at,
-    (case when p.category_type = p_category_type then 1 else 0 end
-      + case when p.category_subtype = p_category_subtype then 1 else 0 end) as relevance,
+    count(distinct lt.tag_id)::int as relevance,
     p.company_id = public.my_company_id() as is_own_company,
     case when p.company_id = public.my_company_id() then c.name else null end as company_name,
     l.review_notes,
     l.solution,
-    (select array_agg(t.name order by t.name)
-       from public.lesson_tags lt join public.tags t on t.id = lt.tag_id
-       where lt.lesson_id = l.id) as tags
+    (select array_agg(t2.name order by t2.name)
+       from public.lesson_tags lt2 join public.tags t2 on t2.id = lt2.tag_id
+       where lt2.lesson_id = l.id) as tags,
+    p.category_type,
+    p.category_subtype,
+    p.procurement_form,
+    p.contract_form
   from public.lessons l
   join public.projects p on p.id = l.project_id
   join public.companies c on c.id = p.company_id
+  join public.lesson_tags lt on lt.lesson_id = l.id
+    and lt.tag_id in (select tag_id from public.project_tags where project_id = p_project_id)
   where l.reviewed_at is not null
-    and l.project_id <> p_exclude_project_id
-    and (p.category_type = p_category_type or p.category_subtype = p_category_subtype)
+    and l.project_id <> p_project_id
     and (p_scope = 'national' or p.company_id = public.my_company_id())
+  group by l.id, l.project_id, p.company_id, c.name, p.category_type, p.category_subtype, p.procurement_form, p.contract_form
   order by relevance desc, l.created_at desc
   limit 30;
 $$;
@@ -601,6 +622,22 @@ create policy "lesson_tags_insert" on public.lesson_tags
 create policy "lesson_tags_delete" on public.lesson_tags
   for delete using (
     exists (select 1 from public.lessons l where l.id = lesson_id and l.created_by = auth.uid())
+  );
+
+-- ------------------------------------------------------------
+-- PROJECT_TAGS
+-- ------------------------------------------------------------
+create policy "project_tags_select" on public.project_tags
+  for select using (public.can_read_project(project_id));
+
+create policy "project_tags_insert" on public.project_tags
+  for insert with check (
+    exists (select 1 from public.projects p where p.id = project_id and p.company_id = public.my_company_id())
+  );
+
+create policy "project_tags_delete" on public.project_tags
+  for delete using (
+    exists (select 1 from public.projects p where p.id = project_id and p.company_id = public.my_company_id())
   );
 
 -- ------------------------------------------------------------

@@ -4,10 +4,18 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LESSON_TYPES, CONSTRUCTION_PHASES, PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES } from '@erfar/shared'
-import type { ProjectCategoryType, ProjectCategorySubtype, LessonType } from '@erfar/shared'
+import {
+  LESSON_TYPES,
+  CONSTRUCTION_PHASES,
+  PROJECT_CATEGORY_TYPES,
+  PROJECT_CATEGORY_SUBTYPES,
+  PROCUREMENT_FORMS,
+  CONTRACT_FORMS,
+} from '@erfar/shared'
+import type { LessonType, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm } from '@erfar/shared'
 
 type Scope = 'internal' | 'national'
+const ALL = 'all' as const
 
 interface Match {
   lesson_id: string
@@ -23,17 +31,19 @@ interface Match {
   review_notes: string | null
   solution: string | null
   tags: string[] | null
+  category_type: ProjectCategoryType
+  category_subtype: ProjectCategorySubtype
+  procurement_form: ProcurementForm
+  contract_form: ContractForm
 }
 
 export default function SimilarLessons({
   projectId,
-  categoryType,
-  categorySubtype,
+  projectTags,
   justCreated,
 }: {
   projectId: string
-  categoryType: ProjectCategoryType
-  categorySubtype: ProjectCategorySubtype
+  projectTags: string[]
   justCreated?: boolean
 }) {
   const supabase = createClient()
@@ -46,19 +56,25 @@ export default function SimilarLessons({
   const [highlight, setHighlight] = useState(!!justCreated)
   const [selected, setSelected] = useState<Match | null>(null)
 
+  // General-information filters — these narrow the tag-matched result set,
+  // they never affect which lessons are found in the first place.
+  const [fCategoryType, setFCategoryType] = useState<ProjectCategoryType | typeof ALL>(ALL)
+  const [fCategorySubtype, setFCategorySubtype] = useState<ProjectCategorySubtype | typeof ALL>(ALL)
+  const [fProcurementForm, setFProcurementForm] = useState<ProcurementForm | typeof ALL>(ALL)
+  const [fContractForm, setFContractForm] = useState<ContractForm | typeof ALL>(ALL)
+
   const load = useCallback(async (s: Scope) => {
+    if (projectTags.length === 0) { setMatches([]); setLoading(false); return }
     setLoading(true)
     setError('')
     const { data, error: rpcError } = await supabase.rpc('search_lessons_for_project', {
-      p_category_type: categoryType,
-      p_category_subtype: categorySubtype,
+      p_project_id: projectId,
       p_scope: s,
-      p_exclude_project_id: projectId,
     })
     if (rpcError) { setError(rpcError.message); setLoading(false); return }
     setMatches(data ?? [])
     setLoading(false)
-  }, [categoryType, categorySubtype, projectId])
+  }, [projectId, projectTags.length])
 
   useEffect(() => { load(scope) }, [scope, load])
 
@@ -94,12 +110,14 @@ export default function SimilarLessons({
   }
 
   const visibleMatches = useMemo(
-    () => matches.filter(m => visibleTypes.has(m.type)),
-    [matches, visibleTypes]
+    () => matches
+      .filter(m => visibleTypes.has(m.type))
+      .filter(m => fCategoryType === ALL || m.category_type === fCategoryType)
+      .filter(m => fCategorySubtype === ALL || m.category_subtype === fCategorySubtype)
+      .filter(m => fProcurementForm === ALL || m.procurement_form === fProcurementForm)
+      .filter(m => fContractForm === ALL || m.contract_form === fContractForm),
+    [matches, visibleTypes, fCategoryType, fCategorySubtype, fProcurementForm, fContractForm]
   )
-
-  const categoryTypeLabel = PROJECT_CATEGORY_TYPES.find(c => c.value === categoryType)?.label ?? categoryType
-  const categorySubtypeLabel = PROJECT_CATEGORY_SUBTYPES.find(c => c.value === categorySubtype)?.label ?? categorySubtype
 
   return (
     <div
@@ -113,7 +131,9 @@ export default function SimilarLessons({
           <p className="text-sm text-gray-400 mt-0.5">
             {highlight
               ? 'Nytt projekt startat — här är vad andra har lärt sig om liknande projekt.'
-              : `Baserat på ${categoryTypeLabel} · ${categorySubtypeLabel}`}
+              : projectTags.length > 0
+                ? `Baserat på taggarna: ${projectTags.join(', ')}`
+                : 'Lägg till taggar på projektet för att se liknande lärdomar.'}
           </p>
         </div>
         <div className="flex border border-gray-200 rounded-lg overflow-hidden text-sm">
@@ -152,13 +172,38 @@ export default function SimilarLessons({
         })}
       </div>
 
+      {projectTags.length > 0 && matches.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <select value={fCategoryType} onChange={e => setFCategoryType(e.target.value as ProjectCategoryType | typeof ALL)}
+            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value={ALL}>Alla projekttyper</option>
+            {PROJECT_CATEGORY_TYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+          <select value={fCategorySubtype} onChange={e => setFCategorySubtype(e.target.value as ProjectCategorySubtype | typeof ALL)}
+            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value={ALL}>Alla kategorier</option>
+            {PROJECT_CATEGORY_SUBTYPES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+          <select value={fProcurementForm} onChange={e => setFProcurementForm(e.target.value as ProcurementForm | typeof ALL)}
+            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value={ALL}>Alla upphandlingsformer</option>
+            {PROCUREMENT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+          <select value={fContractForm} onChange={e => setFContractForm(e.target.value as ContractForm | typeof ALL)}
+            className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value={ALL}>Alla entreprenadformer</option>
+            {CONTRACT_FORMS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+        </div>
+      )}
+
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {loading && <p className="text-gray-400 text-sm">Söker...</p>}
 
-      {!loading && visibleMatches.length === 0 && (
+      {!loading && projectTags.length > 0 && visibleMatches.length === 0 && (
         <p className="text-gray-400 text-sm">
           {matches.length > 0
-            ? 'Inga lärdomar av den valda typen bland träffarna.'
+            ? 'Inga träffar matchar de valda filtren.'
             : scope === 'internal'
               ? 'Inga liknande lärdomar hittades i era egna projekt än.'
               : 'Inga liknande lärdomar hittades nationellt än.'}

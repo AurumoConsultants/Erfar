@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
 import type { Project, ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm } from '@erfar/shared'
+import TagInput from '@/components/TagInput'
 
 export default function EditProjectPage() {
   const router = useRouter()
@@ -13,11 +14,23 @@ export default function EditProjectPage() {
   const supabase = createClient()
 
   const [project, setProject] = useState<Project | null>(null)
+  const [tags, setTags] = useState<string[]>([])
+  const [existingTagNames, setExistingTagNames] = useState<string[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    supabase.from('projects').select('*').eq('id', id).single().then(({ data }) => setProject(data))
+    supabase.from('projects').select('*').eq('id', id).single().then(async ({ data }) => {
+      setProject(data)
+      if (!data) return
+      const { data: projectTagRows } = await supabase
+        .from('project_tags')
+        .select('tag:tags(name)')
+        .eq('project_id', id)
+      setTags((projectTagRows ?? []).map((r: any) => r.tag?.name).filter(Boolean))
+      const { data: companyTags } = await supabase.from('tags').select('name').eq('company_id', data.company_id).eq('kind', 'tag')
+      setExistingTagNames((companyTags ?? []).map(t => t.name))
+    })
   }, [id])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -43,6 +56,24 @@ export default function EditProjectPage() {
       .eq('id', id)
 
     if (updateError) { setError(updateError.message); setSaving(false); return }
+
+    // Replace the project's tag set wholesale — simplest correct way to sync
+    // an edited tag list without diffing adds/removes.
+    await supabase.from('project_tags').delete().eq('project_id', id)
+    for (const tagName of tags) {
+      const { data: tagRow } = await supabase
+        .from('tags')
+        .upsert({ company_id: project.company_id, kind: 'tag', name: tagName }, { onConflict: 'company_id,kind,name' })
+        .select()
+        .single()
+      if (tagRow) {
+        await supabase.from('project_tags').upsert(
+          { project_id: id, tag_id: tagRow.id },
+          { onConflict: 'project_id,tag_id' }
+        )
+      }
+    }
+
     router.push(`/projects/${id}`)
     router.refresh()
   }
@@ -67,6 +98,13 @@ export default function EditProjectPage() {
           <label className="block text-sm font-medium mb-1">Plats</label>
           <input value={project.location ?? ''} onChange={e => setProject({ ...project, location: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Taggar</label>
+          <p className="text-xs text-gray-400 mb-2">
+            Avgör vilka lärdomar som visas som &quot;Liknande lärdomar&quot; för projektet.
+          </p>
+          <TagInput value={tags} onChange={setTags} suggestions={existingTagNames} allowCreate={false} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PROJECT_CATEGORY_TYPES, PROJECT_CATEGORY_SUBTYPES, PROCUREMENT_FORMS, CONTRACT_FORMS } from '@erfar/shared'
 import type { ProjectCategoryType, ProjectCategorySubtype, ProcurementForm, ContractForm } from '@erfar/shared'
+import TagInput from '@/components/TagInput'
 
 export default function NewProjectForm() {
   const router = useRouter()
@@ -18,8 +19,24 @@ export default function NewProjectForm() {
   const [categorySubtype, setCategorySubtype] = useState<ProjectCategorySubtype>(PROJECT_CATEGORY_SUBTYPES[0].value)
   const [procurementForm, setProcurementForm] = useState<ProcurementForm>(PROCUREMENT_FORMS[0].value)
   const [contractForm, setContractForm] = useState<ContractForm>(CONTRACT_FORMS[0].value)
+  const [tags, setTags] = useState<string[]>([])
+  const [existingTagNames, setExistingTagNames] = useState<string[]>([])
+  const [companyId, setCompanyId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()
+      if (!profile?.company_id) return
+      setCompanyId(profile.company_id)
+      const { data: existingTags } = await supabase.from('tags').select('name').eq('company_id', profile.company_id).eq('kind', 'tag')
+      setExistingTagNames((existingTags ?? []).map(t => t.name))
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -49,6 +66,23 @@ export default function NewProjectForm() {
       .single()
 
     if (insertError) { setError(insertError.message); setSaving(false); return }
+
+    // Tags are the primary "Liknande lärdomar" matching key — attach whichever
+    // ones were entered, creating any new company tags as needed.
+    for (const tagName of tags) {
+      const { data: tagRow } = await supabase
+        .from('tags')
+        .upsert({ company_id: profile.company_id, kind: 'tag', name: tagName }, { onConflict: 'company_id,kind,name' })
+        .select()
+        .single()
+      if (tagRow) {
+        await supabase.from('project_tags').upsert(
+          { project_id: project.id, tag_id: tagRow.id },
+          { onConflict: 'project_id,tag_id' }
+        )
+      }
+    }
+
     router.push(`/projects/${project.id}?new=1`)
     router.refresh()
   }
@@ -71,6 +105,13 @@ export default function NewProjectForm() {
           <label className="block text-sm font-medium mb-1">Plats</label>
           <input value={location} onChange={e => setLocation(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Taggar</label>
+          <p className="text-xs text-gray-400 mb-2">
+            Avgör vilka lärdomar som visas som &quot;Liknande lärdomar&quot; för projektet — övriga fält nedan är bara allmän information som går att filtrera på.
+          </p>
+          <TagInput value={tags} onChange={setTags} suggestions={existingTagNames} allowCreate={false} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
