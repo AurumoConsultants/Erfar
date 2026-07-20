@@ -141,6 +141,7 @@ export default {
     companies: 'Företag',
     projects: 'Projekt',
     lessons: 'Lärdomar',
+    taxonomy: 'Taxonomi',
     companiesCount: 'Företag',
     usersCount: 'Användare',
     projectsCount: 'Projekt',

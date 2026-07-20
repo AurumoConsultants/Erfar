@@ -23,6 +23,7 @@ export default function AdminNavbar() {
     { href: '/admin/companies', label: t.admin.companies },
     { href: '/admin/projects', label: t.admin.projects },
     { href: '/admin/lessons', label: t.admin.lessons },
+    { href: '/admin/taxonomy', label: t.admin.taxonomy },
   ]
 
   return (

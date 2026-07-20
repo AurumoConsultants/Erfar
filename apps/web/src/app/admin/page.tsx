@@ -4,12 +4,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export default async function AdminOverviewPage() {
   const supabase = createAdminClient()
 
-  const [{ count: companiesCount }, { count: usersCount }, { count: projectsCount }, { count: lessonsCount }] =
+  const [{ count: companiesCount }, { count: usersCount }, { count: projectsCount }, { count: lessonsCount }, { count: taxonomyCount }] =
     await Promise.all([
       supabase.from('companies').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('projects').select('*', { count: 'exact', head: true }),
       supabase.from('lessons').select('*', { count: 'exact', head: true }),
+      supabase.from('taxonomy_nodes').select('*', { count: 'exact', head: true }),
     ])
 
   const cards = [
@@ -17,12 +18,13 @@ export default async function AdminOverviewPage() {
     { label: 'Användare', count: usersCount ?? 0, href: '/admin/users' },
     { label: 'Projekt', count: projectsCount ?? 0, href: '/admin/projects' },
     { label: 'Lärdomar', count: lessonsCount ?? 0, href: '/admin/lessons' },
+    { label: 'Taxonomikategorier', count: taxonomyCount ?? 0, href: '/admin/taxonomy' },
   ]
 
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">Översikt</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {cards.map(c => (
           <Link key={c.href} href={c.href}
             className="bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-400 transition">
