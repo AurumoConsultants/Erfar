@@ -722,3 +722,174 @@ create policy "lesson_images_storage_delete" on storage.objects
     bucket_id = 'lesson-images'
     and public.can_read_project(((storage.foldername(name))[1])::uuid)
   );
+
+-- ============================================================
+-- TAXONOMY — the building-part hierarchy driving the project Tag-guide
+-- (Vilken del av byggnaden? → attribute group → concrete value, e.g.
+-- Tak → Typ av yttertak → Plåt). Global, not per-company: every client sees
+-- the same tree, which keeps tag names consistent enough for cross-company
+-- ("Nationellt") matching to be meaningful. Admin-managed via /admin/taxonomy
+-- (service-role writes, same pattern as companies/projects/lessons); every
+-- authenticated user can read it since the Tag-guide needs it. Renaming or
+-- deleting a node here has no retroactive effect on tags already created
+-- from it — public.tags rows are plain text, decoupled once created.
+-- ============================================================
+create table public.taxonomy_nodes (
+  id          uuid primary key default gen_random_uuid(),
+  parent_id   uuid references public.taxonomy_nodes(id) on delete cascade,
+  label       text not null,
+  sort_order  int not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index taxonomy_nodes_parent_id_idx on public.taxonomy_nodes(parent_id);
+
+create trigger taxonomy_nodes_updated_at
+  before update on public.taxonomy_nodes
+  for each row execute function public.handle_updated_at();
+
+alter table public.taxonomy_nodes enable row level security;
+
+create policy "taxonomy_nodes_select" on public.taxonomy_nodes
+  for select using (auth.role() = 'authenticated');
+
+-- Seed with the taxonomy previously hardcoded in
+-- packages/shared/src/constants/buildingTaxonomy.ts, so switching to the
+-- database preserves today's Tag-guide exactly. One-off helper, dropped
+-- immediately after use.
+create or replace function public._seed_taxonomy_tree(p_parent_id uuid, p_nodes jsonb)
+returns void language plpgsql as $$
+declare
+  node jsonb;
+  new_id uuid;
+  idx int := 0;
+begin
+  for node in select * from jsonb_array_elements(p_nodes)
+  loop
+    insert into public.taxonomy_nodes (parent_id, label, sort_order)
+    values (p_parent_id, node->>'label', idx)
+    returning id into new_id;
+
+    if node ? 'children' then
+      perform public._seed_taxonomy_tree(new_id, node->'children');
+    end if;
+
+    idx := idx + 1;
+  end loop;
+end;
+$$;
+
+select public._seed_taxonomy_tree(null, '[
+  {"label": "Tak", "children": [
+    {"label": "Typ av yttertak", "children": [
+      {"label": "Plåt"}, {"label": "Tegel"}, {"label": "Papp"}, {"label": "Shingel"}, {"label": "Betongpannor"}
+    ]},
+    {"label": "Takkonstruktion", "children": [
+      {"label": "Sadeltak"}, {"label": "Pulpettak"}, {"label": "Platt tak"}, {"label": "Valmat tak"}
+    ]},
+    {"label": "Takavvattning", "children": [
+      {"label": "Hängrännor"}, {"label": "Stuprör"}, {"label": "Takbrunnar"}
+    ]}
+  ]},
+  {"label": "Fasad", "children": [
+    {"label": "Fasadmaterial", "children": [
+      {"label": "Puts"}, {"label": "Tegel"}, {"label": "Trä"}, {"label": "Plåt"}, {"label": "Skiffer"}
+    ]},
+    {"label": "Fasadisolering", "children": [
+      {"label": "Tilläggsisolering"}, {"label": "Ventilerad fasad"}
+    ]},
+    {"label": "Fasaddetaljer", "children": [
+      {"label": "Vindskivor"}, {"label": "Fönsterbleck"}, {"label": "Sockelplåt"}
+    ]}
+  ]},
+  {"label": "Fönster", "children": [
+    {"label": "Fönstertyp", "children": [
+      {"label": "Träfönster"}, {"label": "Aluminiumfönster"}, {"label": "PVC-fönster"}, {"label": "Kompositfönster"}
+    ]},
+    {"label": "Glastyp", "children": [
+      {"label": "Enkelglas"}, {"label": "Tvåglas"}, {"label": "Treglas"}, {"label": "Energiglas"}
+    ]},
+    {"label": "Fönsterfunktion", "children": [
+      {"label": "Vridfönster"}, {"label": "Fasta fönster"}, {"label": "Skjutfönster"}
+    ]}
+  ]},
+  {"label": "Balkonger", "children": [
+    {"label": "Balkongtyp", "children": [
+      {"label": "Inglasad balkong"}, {"label": "Öppen balkong"}, {"label": "Fransk balkong"}
+    ]},
+    {"label": "Balkongkonstruktion", "children": [
+      {"label": "Utkragad balkong"}, {"label": "Balkong på pelare"}, {"label": "Indragen balkong"}
+    ]},
+    {"label": "Räcke", "children": [
+      {"label": "Glasräcke"}, {"label": "Smidesräcke"}, {"label": "Plåträcke"}
+    ]}
+  ]},
+  {"label": "Sockel", "children": [
+    {"label": "Sockelmaterial", "children": [
+      {"label": "Betong"}, {"label": "Puts"}, {"label": "Natursten"}, {"label": "Klinker"}
+    ]},
+    {"label": "Sockelisolering", "children": [
+      {"label": "Markisolering"}, {"label": "Cellplast"}, {"label": "Mineralull"}
+    ]},
+    {"label": "Sockeldetaljer", "children": [
+      {"label": "Sockelplåt"}, {"label": "Dränering vid sockel"}
+    ]}
+  ]},
+  {"label": "Dörrar", "children": [
+    {"label": "Dörrtyp", "children": [
+      {"label": "Entrédörr"}, {"label": "Innerdörr"}, {"label": "Altandörr"}, {"label": "Garageport"}
+    ]},
+    {"label": "Dörrmaterial", "children": [
+      {"label": "Trä"}, {"label": "Stål"}, {"label": "Aluminium"}, {"label": "Komposit"}
+    ]},
+    {"label": "Dörrfunktion", "children": [
+      {"label": "Slagdörr"}, {"label": "Skjutdörr"}, {"label": "Karuselldörr"}
+    ]}
+  ]},
+  {"label": "Husgrund", "children": [
+    {"label": "Grundtyp", "children": [
+      {"label": "Platta på mark"}, {"label": "Krypgrund"}, {"label": "Källare"}, {"label": "Plintgrund"}
+    ]},
+    {"label": "Grundmaterial", "children": [
+      {"label": "Betong"}, {"label": "Lättklinkerblock"}
+    ]},
+    {"label": "Dränering och skydd", "children": [
+      {"label": "Dräneringsledning"}, {"label": "Fuktisolering"}, {"label": "Radonskydd"}
+    ]}
+  ]},
+  {"label": "Markarbeten", "children": [
+    {"label": "Schaktning", "children": [
+      {"label": "Schakt för grund"}, {"label": "Schakt för ledningar"}, {"label": "Massutbyte"}
+    ]},
+    {"label": "Markbeläggning", "children": [
+      {"label": "Asfalt"}, {"label": "Betongplattor"}, {"label": "Grus"}, {"label": "Gräsyta"}
+    ]},
+    {"label": "VA-arbeten", "children": [
+      {"label": "Dagvatten"}, {"label": "Spillvatten"}, {"label": "Dricksvatten"}
+    ]}
+  ]},
+  {"label": "Installationer", "children": [
+    {"label": "VVS", "children": [
+      {"label": "Värme"}, {"label": "Ventilation"}, {"label": "Sanitet"}
+    ]},
+    {"label": "El", "children": [
+      {"label": "Elcentral"}, {"label": "Belysning"}, {"label": "Starkström"}, {"label": "Svagström"}
+    ]},
+    {"label": "Styr och övervakning", "children": [
+      {"label": "Fastighetsautomation"}, {"label": "Brandlarm"}
+    ]}
+  ]},
+  {"label": "Inre utrymmen", "children": [
+    {"label": "Golv", "children": [
+      {"label": "Parkett"}, {"label": "Klinker"}, {"label": "Matta"}, {"label": "Betonggolv"}
+    ]},
+    {"label": "Innerväggar", "children": [
+      {"label": "Gips"}, {"label": "Tegel"}, {"label": "Lättbetong"}
+    ]},
+    {"label": "Innertak", "children": [
+      {"label": "Undertak"}, {"label": "Målat tak"}, {"label": "Akustikplattor"}
+    ]}
+  ]}
+]'::jsonb);
+
+drop function public._seed_taxonomy_tree(uuid, jsonb);
