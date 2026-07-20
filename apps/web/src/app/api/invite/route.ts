@@ -14,10 +14,10 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { projectId, email, role } = await req.json()
-  if (!['entrepreneur', 'spectator_project', 'spectator_company', 'konsult'].includes(role)) {
+  if (!['entrepreneur', 'spectator_project', 'spectator_company', 'konsult', 'mobil_anvandare'].includes(role)) {
     return NextResponse.json({ error: 'Ogiltig roll' }, { status: 400 })
   }
-  if (role !== 'spectator_company' && !projectId) {
+  if (!['spectator_company', 'mobil_anvandare'].includes(role) && !projectId) {
     return NextResponse.json({ error: 'Projekt krävs för denna roll' }, { status: 400 })
   }
 
@@ -27,7 +27,16 @@ export async function POST(req: Request) {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'client' || !profile.company_id) {
+  if (!profile || !profile.company_id) {
+    return NextResponse.json({ error: 'Åtkomst nekad' }, { status: 403 })
+  }
+  // Clients manage their whole org (entrepreneur/spectator/konsult/mobil_anvandare
+  // invites). Entrepreneurs only manage their own persistent org's mobila användare.
+  if (profile.role === 'entrepreneur') {
+    if (role !== 'mobil_anvandare') {
+      return NextResponse.json({ error: 'Åtkomst nekad' }, { status: 403 })
+    }
+  } else if (profile.role !== 'client') {
     return NextResponse.json({ error: 'Åtkomst nekad' }, { status: 403 })
   }
 

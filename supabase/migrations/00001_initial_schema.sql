@@ -10,10 +10,10 @@ create extension if not exists "pgcrypto";
 -- ============================================================
 -- ENUMS
 -- ============================================================
-create type public.user_role as enum ('client', 'entrepreneur', 'spectator', 'konsult');
+create type public.user_role as enum ('client', 'entrepreneur', 'spectator', 'konsult', 'mobil_anvandare');
 create type public.project_status as enum ('active', 'completed', 'archived');
 create type public.lesson_type as enum ('challenge', 'success');
-create type public.invite_role as enum ('entrepreneur', 'spectator_project', 'spectator_company', 'konsult');
+create type public.invite_role as enum ('entrepreneur', 'spectator_project', 'spectator_company', 'konsult', 'mobil_anvandare');
 create type public.member_role as enum ('entrepreneur', 'spectator', 'konsult');
 create type public.project_category_type as enum ('nybyggnation', 'renovering', 'service');
 -- Same four subtypes apply under every category_type.
@@ -24,7 +24,10 @@ create type public.procurement_form as enum ('generalentreprenad', 'delad_entrep
 create type public.contract_form as enum ('totalentreprenad_abt06', 'utforandeentreprenad_ab04', 'partnering');
 -- "Var i byggprocessen" — which phase of the construction process a lesson relates to.
 create type public.construction_phase as enum ('idea_stage', 'early_stages', 'design', 'execution', 'management');
-create type public.account_type as enum ('private_company', 'kommun');
+-- 'entreprenor' companies are created automatically the first time someone
+-- accepts an 'entrepreneur' invite as a brand-new user — a persistent,
+-- reusable organization that later invited mobila användare join by company_id.
+create type public.account_type as enum ('private_company', 'kommun', 'entreprenor');
 
 -- ============================================================
 -- COMPANIES (tenants, owned by a client)
@@ -121,7 +124,7 @@ create table public.invitations (
   expires_at  timestamptz not null default (now() + interval '14 days'),
   created_at  timestamptz not null default now(),
   constraint invitations_project_role_check check (
-    (role = 'spectator_company' and project_id is null)
+    (role in ('spectator_company', 'mobil_anvandare') and project_id is null)
     or (role in ('entrepreneur', 'spectator_project', 'konsult') and project_id is not null)
   )
 );
@@ -306,6 +309,24 @@ returns boolean language sql stable security definer as $$
   );
 $$;
 
+-- Entreprenör organizations are persistent: a mobil_anvandare invited by an
+-- entrepreneur joins that entrepreneur's company_id directly and gets no
+-- project_members row of their own. Access instead derives from sharing a
+-- company_id with SOME profile that does hold an 'entrepreneur' membership
+-- on the project — covers both the original entrepreneur and any mobila
+-- användare added to their org afterward.
+create or replace function public.is_entreprenor_org_on_project(p_project_id uuid)
+returns boolean language sql stable security definer as $$
+  select exists (
+    select 1 from public.project_members pm
+    join public.profiles pr on pr.id = pm.profile_id
+    where pm.project_id = p_project_id
+      and pm.role = 'entrepreneur'
+      and pr.company_id is not null
+      and pr.company_id = public.my_company_id()
+  );
+$$;
+
 -- does the current user have lesson-logging write access on this project?
 -- (entrepreneur or konsult — both can log lessons; konsult is additionally
 -- restricted client-side to early-phase "Var i byggprocessen" values)
@@ -314,7 +335,7 @@ returns boolean language sql stable security definer as $$
   select exists (
     select 1 from public.project_members
     where project_id = p_project_id and profile_id = auth.uid() and role in ('entrepreneur', 'konsult')
-  );
+  ) or public.is_entreprenor_org_on_project(p_project_id);
 $$;
 
 -- does the current user have company-wide viewer access to this company?
@@ -416,6 +437,7 @@ returns boolean language sql stable security definer as $$
         p.company_id = public.my_company_id()
         or public.is_project_member(p.id)
         or public.is_company_viewer(p.company_id)
+        or public.is_entreprenor_org_on_project(p.id)
       )
   );
 $$;
@@ -466,6 +488,15 @@ create policy "profiles_select_by_client" on public.profiles
     )
   );
 
+-- Members of the same organization can see each other. mobila användare have
+-- no project_members/company_viewers row (they're not scoped to a project),
+-- so client/entrepreneur org admins need this to list and manage them —
+-- also lets entrepreneurs see peers added to their own persistent org.
+create policy "profiles_select_same_company" on public.profiles
+  for select using (
+    company_id is not null and company_id = public.my_company_id()
+  );
+
 -- ------------------------------------------------------------
 -- PROJECTS
 -- ------------------------------------------------------------
@@ -478,6 +509,7 @@ create policy "projects_select" on public.projects
     company_id = public.my_company_id()
     or public.is_project_member(id)
     or public.is_company_viewer(company_id)
+    or public.is_entreprenor_org_on_project(id)
   );
 
 create policy "projects_insert" on public.projects
@@ -602,9 +634,13 @@ create policy "tags_insert" on public.tags
     or exists (
       select 1 from public.project_members pm
       join public.projects p on p.id = pm.project_id
-      where p.company_id = tags.company_id and pm.profile_id = auth.uid() and pm.role in ('entrepreneur', 'konsult')
+      where p.company_id = tags.company_id
+        and (
+          (pm.profile_id = auth.uid() and pm.role in ('entrepreneur', 'konsult'))
+          or public.is_entreprenor_org_on_project(p.id)
+        )
     )
-  ); -- clients, entrepreneurs and konsults can introduce new freeform tags; spectators cannot
+  ); -- clients, entrepreneurs (incl. their org's mobila användare) and konsults can introduce new freeform tags; spectators cannot
 
 -- Needed for upsert(..., {onConflict: 'company_id,kind,name'}) to work once a
 -- tag already exists — that path is an UPDATE, which has no effect on the
@@ -616,7 +652,11 @@ create policy "tags_update" on public.tags
     or exists (
       select 1 from public.project_members pm
       join public.projects p on p.id = pm.project_id
-      where p.company_id = tags.company_id and pm.profile_id = auth.uid() and pm.role in ('entrepreneur', 'konsult')
+      where p.company_id = tags.company_id
+        and (
+          (pm.profile_id = auth.uid() and pm.role in ('entrepreneur', 'konsult'))
+          or public.is_entreprenor_org_on_project(p.id)
+        )
     )
   );
 

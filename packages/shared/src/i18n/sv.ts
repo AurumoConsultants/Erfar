@@ -43,6 +43,7 @@ export default {
     knowledgeBase: 'Kunskapsbank',
     reports: 'Rapporter',
     companyViewers: 'Åskådare (företag)',
+    mobileUsers: 'Mobila användare',
     settings: 'Inställningar',
   },
   project: {
@@ -123,6 +124,7 @@ export default {
     roleSpectatorProject: 'åskådare (detta projekt)',
     roleSpectatorCompany: 'åskådare (hela företaget)',
     roleKonsult: 'konsult',
+    roleMobilAnvandare: 'mobil användare',
     invalidOrUsed: 'Inbjudan är ogiltig, har gått ut eller har redan använts.',
     accept: 'Acceptera inbjudan',
   },
@@ -135,7 +137,7 @@ export default {
     successes: 'Framgångar',
   },
   admin: {
-    title: 'Administration',
+    title: 'Superadmin',
     overview: 'Översikt',
     users: 'Användare',
     companies: 'Företag',

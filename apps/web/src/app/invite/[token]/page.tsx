@@ -7,7 +7,7 @@ import { useI18n } from '@/lib/i18n'
 
 interface InvitationInfo {
   email: string
-  role: 'entrepreneur' | 'spectator_project' | 'spectator_company' | 'konsult'
+  role: 'entrepreneur' | 'spectator_project' | 'spectator_company' | 'konsult' | 'mobil_anvandare'
   company: { id: string; name: string } | null
   project: { id: string; name: string; location: string | null } | null
 }
@@ -17,6 +17,7 @@ const roleLabelKey = {
   spectator_project: 'roleSpectatorProject',
   spectator_company: 'roleSpectatorCompany',
   konsult: 'roleKonsult',
+  mobil_anvandare: 'roleMobilAnvandare',
 } as const
 
 export default function InvitePage() {
@@ -30,6 +31,7 @@ export default function InvitePage() {
   const [error, setError] = useState('')
 
   const [fullName, setFullName] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [password, setPassword] = useState('')
   const [isNewUser, setIsNewUser] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -61,6 +63,7 @@ export default function InvitePage() {
         password,
         fullName,
         isNewUser,
+        companyName,
       }),
     })
     const json = await res.json()
@@ -138,6 +141,13 @@ export default function InvitePage() {
             <div>
               <label className="block text-sm font-medium mb-1">{t.auth.fullName}</label>
               <input required value={fullName} onChange={e => setFullName(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          )}
+          {isNewUser && invitation!.role === 'entrepreneur' && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Ditt företags namn</label>
+              <input required value={companyName} onChange={e => setCompanyName(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           )}

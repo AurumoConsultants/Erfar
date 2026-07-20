@@ -21,12 +21,19 @@ export default function Navbar({ profile, companyName }: NavbarProps) {
     router.push('/')
   }
 
+  // mobila användare only log lessons — no review, no invites, no
+  // knowledge-base browsing beyond what a project page needs to function.
+  const isMobileUser = profile.role === 'mobil_anvandare'
+
   const links = [
     { href: '/dashboard', label: t.nav.dashboard },
     { href: '/projects', label: t.nav.projects },
-    { href: '/knowledge-base', label: t.nav.knowledgeBase },
-    { href: '/reports', label: t.nav.reports },
+    ...(isMobileUser ? [] : [{ href: '/knowledge-base', label: t.nav.knowledgeBase }]),
+    ...(isMobileUser ? [] : [{ href: '/reports', label: t.nav.reports }]),
     ...(profile.role === 'client' ? [{ href: '/company/viewers', label: t.nav.companyViewers }] : []),
+    ...(profile.role === 'client' || profile.role === 'entrepreneur'
+      ? [{ href: '/company/mobile-users', label: t.nav.mobileUsers }]
+      : []),
   ]
 
   return (

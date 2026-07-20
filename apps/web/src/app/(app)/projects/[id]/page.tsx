@@ -62,6 +62,13 @@ export default async function ProjectDetailPage({
       .maybeSingle()
     isEntrepreneur = membership?.role === 'entrepreneur'
     isContributor = isEntrepreneur || membership?.role === 'konsult'
+    // mobila användare (and any other member of the same persistent
+    // entreprenör org) have no project_members row of their own — their
+    // logging access comes from sharing company_id with the org's entrepreneur.
+    if (!isContributor && profile?.role === 'mobil_anvandare') {
+      const { data: orgWide } = await supabase.rpc('is_entreprenor_org_on_project', { p_project_id: id })
+      isContributor = !!orgWide
+    }
   }
   const canLogLesson = isClientOwner || isContributor
   // Client and entrepreneur team members run the review meeting — konsult and
