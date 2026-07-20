@@ -33,6 +33,12 @@ export default async function ProjectDetailPage({
   const { data: project } = await supabase.from('projects').select('*').eq('id', id).single()
   if (!project) notFound()
 
+  const { data: projectTagRows } = await supabase
+    .from('project_tags')
+    .select('tag:tags(name)')
+    .eq('project_id', id)
+  const projectTags: string[] = (projectTagRows ?? []).map((r: any) => r.tag?.name).filter(Boolean)
+
   const { data: lessonsRaw } = await supabase
     .from('lessons')
     .select('*, tags:lesson_tags(tag:tags(*)), images:lesson_images(*)')
@@ -79,6 +85,9 @@ export default async function ProjectDetailPage({
             <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
               {procurementFormLabel(project.procurement_form)} · {contractFormLabel(project.contract_form)}
             </span>
+            {projectTags.map(tag => (
+              <span key={tag} className="text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full">{tag}</span>
+            ))}
           </div>
         </div>
         <div className="flex gap-2">
@@ -119,8 +128,7 @@ export default async function ProjectDetailPage({
       {isClientOwner && (
         <SimilarLessons
           projectId={id}
-          categoryType={project.category_type}
-          categorySubtype={project.category_subtype}
+          projectTags={projectTags}
           justCreated={justCreatedParam === '1'}
         />
       )}
