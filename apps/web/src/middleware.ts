@@ -6,8 +6,12 @@ const GATE_COOKIE = 'erfar_gate'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isGateRoute = pathname === '/gate' || pathname.startsWith('/api/gate')
+  // The PWA manifest must stay reachable regardless of gate/login state —
+  // the browser fetches it independently to decide whether "Add to Home
+  // Screen" is available, not as part of a normal page navigation.
+  const isManifestRoute = pathname === '/manifest.webmanifest'
 
-  if (isGateRoute) {
+  if (isGateRoute || isManifestRoute) {
     return NextResponse.next()
   }
 
