@@ -7,14 +7,14 @@ import { createClient } from '@/lib/supabase/client'
 import { lessonSchema, type LessonFormValues } from '@/lib/validations/lesson'
 import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES, BUILDING_PARTS } from '@erfar/shared'
 import type { Lesson, ConstructionPhase } from '@erfar/shared'
-import TagInput from './TagInput'
+import TagWizard from './TagWizard'
+import TagTree from './TagTree'
 import MediaUploader from './MediaUploader'
 import CategoryPicker from './CategoryPicker'
 
 interface LessonFormProps {
   projectId: string
   companyId: string
-  existingTagNames: string[]
   existingWorkTypes: string[]
   existingBuildingParts: string[]
   lesson: Lesson
@@ -27,7 +27,7 @@ interface LessonFormProps {
 // Editing an existing lesson is a single page with every field visible at
 // once (unlike the step-by-step wizard used to create a new lesson).
 export default function LessonForm({
-  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, lesson, allowedPhases,
+  projectId, companyId, existingWorkTypes, existingBuildingParts, lesson, allowedPhases,
 }: LessonFormProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -60,6 +60,13 @@ export default function LessonForm({
   const tags = watch('tags')
   const workType = watch('work_type') ?? ''
   const buildingPart = watch('building_part') ?? ''
+
+  function addTag(tagName: string) {
+    if (!tags.includes(tagName)) setValue('tags', [...tags, tagName])
+  }
+  function removeTag(tagName: string) {
+    setValue('tags', tags.filter(t => t !== tagName))
+  }
 
   async function onSubmit(values: LessonFormValues) {
     const parsed = lessonSchema.safeParse(values)
@@ -230,8 +237,9 @@ export default function LessonForm({
 
       <div>
         <label className="block text-sm font-medium mb-1">Taggar</label>
-        <TagInput value={tags} onChange={t => setValue('tags', t)} suggestions={existingTagNames} />
+        <TagWizard selected={tags} onAdd={addTag} />
       </div>
+      <TagTree tags={tags} onRemove={removeTag} />
 
       <div>
         <label className="block text-sm font-medium mb-1">Lägg till nya foton eller videor</label>

@@ -32,7 +32,6 @@ export default async function EditLessonPage({ params }: { params: Promise<{ id:
       <LessonForm
         projectId={project.id}
         companyId={project.company_id}
-        existingTagNames={byKind('tag')}
         existingWorkTypes={byKind('work_type')}
         existingBuildingParts={byKind('building_part')}
         lesson={lesson}
