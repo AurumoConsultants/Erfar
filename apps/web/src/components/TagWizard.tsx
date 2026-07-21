@@ -91,7 +91,7 @@ export default function TagWizard({
                 type="button"
                 disabled={alreadyAdded}
                 onClick={() => onAdd(tagName)}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold border transition ${
+                className={`px-3 py-2.5 min-h-11 rounded-lg text-sm font-semibold border transition ${
                   alreadyAdded
                     ? 'bg-orange-50 text-orange-400 border-orange-200 cursor-default'
                     : 'border-gray-200 text-gray-700 hover:bg-white hover:border-orange-300'
@@ -106,7 +106,7 @@ export default function TagWizard({
               key={node.id}
               type="button"
               onClick={() => setPath([...path, node])}
-              className="px-3 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-100 transition"
+              className="px-3 py-2.5 min-h-11 rounded-lg text-sm font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-100 transition"
             >
               {node.label} ›
             </button>
