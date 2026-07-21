@@ -30,10 +30,16 @@ export default function MediaUploader({ files, onChange, addLabel, gdprNotice }:
       <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
         ⚠️ {gdprNotice}
       </p>
-      <label className="inline-block cursor-pointer text-sm border border-gray-300 rounded-lg px-3 py-2 hover:bg-gray-50">
-        {addLabel}
-        <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleSelect} />
-      </label>
+      <div className="flex flex-wrap gap-2">
+        <label className="inline-flex items-center justify-center cursor-pointer text-sm border border-gray-300 rounded-lg px-3 py-2.5 min-h-11 hover:bg-gray-50">
+          📷 Ta foto
+          <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleSelect} />
+        </label>
+        <label className="inline-flex items-center justify-center cursor-pointer text-sm border border-gray-300 rounded-lg px-3 py-2.5 min-h-11 hover:bg-gray-50">
+          {addLabel}
+          <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleSelect} />
+        </label>
+      </div>
       {previews.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-3">
           {previews.map((p, i) => (

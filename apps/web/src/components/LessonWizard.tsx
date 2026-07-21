@@ -37,7 +37,9 @@ export default function LessonWizard({
   const supabase = createClient()
 
   const visiblePhases = CONSTRUCTION_PHASES.filter(p => !allowedPhases || allowedPhases.includes(p.value))
-  const phaseGridColsClass = visiblePhases.length >= 5 ? 'grid-cols-5' : 'grid-cols-3'
+  // Always 3 columns on narrow screens so each phase button stays a real tap
+  // target; wider screens can afford 5-across when all phases are shown.
+  const phaseGridColsClass = visiblePhases.length >= 5 ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-3'
 
   const [step, setStep] = useState(1)
   const [type, setType] = useState<LessonType>('challenge')
@@ -193,7 +195,7 @@ export default function LessonWizard({
                   key={lt.value}
                   type="button"
                   onClick={() => setType(lt.value)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition ${
+                  className={`flex-1 py-3 min-h-11 rounded-lg text-sm font-semibold border transition ${
                     type === lt.value ? 'text-white border-transparent' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                   }`}
                   style={type === lt.value ? { backgroundColor: lt.color } : undefined}
@@ -216,7 +218,7 @@ export default function LessonWizard({
                     key={p.value}
                     type="button"
                     onClick={() => setConstructionPhase(p.value)}
-                    className={`py-2 px-1 rounded-lg text-xs font-semibold border transition leading-tight ${
+                    className={`py-2.5 px-1 min-h-11 rounded-lg text-xs font-semibold border transition leading-tight flex items-center justify-center text-center ${
                       constructionPhase === p.value
                         ? 'bg-orange-600 text-white border-orange-600'
                         : 'border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -335,18 +337,18 @@ export default function LessonWizard({
       <div className="flex gap-3 pt-2">
         {step > 1 && (
           <button type="button" onClick={goBack}
-            className="flex-1 border border-gray-300 text-gray-700 font-semibold py-2 rounded-lg hover:bg-gray-50 transition">
+            className="flex-1 border border-gray-300 text-gray-700 font-semibold py-3 min-h-11 rounded-lg hover:bg-gray-50 transition">
             Tillbaka
           </button>
         )}
         {step < TOTAL_STEPS ? (
           <button type="button" onClick={goNext}
-            className="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 transition">
+            className="flex-1 bg-orange-600 text-white font-semibold py-3 min-h-11 rounded-lg hover:bg-orange-700 transition">
             Nästa
           </button>
         ) : (
           <button type="button" onClick={handleFinish} disabled={saving}
-            className="flex-1 bg-orange-600 text-white font-semibold py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
+            className="flex-1 bg-orange-600 text-white font-semibold py-3 min-h-11 rounded-lg hover:bg-orange-700 disabled:opacity-50 transition">
             {saving ? 'Sparar...' : 'Spara lärdom'}
           </button>
         )}
