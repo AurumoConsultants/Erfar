@@ -78,7 +78,7 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{project.name}</h1>
           {project.location && <p className="text-gray-500 text-sm mt-1">{project.location}</p>}
@@ -97,16 +97,16 @@ export default async function ProjectDetailPage({
             ))}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           {canLogLesson && (
             <Link href={`/projects/${id}/lessons/new`}
-              className="bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-orange-700 transition">
+              className="bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 min-h-11 rounded-lg hover:bg-orange-700 transition flex items-center justify-center">
               Logga en lärdom
             </Link>
           )}
           {canReview && (
             <Link href={`/projects/${id}/review`}
-              className="border border-gray-300 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-50 transition inline-flex items-center gap-2">
+              className="border border-gray-300 text-sm font-semibold px-4 py-2.5 min-h-11 rounded-lg hover:bg-gray-50 transition inline-flex items-center justify-center gap-2">
               Granska lärdomar
               {pendingReviewCount > 0 && (
                 <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-1.5 py-0.5 rounded-full">
@@ -118,11 +118,11 @@ export default async function ProjectDetailPage({
           {isClientOwner && (
             <>
               <Link href={`/projects/${id}/members`}
-                className="border border-gray-300 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+                className="border border-gray-300 text-sm font-semibold px-4 py-2.5 min-h-11 rounded-lg hover:bg-gray-50 transition flex items-center justify-center">
                 Medlemmar
               </Link>
               <Link href={`/projects/${id}/edit`}
-                className="border border-gray-300 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+                className="border border-gray-300 text-sm font-semibold px-4 py-2.5 min-h-11 rounded-lg hover:bg-gray-50 transition flex items-center justify-center">
                 Redigera
               </Link>
             </>

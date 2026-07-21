@@ -52,7 +52,7 @@ export default function CategoryPicker({
             key={opt}
             type="button"
             onClick={() => onChange(opt)}
-            className={`capitalize px-3 py-2 rounded-lg text-sm font-semibold border transition ${
+            className={`capitalize px-3 py-2.5 min-h-11 rounded-lg text-sm font-semibold border transition ${
               value === opt ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
