@@ -4,18 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { lessonSchema } from '@/lib/validations/lesson'
-import { suggestTags } from '@/lib/ai/suggestTags'
-import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES, BUILDING_PARTS, SUGGESTED_TAGS } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES, BUILDING_PARTS } from '@erfar/shared'
 import type { LessonType, ConstructionPhase } from '@erfar/shared'
 import CategoryPicker from './CategoryPicker'
 import MediaUploader from './MediaUploader'
 import VoiceRecorder from './VoiceRecorder'
-import TagInput from './TagInput'
+import TagWizard from './TagWizard'
+import TagTree from './TagTree'
 
 interface LessonWizardProps {
   projectId: string
   companyId: string
-  existingTagNames: string[]
   existingWorkTypes: string[]
   existingBuildingParts: string[]
   // Some roles only ever log lessons for a subset of construction phases
@@ -31,7 +30,7 @@ function capitalize(s: string) {
 }
 
 export default function LessonWizard({
-  projectId, companyId, existingTagNames, existingWorkTypes, existingBuildingParts, allowedPhases,
+  projectId, companyId, existingWorkTypes, existingBuildingParts, allowedPhases,
 }: LessonWizardProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -49,12 +48,17 @@ export default function LessonWizard({
   const [media, setMedia] = useState<File[]>([])
   const [description, setDescription] = useState('')
   const [tags, setTags] = useState<string[]>([])
-  const [suggested, setSuggested] = useState<string[]>([])
   const [contactPhone, setContactPhone] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [suggestionsChecked, setSuggestionsChecked] = useState(false)
+
+  function addTag(tagName: string) {
+    setTags(prev => prev.includes(tagName) ? prev : [...prev, tagName])
+  }
+  function removeTag(tagName: string) {
+    setTags(prev => prev.filter(t => t !== tagName))
+  }
 
   function goNext() {
     setError('')
@@ -66,25 +70,12 @@ export default function LessonWizard({
       setError('Skriv en kommentar för att fortsätta.')
       return
     }
-    // First "Nästa" on step 4 runs the tag suggestion and stays put so the
-    // user can review/add the suggestions before actually moving on.
-    if (step === 4 && !suggestionsChecked) {
-      const candidates = Array.from(new Set([...existingTagNames, ...SUGGESTED_TAGS]))
-      setSuggested(suggestTags(description, candidates).filter(s => !tags.includes(s)))
-      setSuggestionsChecked(true)
-      return
-    }
     setStep(s => Math.min(TOTAL_STEPS, s + 1))
   }
 
   function goBack() {
     setError('')
     setStep(s => Math.max(1, s - 1))
-  }
-
-  function toggleSuggested(tag: string) {
-    setTags(prev => [...prev, tag])
-    setSuggested(prev => prev.filter(s => s !== tag))
   }
 
   async function handleFinish() {
@@ -274,13 +265,13 @@ export default function LessonWizard({
           <label className="block text-sm font-medium">Kommentar</label>
           <textarea
             value={description}
-            onChange={e => { setDescription(e.target.value); setSuggestionsChecked(false) }}
+            onChange={e => setDescription(e.target.value)}
             rows={5}
             placeholder="Beskriv lärdomen..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <VoiceRecorder
-            onTranscript={text => { setDescription(prev => (prev ? `${prev} ${text}` : text)); setSuggestionsChecked(false) }}
+            onTranscript={text => setDescription(prev => (prev ? `${prev} ${text}` : text))}
             recordLabel="Spela in röst"
             stopLabel="Stoppa inspelning"
             recordingLabel="Lyssnar..."
@@ -288,21 +279,9 @@ export default function LessonWizard({
           />
           <div>
             <label className="block text-sm font-medium mb-1">Taggar</label>
-            <TagInput value={tags} onChange={setTags} suggestions={existingTagNames} />
+            <TagWizard selected={tags} onAdd={addTag} />
           </div>
-          {suggested.length > 0 && (
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Föreslagna taggar utifrån texten</p>
-              <div className="flex flex-wrap gap-2">
-                {suggested.map(s => (
-                  <button key={s} type="button" onClick={() => toggleSuggested(s)}
-                    className="text-xs border border-blue-200 text-blue-700 px-2 py-1 rounded-full hover:bg-blue-50">
-                    + {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <TagTree tags={tags} onRemove={removeTag} />
         </div>
       )}
 
