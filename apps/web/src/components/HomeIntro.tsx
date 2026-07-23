@@ -74,12 +74,6 @@ export function HomeIntro() {
           >
             Logga in
           </Link>
-          <Link
-            href="/auth/signup"
-            className="px-6 py-3 border border-white text-white font-semibold rounded-lg hover:bg-blue-800 transition"
-          >
-            Registrera
-          </Link>
         </div>
       </div>
     </main>
