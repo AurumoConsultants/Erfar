@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { LESSON_TYPES } from '@erfar/shared'
+import Card from '@/components/ui/Card'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -28,18 +29,18 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <Card>
           <p className="text-sm text-gray-500">Projekt</p>
           <p className="text-3xl font-bold mt-1">{projects?.length ?? 0}</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+        </Card>
+        <Card>
           <p className="text-sm text-gray-500">{LESSON_TYPES[1].icon} Framgångar</p>
           <p className="text-3xl font-bold mt-1">{successCount}</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
+        </Card>
+        <Card>
           <p className="text-sm text-gray-500">{LESSON_TYPES[0].icon} Utmaningar</p>
           <p className="text-3xl font-bold mt-1">{challengeCount}</p>
-        </div>
+        </Card>
       </div>
 
       <div>
@@ -49,10 +50,11 @@ export default async function DashboardPage() {
         </div>
         <div className="space-y-2">
           {(projects ?? []).slice(0, 5).map(p => (
-            <Link key={p.id} href={`/projects/${p.id}`}
-              className="block bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 transition">
-              <span className="font-medium">{p.name}</span>
-              <span className="text-xs text-gray-400 ml-2 capitalize">{p.status}</span>
+            <Link key={p.id} href={`/projects/${p.id}`} className="block">
+              <Card className="px-4 py-3 hover:border-accent-300 transition">
+                <span className="font-medium">{p.name}</span>
+                <span className="text-xs text-gray-400 ml-2 capitalize">{p.status}</span>
+              </Card>
             </Link>
           ))}
           {(projects ?? []).length === 0 && (
