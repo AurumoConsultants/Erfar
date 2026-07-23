@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,11 +17,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!profile) redirect('/auth/login')
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar profile={profile} companyName={profile.company?.name ?? null} />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        {children}
-      </main>
-    </div>
+    <ToastProvider>
+      <div className="min-h-screen flex flex-col">
+        <Navbar profile={profile} companyName={profile.company?.name ?? null} />
+        <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+          {children}
+        </main>
+      </div>
+    </ToastProvider>
   )
 }
