@@ -12,7 +12,13 @@ export default async function AdminCompaniesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Företag</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Företag</h1>
+        <Link href="/admin/companies/new"
+          className="bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-orange-700 transition">
+          Nytt företag
+        </Link>
+      </div>
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
