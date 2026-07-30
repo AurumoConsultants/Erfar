@@ -105,11 +105,17 @@ export interface Lesson {
   building_part_id: string | null
   contact_phone: string | null
   contact_email: string | null
-  created_by: string
+  // Null for lessons pushed in via the Procere integration — see
+  // external_source/external_submitted_by below for provenance instead.
+  created_by: string | null
   reviewed_at: string | null
   reviewed_by: string | null
   review_notes: string | null
   solution: string | null
+  // Set only when this lesson was pushed in from an external system
+  // (currently just 'procere') rather than logged by a real Erfar user.
+  external_source: string | null
+  external_submitted_by: string | null
   created_at: string
   updated_at: string
   // joined

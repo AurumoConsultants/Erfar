@@ -8,7 +8,9 @@ export default async function AdminLessonsPage() {
 
   const { data: lessons } = await supabase
     .from('lessons')
-    .select('id, title, type, created_at, project:projects(name, company:companies(name)), author:profiles!created_by(full_name)')
+    .select(
+      'id, title, type, created_at, external_source, external_submitted_by, project:projects(name, company:companies(name)), author:profiles!created_by(full_name)'
+    )
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -34,6 +36,8 @@ export default async function AdminLessonsPage() {
             {(lessons ?? []).map(l => {
               const project = l.project as unknown as { name: string; company: { name: string } | null } | null
               const author = l.author as unknown as { full_name: string } | null
+              const authorLabel =
+                author?.full_name ?? (l.external_source === 'procere' ? `Importerad från Procere` : '—')
               const info = typeInfo(l.type)
               return (
                 <tr key={l.id} className="border-b border-gray-100 last:border-0">
@@ -43,7 +47,7 @@ export default async function AdminLessonsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-500">{project?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-gray-500">{project?.company?.name ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{author?.full_name ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-500">{authorLabel}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`/admin/lessons/${l.id}/edit`}

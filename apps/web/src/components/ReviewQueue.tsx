@@ -56,7 +56,9 @@ export default function ReviewQueue({ lessons }: { lessons: Lesson[] }) {
                 <div>
                   <h3 className="font-semibold text-gray-900">{lesson.title}</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {lesson.author?.full_name} · {new Date(lesson.created_at).toLocaleDateString('sv-SE')}
+                    {lesson.author?.full_name ??
+                      (lesson.external_source === 'procere' ? 'Importerad från Procere' : 'Okänd')}{' '}
+                    · {new Date(lesson.created_at).toLocaleDateString('sv-SE')}
                     {phaseInfo && <> · {phaseInfo.label}</>}
                   </p>
                 </div>

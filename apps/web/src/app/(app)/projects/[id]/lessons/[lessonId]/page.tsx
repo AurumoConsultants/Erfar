@@ -41,7 +41,11 @@ export default async function LessonDetailPage({ params }: { params: Promise<{ i
             <div>
               <h1 className="text-xl font-bold">{lesson.title}</h1>
               <p className="text-sm text-gray-400 mt-0.5">
-                {lesson.author?.full_name} · {new Date(lesson.created_at).toLocaleDateString('sv-SE')}
+                {lesson.author?.full_name ??
+                  (lesson.external_source === 'procere'
+                    ? `Importerad från Procere${lesson.external_submitted_by ? ` (${lesson.external_submitted_by})` : ''}`
+                    : 'Okänd')}{' '}
+                · {new Date(lesson.created_at).toLocaleDateString('sv-SE')}
               </p>
             </div>
           </div>
