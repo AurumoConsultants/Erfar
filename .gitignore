@@ -16,3 +16,6 @@ apps/videos/out
 .claude/scheduled_tasks.lock
 87332.pdf
 Authenticator/
+
+.vercel
+.env*
