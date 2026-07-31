@@ -13,6 +13,68 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "videos", "start", "--", "--port=3010"],
       "port": 3010
+    },
+    {
+      "name": "zhopr",
+      "runtimeExecutable": "C:\\PROGRA~1\\nodejs\\npm.cmd",
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Users\\Johan Svartholm\\projects\\zhopr",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3020"
+      ],
+      "port": 3020
+    },
+    {
+      "name": "procere",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--dir",
+        "C:\\Users\\JOHANS~1\\projects\\Procere",
+        "--filter",
+        "web",
+        "dev",
+        "--port=3030"
+      ],
+      "port": 3030
+    },
+    {
+      "name": "windowa",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--dir",
+        "C:\\Users\\JOHANS~1\\projects\\Windowa",
+        "--filter",
+        "web",
+        "dev",
+        "--port=3040"
+      ],
+      "port": 3040
+    },
+    {
+      "name": "scandidog-vat",
+      "runtimeExecutable": "C:\\PROGRA~1\\nodejs\\npm.cmd",
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Users\\JOHANS~1\\projects\\scandidog-vat-bridge",
+        "run",
+        "dev"
+      ],
+      "port": 3050
+    },
+    {
+      "name": "hotdog-winner",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--dir",
+        "C:\\Users\\JOHANS~1\\projects\\HOTDOG~1",
+        "dev",
+        "--port=3060"
+      ],
+      "port": 3060
     }
   ]
 }
