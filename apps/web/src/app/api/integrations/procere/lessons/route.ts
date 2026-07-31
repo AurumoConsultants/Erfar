@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { verifyIntegrationSecret, isEntrepreneurOnProject } from '@/lib/integrations/procereAuth'
 import type { LessonType, ConstructionPhase } from '@erfar/shared'
 import { NextResponse } from 'next/server'
 
@@ -13,8 +14,7 @@ const CONSTRUCTION_PHASES: ConstructionPhase[] = ['idea_stage', 'early_stages', 
 // the claimed company is genuinely the entrepreneur on record for the
 // target project.
 export async function POST(req: Request) {
-  const secret = req.headers.get('x-integration-secret')
-  if (!secret || secret !== process.env.PROCERE_INTEGRATION_SECRET) {
+  if (!verifyIntegrationSecret(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -36,16 +36,7 @@ export async function POST(req: Request) {
   // Confirm org_number is genuinely the entrepreneur on record for this
   // project — without this, the shared secret alone would let a caller
   // push a lesson into any Erfar project by guessing its id.
-  const { data: entrepreneurMember } = await admin
-    .from('project_members')
-    .select('id, profiles!inner(company_id, companies!inner(org_number, account_type))')
-    .eq('project_id', erfar_project_id)
-    .eq('role', 'entrepreneur')
-    .eq('profiles.companies.account_type', 'entreprenor')
-    .eq('profiles.companies.org_number', org_number)
-    .maybeSingle()
-
-  if (!entrepreneurMember) {
+  if (!(await isEntrepreneurOnProject(admin, erfar_project_id, org_number))) {
     return NextResponse.json(
       { error: 'Kunde inte bekräfta att detta org.nr är entreprenör på det angivna Erfar-projektet.' },
       { status: 403 }
