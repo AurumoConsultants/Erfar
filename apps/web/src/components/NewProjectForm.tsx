@@ -104,7 +104,7 @@ export default function NewProjectForm() {
           <div>
             <label className="block text-sm font-medium mb-1">Taggar</label>
             <p className="text-xs text-gray-400 mb-2">
-              Avgör vilka lärdomar som visas som &quot;Liknande lärdomar&quot; för projektet — övriga fält nedan är bara allmän information som går att filtrera på.
+              Välj vilka byggdelar som påverkas av ditt projekt — övriga fält nedan är bara allmän information som går att filtrera på.
             </p>
             {!wizardStarted ? (
               <button
