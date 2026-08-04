@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { lessonSchema } from '@/lib/validations/lesson'
-import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES, BUILDING_PARTS } from '@erfar/shared'
+import { LESSON_TYPES, CONSTRUCTION_PHASES, WORK_TYPES } from '@erfar/shared'
 import type { LessonType, ConstructionPhase } from '@erfar/shared'
 import CategoryPicker from './CategoryPicker'
 import MediaUploader from './MediaUploader'
@@ -16,7 +16,6 @@ interface LessonWizardProps {
   projectId: string
   companyId: string
   existingWorkTypes: string[]
-  existingBuildingParts: string[]
   // Some roles only ever log lessons for a subset of construction phases
   // (entrepreneurs: execution only; konsult: idea_stage/early_stages/design).
   // Undefined/omitted means all phases are selectable.
@@ -25,12 +24,8 @@ interface LessonWizardProps {
 
 const TOTAL_STEPS = 5
 
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
 export default function LessonWizard({
-  projectId, companyId, existingWorkTypes, existingBuildingParts, allowedPhases,
+  projectId, companyId, existingWorkTypes, allowedPhases,
 }: LessonWizardProps) {
   const router = useRouter()
   const supabase = createClient()
@@ -43,8 +38,8 @@ export default function LessonWizard({
   const [step, setStep] = useState(1)
   const [type, setType] = useState<LessonType>('challenge')
   const [constructionPhase, setConstructionPhase] = useState<ConstructionPhase>(visiblePhases[0].value)
+  const [title, setTitle] = useState('')
   const [workType, setWorkType] = useState('')
-  const [buildingPart, setBuildingPart] = useState('')
   const [media, setMedia] = useState<File[]>([])
   const [description, setDescription] = useState('')
   const [tags, setTags] = useState<string[]>([])
@@ -62,12 +57,16 @@ export default function LessonWizard({
 
   function goNext() {
     setError('')
-    if (step === 2 && (!workType || !buildingPart)) {
-      setError('Välj en kategori i båda nivåerna för att fortsätta.')
+    if (step === 2 && !title.trim()) {
+      setError('Namnge lärdomen för att fortsätta.')
       return
     }
     if (step === 4 && !description.trim()) {
       setError('Skriv en kommentar för att fortsätta.')
+      return
+    }
+    if (step === 4 && !workType) {
+      setError('Välj vad som har gjorts för att fortsätta.')
       return
     }
     setStep(s => Math.min(TOTAL_STEPS, s + 1))
@@ -79,7 +78,6 @@ export default function LessonWizard({
   }
 
   async function handleFinish() {
-    const title = `${capitalize(workType)} – ${capitalize(buildingPart)}`
     const values = {
       type,
       construction_phase: constructionPhase,
@@ -87,7 +85,6 @@ export default function LessonWizard({
       description,
       tags,
       work_type: workType,
-      building_part: buildingPart,
       contact_phone: contactPhone,
       contact_email: contactEmail,
     }
@@ -108,11 +105,6 @@ export default function LessonWizard({
         .upsert({ company_id: companyId, kind: 'work_type', name: workType }, { onConflict: 'company_id,kind,name' })
         .select()
         .single()
-      const { data: buildingPartRow } = await supabase
-        .from('tags')
-        .upsert({ company_id: companyId, kind: 'building_part', name: buildingPart }, { onConflict: 'company_id,kind,name' })
-        .select()
-        .single()
 
       const { data: inserted, error: insertError } = await supabase
         .from('lessons')
@@ -123,7 +115,6 @@ export default function LessonWizard({
           title,
           description: description || null,
           work_type_id: workTypeRow?.id ?? null,
-          building_part_id: buildingPartRow?.id ?? null,
           contact_phone: contactPhone || null,
           contact_email: contactEmail || null,
           created_by: user.id,
@@ -225,29 +216,15 @@ export default function LessonWizard({
       )}
 
       {step === 2 && (
-        <div className="space-y-6">
-          <CategoryPicker
-            label="Vad har gjorts?"
-            kind="work_type"
-            companyId={companyId}
-            value={workType}
-            onChange={setWorkType}
-            presets={WORK_TYPES}
-            existing={existingWorkTypes}
-            addCustomLabel="Lägg till egen..."
+        <div className="space-y-3">
+          <label className="block text-sm font-medium">Namnge lärdomen</label>
+          <input
+            type="text"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="T.ex. Fuktskydd vid grundläggning"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {workType && (
-            <CategoryPicker
-              label="Vilken byggdel?"
-              kind="building_part"
-              companyId={companyId}
-              value={buildingPart}
-              onChange={setBuildingPart}
-              presets={BUILDING_PARTS}
-              existing={existingBuildingParts}
-              addCustomLabel="Lägg till egen..."
-            />
-          )}
         </div>
       )}
 
@@ -282,6 +259,16 @@ export default function LessonWizard({
             <TagWizard selected={tags} onAdd={addTag} />
           </div>
           <TagTree tags={tags} onRemove={removeTag} />
+          <CategoryPicker
+            label="Vad har gjorts?"
+            kind="work_type"
+            companyId={companyId}
+            value={workType}
+            onChange={setWorkType}
+            presets={WORK_TYPES}
+            existing={existingWorkTypes}
+            addCustomLabel="Lägg till egen..."
+          />
         </div>
       )}
 
