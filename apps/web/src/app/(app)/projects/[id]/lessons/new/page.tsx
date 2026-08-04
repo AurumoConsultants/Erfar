@@ -24,7 +24,6 @@ export default async function NewLessonPage({ params }: { params: Promise<{ id: 
         projectId={project.id}
         companyId={project.company_id}
         existingWorkTypes={byKind('work_type')}
-        existingBuildingParts={byKind('building_part')}
         allowedPhases={allowedPhasesForRole(profile?.role)}
       />
     </div>
