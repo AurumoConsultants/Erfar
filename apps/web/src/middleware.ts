@@ -1,28 +1,18 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-const GATE_COOKIE = 'erfar_gate'
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const isGateRoute = pathname === '/gate' || pathname.startsWith('/api/gate')
-  // The PWA manifest must stay reachable regardless of gate/login state —
-  // the browser fetches it independently to decide whether "Add to Home
+  // The PWA manifest must stay reachable regardless of login state — the
+  // browser fetches it independently to decide whether "Add to Home
   // Screen" is available, not as part of a normal page navigation.
   const isManifestRoute = pathname === '/manifest.webmanifest'
   // Machine-to-machine routes (Procere's integration) authenticate via
-  // their own shared secret, not the browser gate cookie — a real caller
-  // never has one, so the gate would 405 every legitimate request.
+  // their own shared secret, not a browser session.
   const isIntegrationRoute = pathname.startsWith('/api/integrations/')
 
-  if (isGateRoute || isManifestRoute || isIntegrationRoute) {
+  if (isManifestRoute || isIntegrationRoute) {
     return NextResponse.next()
-  }
-
-  if (request.cookies.get(GATE_COOKIE)?.value !== 'granted') {
-    const url = new URL('/gate', request.url)
-    url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
   }
 
   return await updateSession(request)
