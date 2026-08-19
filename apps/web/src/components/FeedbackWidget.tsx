@@ -4,6 +4,9 @@
 // the shared Aurumo CRM feedback pipeline (crm.aurumo.se) using the exact
 // same request contract as the sibling Procere/Reditus/Windowa widgets —
 // do not change the body shape or header name without updating all four.
+//
+// Requires NEXT_PUBLIC_FEEDBACK_API_KEY to be set at build time (Vercel
+// project env vars) — it's inlined into the client bundle.
 import { useState, type FormEvent } from 'react'
 import { buttonClassName } from '@/components/ui/Button'
 import { fieldInputClassName } from '@/components/ui/Field'
