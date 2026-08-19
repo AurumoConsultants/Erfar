@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
 import { ToastProvider } from '@/components/ui/Toast'
+import FeedbackWidget from '@/components/FeedbackWidget'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -24,6 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
+      <FeedbackWidget authorName={profile.full_name} authorEmail={profile.email} />
     </ToastProvider>
   )
 }

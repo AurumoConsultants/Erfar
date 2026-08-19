@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getAdminProfile } from '@/lib/admin/guard'
 import AdminNavbar from '@/components/AdminNavbar'
+import FeedbackWidget from '@/components/FeedbackWidget'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const profile = await getAdminProfile()
@@ -12,6 +13,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         {children}
       </main>
+      <FeedbackWidget authorName={profile.full_name} authorEmail={profile.email} />
     </div>
   )
 }
