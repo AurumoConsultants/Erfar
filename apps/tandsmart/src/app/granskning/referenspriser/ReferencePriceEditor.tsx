@@ -13,6 +13,7 @@ interface Row {
   price_general: number | null
   price_specialist: number | null
   valid_year: number
+  patient_note: string | null
 }
 
 const toNumber = (v: string) => (v.trim() === '' ? null : Number(v.replace(',', '.')))
@@ -20,7 +21,7 @@ const toNumber = (v: string) => (v.trim() === '' ? null : Number(v.replace(',', 
 export default function ReferencePriceEditor({ initial }: { initial: Row[] }) {
   const router = useRouter()
   const [filter, setFilter] = useState('')
-  const [draft, setDraft] = useState({ code: '', description: '', general: '', specialist: '' })
+  const [draft, setDraft] = useState({ code: '', description: '', general: '', specialist: '', note: '' })
   const [status, setStatus] = useState<string | null>(null)
 
   const shown = initial.filter(r => !filter || r.code.startsWith(filter) || r.description.toLowerCase().includes(filter.toLowerCase()))
@@ -45,10 +46,14 @@ export default function ReferencePriceEditor({ initial }: { initial: Row[] }) {
             onClick={() => upsert({
               code: draft.code, description: draft.description.trim(),
               price_general: toNumber(draft.general), price_specialist: toNumber(draft.specialist),
-              valid_year: new Date().getFullYear(),
-            }).then(() => setDraft({ code: '', description: '', general: '', specialist: '' }))}>
+              valid_year: initial.find(r => r.code === draft.code)?.valid_year ?? new Date().getFullYear(),
+              patient_note: draft.note.trim() || null,
+            }).then(() => setDraft({ code: '', description: '', general: '', specialist: '', note: '' }))}>
             Spara
           </Button>
+          <textarea rows={3} placeholder="Din förklaring för patienter (visas på /priser/kod). Valfritt — vad åtgärden innebär, när den behövs, vad man bör fråga om."
+            aria-label="Förklaring för patienter" value={draft.note} onChange={e => setDraft({ ...draft, note: e.target.value })}
+            className={fieldInputClassName('col-span-12')} />
         </div>
         {status && <p className="text-sm text-gray-600">{status}</p>}
       </Card>
@@ -68,9 +73,9 @@ export default function ReferencePriceEditor({ initial }: { initial: Row[] }) {
           <tbody>
             {shown.map(r => (
               <tr key={r.code} className="border-b border-gray-100 cursor-pointer hover:bg-gray-50"
-                onClick={() => setDraft({ code: r.code, description: r.description, general: r.price_general?.toString() ?? '', specialist: r.price_specialist?.toString() ?? '' })}>
+                onClick={() => setDraft({ code: r.code, description: r.description, general: r.price_general?.toString() ?? '', specialist: r.price_specialist?.toString() ?? '', note: r.patient_note ?? '' })}>
                 <td className="py-1.5 pr-3 font-mono">{r.code}</td>
-                <td className="py-1.5 pr-3">{r.description}</td>
+                <td className="py-1.5 pr-3">{r.description}{r.patient_note && <span className="ml-2 text-xs text-accent-700" title="Har förklaring">✎</span>}</td>
                 <td className="py-1.5 pr-3 text-right">{r.price_general ?? '—'}</td>
                 <td className="py-1.5 pr-3 text-right">{r.price_specialist ?? '—'}</td>
                 <td className="py-1.5 text-right text-gray-500">{r.valid_year}</td>

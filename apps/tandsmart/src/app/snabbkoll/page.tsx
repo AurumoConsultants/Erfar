@@ -4,7 +4,8 @@ import type { ReferencePrice } from '@/lib/pricing'
 
 export const metadata = { title: 'Snabbkoll av tandvårdspris — Tandsmart' }
 
-export default async function QuickCheckPage() {
+export default async function QuickCheckPage({ searchParams }: { searchParams: Promise<{ kod?: string }> }) {
+  const { kod } = await searchParams
   const supabase = await createClient()
   const { data } = await supabase
     .from('reference_prices')
@@ -20,7 +21,7 @@ export default async function QuickCheckPage() {
           TLV:s referenspriser och ungefär vad du betalar efter tandvårdsstödet. Inget konto behövs.
         </p>
       </div>
-      <QuickCheck references={(data ?? []) as ReferencePrice[]} />
+      <QuickCheck references={(data ?? []) as ReferencePrice[]} initialCode={kod?.replace(/\D/g, '').slice(0, 4) || undefined} />
     </div>
   )
 }

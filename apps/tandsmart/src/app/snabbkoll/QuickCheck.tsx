@@ -9,8 +9,11 @@ import QuoteItemsEditor, { emptyItem, toQuoteItems, type EditableItem } from '@/
 import PriceAnalysisView from '@/components/PriceAnalysisView'
 import { analyzeQuote, type ReferencePrice } from '@/lib/pricing'
 
-export default function QuickCheck({ references }: { references: ReferencePrice[] }) {
-  const [items, setItems] = useState<EditableItem[]>([emptyItem()])
+export default function QuickCheck({ references, initialCode }: { references: ReferencePrice[]; initialCode?: string }) {
+  const [items, setItems] = useState<EditableItem[]>(() => {
+    const ref = initialCode ? references.find(r => r.code === initialCode) : undefined
+    return [ref ? { ...emptyItem(), code: ref.code, description: ref.description } : emptyItem()]
+  })
   const [birthYear, setBirthYear] = useState('')
   const [priorCosts, setPriorCosts] = useState('')
   const [isSpecialist, setIsSpecialist] = useState(false)

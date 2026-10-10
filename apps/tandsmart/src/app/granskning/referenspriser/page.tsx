@@ -7,7 +7,7 @@ export default async function ReferencePricesPage() {
   const supabase = await createClient()
   const { data } = await supabase
     .from('reference_prices')
-    .select('code, description, price_general, price_specialist, valid_year')
+    .select('code, description, price_general, price_specialist, valid_year, patient_note')
     .order('code')
 
   return (
@@ -17,7 +17,7 @@ export default async function ReferencePricesPage() {
         <p className="text-sm text-gray-600 mt-1">
           TLV:s referenspriser som prisjämförelsen bygger på. Läs in hela årets lista med
           {' '}<code className="text-xs bg-gray-100 px-1 rounded">pnpm --filter tandsmart import-referenspriser &lt;fil.xlsx&gt;</code>
-          {' '}eller justera enskilda rader här.
+          {' '}eller justera enskilda rader här. Klicka på en rad för att redigera den och skriva en förklaring som visas för patienter på <a href="/priser" className="underline">prissidorna</a>.
         </p>
       </div>
       <ReferencePriceEditor initial={data ?? []} />

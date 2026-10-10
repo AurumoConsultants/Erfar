@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Pages anyone can open without logging in.
-const PUBLIC_PREFIXES = ['/auth', '/snabbkoll', '/integritet', '/api']
+const PUBLIC_PREFIXES = ['/auth', '/snabbkoll', '/priser', '/guider', '/integritet', '/api', '/sitemap.xml', '/robots.txt']
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })

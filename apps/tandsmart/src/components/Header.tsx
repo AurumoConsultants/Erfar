@@ -13,7 +13,8 @@ export default async function Header() {
             className="h-8 sm:h-9 w-auto" />
         </Link>
         <nav className="flex items-center gap-4 text-sm">
-          <Link href="/snabbkoll" className="text-gray-600 hover:text-gray-900">Snabbkoll av pris</Link>
+          <Link href="/priser" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Priser</Link>
+          <Link href="/snabbkoll" className="text-gray-600 hover:text-gray-900">Snabbkoll</Link>
           {profile?.role === 'tandlakare' && (
             <>
               <Link href="/granskning" className="text-gray-600 hover:text-gray-900">Granskning</Link>

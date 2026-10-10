@@ -3,6 +3,7 @@ import './globals.css'
 import Header from '@/components/Header'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://tandsmart.vercel.app'),
   title: 'Tandsmart — second opinion på din tandvård',
   description: 'Få ditt prisförslag, din vårdplan och din klinik granskade av en legitimerad tandläkare.',
 }
@@ -23,7 +24,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Tandsmart ger en rådgivande bedömning utifrån det underlag du skickar in. Den ersätter inte
               en undersökning på plats — vid akuta besvär, kontakta din klinik eller ring 1177.
             </p>
-            <p><a href="/integritet" className="underline">Integritet & personuppgifter</a></p>
+            <p className="flex flex-wrap gap-x-4 gap-y-1">
+              <a href="/priser" className="underline">Referenspriser</a>
+              <a href="/guider" className="underline">Prisguider</a>
+              <a href="/integritet" className="underline">Integritet & personuppgifter</a>
+            </p>
           </div>
         </footer>
       </body>
