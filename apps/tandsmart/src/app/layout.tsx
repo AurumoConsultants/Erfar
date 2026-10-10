@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { Lexend } from 'next/font/google'
 import Header from '@/components/Header'
+
+// Rounded geometric sans close to the logo's wordmark, for brand headings.
+const brand = Lexend({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-lexend', display: 'swap' })
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://tandsmart.vercel.app'),
@@ -14,7 +18,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sv">
+    <html lang="sv" className={brand.variable}>
       <body className="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">{children}</main>

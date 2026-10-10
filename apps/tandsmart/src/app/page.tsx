@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import { buttonClassName } from '@/components/ui/Button'
@@ -69,14 +70,37 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      <section>
-        <Card className="bg-accent-50 border-accent-200">
-          <h2 className="font-semibold text-lg">Om Sylvia</h2>
-          <p className="text-sm text-gray-700 mt-2">
-            Alla ärenden granskas personligen av Sylvia, legitimerad tandläkare. Tandsmart är oberoende —
-            vi tar inte provision från kliniker och säljer inga behandlingar.
+      <section className="overflow-hidden rounded-2xl border border-accent-200 bg-accent-50 grid grid-cols-1 md:grid-cols-5">
+        <div className="md:col-span-3 p-6 sm:p-10 flex flex-col justify-center space-y-5">
+          <p className="font-brand font-semibold text-accent-600 uppercase tracking-wider text-sm">Om Sylvia</p>
+          <h2 className="font-brand font-bold text-brand-navy text-3xl sm:text-4xl leading-tight">
+            En tandläkare på din sida — inte på klinikens.
+          </h2>
+          <p className="text-lg text-gray-700">
+            Bakom varje svar står Sylvia, legitimerad tandläkare. Hon läser ditt prisförslag, din vårdplan och
+            ditt underlag personligen och säger rakt ut vad hon tycker — som hon hade gjort till en vän.
           </p>
-        </Card>
+          <ul className="space-y-2 font-brand font-semibold text-brand-navy">
+            {[
+              'Varje ärende granskas personligen av en legitimerad tandläkare',
+              'Helt oberoende — ingen provision från kliniker, inga behandlingar att sälja',
+              'Ett skriftligt svar du kan ta med dig till din klinik',
+            ].map(point => (
+              <li key={point} className="flex gap-3">
+                <span aria-hidden className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-600 text-white text-sm">✓</span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col sm:flex-row gap-3 pt-1">
+            <Link href={startHref} className={buttonClassName('primary')}>Låt Sylvia granska ditt förslag</Link>
+            <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white')}>Gör en gratis snabbkoll</Link>
+          </div>
+        </div>
+        <div className="md:col-span-2 relative min-h-80 md:min-h-full order-first md:order-last">
+          <Image src="/sylvia.webp" alt="Sylvia, legitimerad tandläkare" fill priority={false}
+            sizes="(min-width: 768px) 40vw, 100vw" className="object-cover object-top" />
+        </div>
       </section>
     </div>
   )

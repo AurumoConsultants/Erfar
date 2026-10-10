@@ -16,4 +16,8 @@
   --color-accent-700: #1f625e;
   --color-accent-800: #1d4f4c;
   --color-accent-900: #1b4240;
+
+  /* Navy of the logo wordmark, and its typeface (set in layout.tsx). */
+  --color-brand-navy: #083865;
+  --font-brand: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
 }
