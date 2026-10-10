@@ -21,3 +21,12 @@
   --color-brand-navy: #083865;
   --font-brand: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Headings use the logo's typeface and navy everywhere; a utility class
+   (e.g. text-white on dark bands) still overrides the colour. */
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-brand);
+    color: var(--color-brand-navy);
+  }
+}

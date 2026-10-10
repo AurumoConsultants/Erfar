@@ -6,6 +6,7 @@ import Badge from '@/components/ui/Badge'
 import { requireDentist } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { SERVICE_LABELS, STATUS_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
+import PageHeader from '@/components/ui/PageHeader'
 
 const TABS: CaseStatus[] = ['inskickat', 'under_granskning', 'komplettering', 'besvarat', 'avslutat']
 
@@ -34,12 +35,24 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Granskning</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {showAll ? `${cases.length} ärenden totalt, nyast först.` : `${open.length} öppna ärenden, äldst först.`} Klicka på ett ärende för att öppna det.
-        </p>
-      </div>
+      <PageHeader icon="inbox" eyebrow="Tandläkarvy" title="Granskning"
+        actions={<Link href="/granskning/referenspriser" className={buttonClassName('secondary', 'bg-white')}>Referenspriser</Link>}>
+        {showAll ? `${cases.length} ärenden totalt, nyast först.` : `${open.length} öppna ärenden, äldst först.`} Klicka på ett ärende för att öppna det.
+      </PageHeader>
+
+      <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {([
+          ['Nya', cases.filter(c => c.status === 'inskickat').length, 'bg-accent-600 text-white'],
+          ['Under granskning', cases.filter(c => c.status === 'under_granskning').length, 'bg-white'],
+          ['Väntar på patient', cases.filter(c => c.status === 'komplettering').length, 'bg-white'],
+          ['Över 3 dagar', open.filter(c => Date.now() - new Date(c.created_at).getTime() >= 3 * 86_400_000).length, 'bg-white'],
+        ] as const).map(([label, count, tone]) => (
+          <div key={label} className={`rounded-2xl border border-gray-200 shadow-sm p-4 ${tone}`}>
+            <dt className={`text-xs font-medium ${tone.includes('text-white') ? 'text-white/80' : 'text-gray-500'}`}>{label}</dt>
+            <dd className={`font-brand font-bold text-3xl mt-1 ${tone.includes('text-white') ? '' : 'text-brand-navy'}`}>{count}</dd>
+          </div>
+        ))}
+      </dl>
 
       <nav className="flex gap-2 flex-wrap text-sm">
         <Link href="/granskning" className={tabClass(!status && !showAll)}>
@@ -60,9 +73,9 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
           const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / 86_400_000)
           return (
             <Link key={c.id} href={`/granskning/${c.id}`} className="block">
-              <Card className="px-4 py-3 hover:border-accent-300 hover:shadow-sm transition flex items-center justify-between gap-3">
+              <Card className={`px-4 py-3 border-l-4 ${days >= 3 && (c.status === 'inskickat' || c.status === 'under_granskning') ? 'border-l-red-500' : 'border-l-accent-500'} hover:border-accent-300 hover:shadow-md transition flex items-center justify-between gap-3`}>
                 <div className="min-w-0">
-                  <p className="font-medium">{c.title}</p>
+                  <p className="font-brand font-semibold text-brand-navy">{c.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {c.patient?.full_name} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
                     {c.clinic_name && ` — ${c.clinic_name}`}

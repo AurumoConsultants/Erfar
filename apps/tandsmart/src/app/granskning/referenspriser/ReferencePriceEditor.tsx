@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import { fieldInputClassName } from '@/components/ui/Field'
+import CardTitle from '@/components/ui/CardTitle'
 
 interface Row {
   code: string
@@ -36,7 +37,7 @@ export default function ReferencePriceEditor({ initial }: { initial: Row[] }) {
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <h2 className="font-semibold">Lägg till eller ändra kod</h2>
+        <CardTitle icon="pencil">Lägg till eller ändra kod</CardTitle>
         <div className="grid grid-cols-12 gap-2">
           <input placeholder="Kod" aria-label="Kod" value={draft.code} onChange={e => setDraft({ ...draft, code: e.target.value.trim() })} className={fieldInputClassName('col-span-3 sm:col-span-2')} />
           <input placeholder="Beskrivning" aria-label="Beskrivning" value={draft.description} onChange={e => setDraft({ ...draft, description: e.target.value })} className={fieldInputClassName('col-span-9 sm:col-span-5')} />

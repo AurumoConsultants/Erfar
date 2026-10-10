@@ -13,6 +13,8 @@ import ReviewWorkspace from './ReviewWorkspace'
 import ClinicReviewForm from './ClinicReviewForm'
 import RequestComplement from './RequestComplement'
 import ClinicRequestList from '@/components/ClinicRequestList'
+import CardTitle from '@/components/ui/CardTitle'
+import PageHeader from '@/components/ui/PageHeader'
 
 export default async function ReviewCasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -27,20 +29,14 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-2xl font-bold">{c.title}</h1>
-          <StatusBadge status={c.status} />
-        </div>
-        <p className="text-sm text-gray-500 mt-1">
-          {patient?.full_name}{age != null && `, ${age} år`} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
-          {' · '}Inkom {new Date(c.created_at).toLocaleDateString('sv-SE')}
-        </p>
-      </div>
+      <PageHeader icon="clipboard" eyebrow="Granskning" title={c.title} badge={<StatusBadge status={c.status} />}>
+        {patient?.full_name}{age != null && `, ${age} år`} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
+        {' · '}Inkom {new Date(c.created_at).toLocaleDateString('sv-SE')}
+      </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="space-y-3">
-          <h2 className="font-semibold">Patientens underlag</h2>
+          <CardTitle icon="folder">Patientens underlag</CardTitle>
           <dl className="text-sm grid grid-cols-3 gap-x-3 gap-y-1">
             <dt className="text-gray-500">Klinik</dt>
             <dd className="col-span-2">{c.clinic_name ?? '—'}{c.clinic_city && `, ${c.clinic_city}`}{c.is_specialist && ' (specialist)'}</dd>
@@ -60,7 +56,7 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
           )}
         </Card>
         <Card>
-          <h2 className="font-semibold mb-3">Prisjämförelse</h2>
+          <CardTitle icon="chart" className="mb-4">Prisjämförelse</CardTitle>
           <PriceAnalysisView analysis={analysis} />
         </Card>
       </div>
@@ -87,11 +83,11 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
 
       {c.services.includes('klinik') || orgNumber ? (
         <Card className="space-y-4">
-          <h2 className="font-semibold">Klinikkoll</h2>
+          <CardTitle icon="building">Klinikkoll</CardTitle>
           <div className="flex flex-wrap gap-2 text-sm">
             {clinicSourceLinks(c.clinic_name, orgNumber).map(link => (
               <a key={link.href} href={link.href} target="_blank" rel="noreferrer"
-                className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200">{link.label} ↗</a>
+                className="px-3 py-1.5 rounded-full bg-accent-50 border border-accent-200 text-accent-800 hover:bg-accent-100">{link.label} ↗</a>
             ))}
           </div>
           {orgNumber ? (
@@ -103,7 +99,7 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
       ) : null}
 
       <Card>
-        <h2 className="font-semibold mb-3">Meddelanden med patienten</h2>
+        <CardTitle icon="chat" className="mb-4">Meddelanden med patienten</CardTitle>
         <CaseMessages caseId={c.id} viewerId={dentist.id} messages={messages} />
       </Card>
     </div>

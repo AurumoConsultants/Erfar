@@ -6,6 +6,7 @@ import StatusBadge from '@/components/StatusBadge'
 import { requireProfile } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { SERVICE_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
+import PageHeader from '@/components/ui/PageHeader'
 
 export default async function MyCasesPage() {
   const profile = await requireProfile()
@@ -20,20 +21,17 @@ export default async function MyCasesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Mina ärenden</h1>
-          <p className="text-gray-500 text-sm mt-1">Hej {profile.full_name}</p>
-        </div>
-        <Link href="/arenden/nytt" className={buttonClassName('primary')}>Nytt ärende</Link>
-      </div>
+      <PageHeader icon="folder" eyebrow={`Hej ${profile.full_name}`} title="Mina ärenden"
+        actions={<Link href="/arenden/nytt" className={buttonClassName('primary')}>+ Nytt ärende</Link>}>
+        Följ dina ärenden och läs tandläkarens bedömningar.
+      </PageHeader>
 
       <div className="space-y-2">
         {(cases ?? []).map(c => (
           <Link key={c.id} href={`/arenden/${c.id}`} className="block">
-            <Card className="px-4 py-3 hover:border-accent-300 transition flex items-center justify-between gap-3">
+            <Card className="px-4 py-3 border-l-4 border-l-accent-500 hover:border-accent-300 hover:shadow-md transition flex items-center justify-between gap-3">
               <div>
-                <p className="font-medium">{c.title}</p>
+                <p className="font-brand font-semibold text-brand-navy">{c.title}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {(c.services as CaseService[]).map(s => SERVICE_LABELS[s]).join(' · ')}
                   {c.clinic_name && ` — ${c.clinic_name}`}

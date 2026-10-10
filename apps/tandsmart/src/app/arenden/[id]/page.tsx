@@ -11,12 +11,14 @@ import { loadCase } from '@/lib/caseData'
 import { SERVICE_LABELS, VERDICT_LABELS } from '@/lib/cases'
 import ComplementForm from './ComplementForm'
 import ClinicRequestPanel from './ClinicRequestPanel'
+import CardTitle from '@/components/ui/CardTitle'
+import PageHeader from '@/components/ui/PageHeader'
 
 function ReviewSection({ title, text }: { title: string; text: string | null }) {
   if (!text) return null
   return (
     <div>
-      <h3 className="font-semibold text-sm">{title}</h3>
+      <h3 className="font-semibold">{title}</h3>
       <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{text}</p>
     </div>
   )
@@ -41,16 +43,10 @@ export default async function CasePage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-2xl font-bold">{c.title}</h1>
-          <StatusBadge status={c.status} />
-        </div>
-        <p className="text-sm text-gray-500 mt-1">
-          {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
-          {c.clinic_name && ` — ${c.clinic_name}`} · Skapat {new Date(c.created_at).toLocaleDateString('sv-SE')}
-        </p>
-      </div>
+      <PageHeader icon="clipboard" eyebrow="Ditt ärende" title={c.title} badge={<StatusBadge status={c.status} />}>
+        {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
+        {c.clinic_name && ` — ${c.clinic_name}`} · Skapat {new Date(c.created_at).toLocaleDateString('sv-SE')}
+      </PageHeader>
 
       {uppladdning === 'misslyckades' && (
         <Card className="border-amber-300 bg-amber-50 text-sm">
@@ -61,9 +57,9 @@ export default async function CasePage({
       {c.status === 'komplettering' && c.info_request ? (
         <ComplementForm caseId={c.id} patientId={profile.id} request={c.info_request} requestedAt={c.info_requested_at} />
       ) : answered ? (
-        <Card className="space-y-4 border-accent-300">
+        <Card className="space-y-4 border-accent-300 border-t-4 border-t-accent-500">
           <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="font-semibold text-lg">Tandläkarens bedömning</h2>
+            <CardTitle icon="doctor">Tandläkarens bedömning</CardTitle>
             {c.review_verdict && (
               <Badge tone={VERDICT_LABELS[c.review_verdict].tone}>{VERDICT_LABELS[c.review_verdict].label}</Badge>
             )}
@@ -94,14 +90,14 @@ export default async function CasePage({
 
       {analysis.lines.length > 0 && (
         <Card>
-          <h2 className="font-semibold mb-3">Automatisk prisjämförelse</h2>
+          <CardTitle icon="chart" className="mb-4">Automatisk prisjämförelse</CardTitle>
           <PriceAnalysisView analysis={analysis} />
         </Card>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="space-y-3">
-          <h2 className="font-semibold">Ditt underlag</h2>
+          <CardTitle icon="folder">Ditt underlag</CardTitle>
           {c.patient_description && <p className="text-sm whitespace-pre-wrap">{c.patient_description}</p>}
           {c.patient_questions && (
             <p className="text-sm whitespace-pre-wrap"><span className="font-medium">Dina frågor: </span>{c.patient_questions}</p>
@@ -109,7 +105,7 @@ export default async function CasePage({
           <CaseFilesList files={files} />
         </Card>
         <Card>
-          <h2 className="font-semibold mb-3">Meddelanden</h2>
+          <CardTitle icon="chat" className="mb-4">Meddelanden</CardTitle>
           <CaseMessages caseId={c.id} viewerId={profile.id} messages={messages} />
         </Card>
       </div>

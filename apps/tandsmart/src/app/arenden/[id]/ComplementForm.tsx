@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card'
 import Field, { fieldInputClassName } from '@/components/ui/Field'
 import CaseFilePicker from '@/components/CaseFilePicker'
 import { uploadCaseFiles, type PendingCaseFile } from '@/lib/uploadCaseFiles'
+import CardTitle from '@/components/ui/CardTitle'
 
 interface Props {
   caseId: string
@@ -55,7 +56,7 @@ export default function ComplementForm({ caseId, patientId, request, requestedAt
   return (
     <Card className="border-accent-300 bg-accent-50 space-y-4">
       <div>
-        <h2 className="font-semibold text-lg">Tandläkaren behöver mer underlag</h2>
+        <CardTitle icon="upload">Tandläkaren behöver mer underlag</CardTitle>
         {requestedAt && (
           <p className="text-xs text-gray-500">Begärt {new Date(requestedAt).toLocaleDateString('sv-SE')}</p>
         )}

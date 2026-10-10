@@ -20,6 +20,16 @@ interface Props {
   references: ReferencePrice[]
 }
 
+// Numbered step heading in the brand style.
+function StepTitle({ n, children }: { n: number; children: React.ReactNode }) {
+  return (
+    <h2 className="flex items-center gap-3 text-lg font-bold">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-600 text-white text-sm">{n}</span>
+      <span>{children}</span>
+    </h2>
+  )
+}
+
 export default function NewCaseForm({ userId, birthYear, references }: Props) {
   const router = useRouter()
   const [services, setServices] = useState<CaseService[]>(['pris', 'vardplan'])
@@ -111,7 +121,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <Card className="space-y-4">
-        <h2 className="font-semibold">1. Vad vill du ha hjälp med?</h2>
+        <StepTitle n={1}>Vad vill du ha hjälp med?</StepTitle>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {SERVICES.map(s => (
             <label key={s.value}
@@ -139,7 +149,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
       </Card>
 
       <Card className="space-y-4">
-        <h2 className="font-semibold">2. Kliniken</h2>
+        <StepTitle n={2}>Kliniken</StepTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Klinikens namn" htmlFor="cn">
             <input id="cn" value={clinicName} onChange={e => setClinicName(e.target.value)} className={fieldInputClassName()} />
@@ -162,7 +172,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
       </Card>
 
       <Card className="space-y-4">
-        <h2 className="font-semibold">3. Underlag</h2>
+        <StepTitle n={3}>Underlag</StepTitle>
         <CaseFilePicker files={files} onChange={setFiles} onError={setError}
           defaultKind={file => (file.type === 'application/pdf' ? 'prisforslag' : 'foto')}
           hint="PDF eller bild, max 20 MB per fil. Fota gärna kostnadsförslaget med mobilen." />
@@ -170,7 +180,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
 
       <Card className="space-y-4">
         <div>
-          <h2 className="font-semibold">4. Åtgärder och priser <span className="font-normal text-gray-400">(valfritt men rekommenderat)</span></h2>
+          <StepTitle n={4}>Åtgärder och priser <span className="font-sans text-sm font-normal text-gray-400">(valfritt men rekommenderat)</span></StepTitle>
           <p className="text-sm text-gray-500 mt-1">Skriv av åtgärdskoderna från kostnadsförslaget så får du en direkt jämförelse.</p>
         </div>
         <QuoteItemsEditor items={items} onChange={setItems} references={references} />

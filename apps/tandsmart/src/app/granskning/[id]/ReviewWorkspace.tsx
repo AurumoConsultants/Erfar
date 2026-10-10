@@ -9,6 +9,7 @@ import Card from '@/components/ui/Card'
 import Field, { fieldInputClassName } from '@/components/ui/Field'
 import { VERDICT_LABELS, type CaseStatus, type CaseVerdict } from '@/lib/cases'
 import type { AiDraft } from '@/lib/ai/draftSchema'
+import CardTitle from '@/components/ui/CardTitle'
 
 interface ReviewFields {
   verdict: CaseVerdict | ''
@@ -130,7 +131,7 @@ export default function ReviewWorkspace({ caseId, status, hasItems, aiEnabled, i
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="space-y-4 bg-gray-50">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-semibold">AI-föranalys <span className="text-xs font-normal text-gray-500">— syns bara för dig</span></h2>
+          <CardTitle icon="sparkles">AI-föranalys <span className="font-sans text-xs font-normal text-gray-500">— syns bara för dig</span></CardTitle>
           {aiEnabled && (
             <Button variant="secondary" onClick={runAi} disabled={busy !== null}>
               {busy === 'ai' ? 'Analyserar…' : draft ? 'Kör om' : 'Analysera underlaget'}
@@ -187,7 +188,7 @@ export default function ReviewWorkspace({ caseId, status, hasItems, aiEnabled, i
       </Card>
 
       <Card className="space-y-4">
-        <h2 className="font-semibold">Din bedömning</h2>
+        <CardTitle icon="pencil">Din bedömning</CardTitle>
         <Field label="Omdöme" htmlFor="verdict">
           <select id="verdict" value={review.verdict} onChange={e => set('verdict', e.target.value as CaseVerdict | '')}
             className={fieldInputClassName()}>

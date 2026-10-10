@@ -19,7 +19,7 @@ export default function PriceAnalysisView({ analysis }: { analysis: QuoteAnalysi
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-gray-500 border-b-2 border-accent-200">
               <th className="py-2 pr-3 font-medium">Åtgärd</th>
               <th className="py-2 pr-3 font-medium text-right">Pris</th>
               <th className="py-2 pr-3 font-medium text-right">Referenspris</th>
@@ -51,21 +51,21 @@ export default function PriceAnalysisView({ analysis }: { analysis: QuoteAnalysi
       </div>
 
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-        <div className="bg-gray-50 rounded-lg p-3">
+        <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
           <dt className="text-gray-500">Totalt enligt förslaget</dt>
-          <dd className="font-semibold text-lg">{formatKr(analysis.total)}</dd>
+          <dd className="font-brand font-bold text-xl text-brand-navy">{formatKr(analysis.total)}</dd>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
+        <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
           <dt className="text-gray-500">Över referenspris</dt>
-          <dd className="font-semibold text-lg">{formatKr(analysis.aboveReferenceTotal)}</dd>
+          <dd className="font-brand font-bold text-xl text-brand-navy">{formatKr(analysis.aboveReferenceTotal)}</dd>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
+        <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
           <dt className="text-gray-500">Uppskattat tandvårdsstöd</dt>
-          <dd className="font-semibold text-lg">{formatKr(analysis.estimatedSubsidy)}</dd>
+          <dd className="font-brand font-bold text-xl text-brand-navy">{formatKr(analysis.estimatedSubsidy)}</dd>
         </div>
-        <div className="bg-accent-50 rounded-lg p-3">
-          <dt className="text-gray-600">Du betalar ca</dt>
-          <dd className="font-semibold text-lg text-accent-800">{formatKr(analysis.estimatedPatientCost)}</dd>
+        <div className="bg-accent-600 text-white rounded-xl p-3 shadow-md shadow-accent-600/20">
+          <dt className="text-white/80">Du betalar ca</dt>
+          <dd className="font-brand font-bold text-xl">{formatKr(analysis.estimatedPatientCost)}</dd>
         </div>
       </dl>
 

@@ -8,6 +8,7 @@ import Field, { fieldInputClassName } from '@/components/ui/Field'
 import ClinicRequestList from '@/components/ClinicRequestList'
 import type { ClinicRequestRow } from '@/lib/caseData'
 import { formatPersonnummerInput, normalizePersonnummer } from '@/lib/clinicRequest'
+import CardTitle from '@/components/ui/CardTitle'
 
 const ITEMS = [
   { value: 'journal', label: 'Journalanteckningar' },
@@ -79,7 +80,7 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
   return (
     <Card className="space-y-4">
       <div>
-        <h2 className="font-semibold">Låt kliniken skicka journal och röntgen</h2>
+        <CardTitle icon="building">Låt kliniken skicka journal och röntgen</CardTitle>
         <p className="text-sm text-gray-600 mt-1">
           Slipp begära ut journalen själv: ge ditt samtycke så får kliniken en säker länk där de laddar upp underlaget
           direkt till ditt ärende.
