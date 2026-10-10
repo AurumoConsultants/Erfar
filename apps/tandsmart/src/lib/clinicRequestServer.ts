@@ -24,6 +24,8 @@ export interface ActiveClinicRequest {
   expires_at: string
   status: string
   uploaded_files: number
+  bankid_verified_at: string | null
+  bankid_name: string | null
   patient_id: string
 }
 
@@ -34,7 +36,7 @@ export async function findActiveClinicRequest(token: string): Promise<ActiveClin
   const admin = createAdminClient()
   const { data } = await admin
     .from('clinic_requests')
-    .select('id, case_id, clinic_name, patient_name, patient_personnummer, requested_items, period, consent_text, consented_at, expires_at, status, uploaded_files, case:cases(patient_id, status)')
+    .select('id, case_id, clinic_name, patient_name, patient_personnummer, requested_items, period, consent_text, consented_at, expires_at, status, uploaded_files, bankid_verified_at, bankid_name, case:cases(patient_id, status)')
     .eq('token_hash', hashToken(token))
     .maybeSingle()
   if (!data) return null

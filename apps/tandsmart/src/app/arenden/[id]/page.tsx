@@ -106,7 +106,7 @@ export default async function CasePage({
       )}
 
       <ClinicRequestPanel caseId={c.id} defaultClinicName={c.clinic_name ?? ''} requests={clinicRequests}
-        canRequest={!answered} verifiedPersonnummer={identity?.personnummer ?? null} />
+        canRequest={!answered} verifiedPersonnummer={bankIdSession ? identity?.personnummer ?? null : null} />
 
       {analysis.lines.length > 0 && (
         <Card>

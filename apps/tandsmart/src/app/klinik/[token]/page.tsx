@@ -36,6 +36,25 @@ export default async function ClinicUploadPage({ params }: { params: Promise<{ t
         </p>
       </div>
 
+      {request.bankid_verified_at ? (
+        <Card className="flex gap-3 items-start border-green-300 bg-green-50">
+          <span aria-hidden className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">✓</span>
+          <div className="text-sm">
+            <p className="font-semibold text-green-900">Patienten har legitimerat sig med BankID</p>
+            <p className="text-green-900/80">
+              {request.bankid_name ?? request.patient_name}, {request.patient_personnummer}. Legitimerad{' '}
+              {new Date(request.bankid_verified_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Stockholm' })}.
+              Namn och personnummer kommer från BankID och kan inte ändras av patienten.
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <Card className="text-sm border-amber-300 bg-amber-50">
+          Den här begäran skapades innan Tandsmart krävde BankID. Patientens identitet är inte verifierad med BankID —
+          kontrollera den enligt era rutiner innan ni lämnar ut uppgifter.
+        </Card>
+      )}
+
       <Card className="space-y-3">
         <h2 className="font-semibold">Patient</h2>
         <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-sm">
@@ -51,8 +70,8 @@ export default async function ClinicUploadPage({ params }: { params: Promise<{ t
         <h2 className="font-semibold">Patientens samtycke</h2>
         <blockquote className="text-sm border-l-4 border-accent-300 pl-3 italic">{request.consent_text}</blockquote>
         <p className="text-xs text-gray-500">
-          Lämnat {new Date(request.consented_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' })} av patienten,
-          inloggad i Tandsmart. Samtycket bryter tystnadsplikten för just dessa uppgifter till Tandsmart. Bedöm själva om
+          Lämnat {new Date(request.consented_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Stockholm' })} av patienten,
+          {request.bankid_verified_at ? ' legitimerad med BankID.' : ' inloggad i Tandsmart.'} Samtycket bryter tystnadsplikten för just dessa uppgifter till Tandsmart. Bedöm själva om
           underlaget räcker för er dokumentation av utlämnandet, och journalför utlämnandet enligt era rutiner.
         </p>
       </Card>

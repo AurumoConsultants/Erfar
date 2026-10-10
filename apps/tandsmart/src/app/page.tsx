@@ -128,7 +128,7 @@ export default async function HomePage() {
       </section>
 
       <section className="relative mt-24 rounded-2xl border border-accent-200 bg-accent-50 grid grid-cols-1 md:grid-cols-5">
-        <div className="relative z-10 md:col-span-3 p-6 sm:p-10 md:pr-24 flex flex-col justify-center space-y-5">
+        <div className="relative z-10 md:col-span-3 p-6 sm:p-10 md:pr-10 lg:pr-24 flex flex-col justify-center space-y-5">
           <p className="font-brand font-semibold text-accent-600 uppercase tracking-wider text-sm">Om Doktor Sylvia</p>
           <h2 className="font-brand font-bold text-brand-navy text-3xl sm:text-4xl leading-tight">
             En tandläkare på din sida — inte på klinikens.
@@ -154,16 +154,17 @@ export default async function HomePage() {
             <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white')}>Gör en gratis snabbkoll</Link>
           </div>
         </div>
-        <div className="md:col-span-2 relative z-20 aspect-[800/920] md:aspect-auto md:min-h-full order-first md:order-last">
+        <div className="md:col-span-2 relative z-20 aspect-[800/920] sm:aspect-[5/4] md:aspect-auto md:min-h-full order-first md:order-last">
           <div aria-hidden className="absolute inset-0 overflow-hidden rounded-t-2xl md:rounded-none md:rounded-r-2xl bg-gradient-to-br from-accent-100 via-accent-200 to-accent-400">
             <div className="absolute -right-10 top-10 h-64 w-64 rounded-full bg-white/40 blur-2xl" />
           </div>
-          {/* Cut-out portrait (transparent background) taller than its panel so the head rises
-              above the box. On mobile it spans the panel's exact width; on desktop it is anchored
-              to the right edge and the pointing arm reaches over the text column's background. */}
+          {/* Cut-out portrait (transparent background). Phones: spans the panel's exact width and
+              the head rises above the box. Large phones and tablets: fills its panel exactly, so it
+              never covers the text. Desktop: taller than the panel, anchored right, with the
+              pointing arm reaching over the text column's background. */}
           <Image src="/sylvia.webp" alt="Doktor Sylvia, legitimerad tandläkare" width={800} height={1071}
-            sizes="(min-width: 768px) 420px, 340px"
-            className="absolute bottom-0 left-0 w-full h-auto md:left-auto md:right-0 md:h-[118%] md:w-auto md:max-w-none" />
+            sizes="(min-width: 1024px) 420px, (min-width: 640px) 600px, 340px"
+            className="absolute bottom-0 left-0 w-full h-auto sm:h-full sm:object-cover sm:object-[50%_20%] sm:rounded-t-2xl md:rounded-none md:rounded-r-2xl lg:rounded-none lg:object-contain lg:left-auto lg:right-0 lg:h-[118%] lg:w-auto lg:max-w-none" />
         </div>
       </section>
     </div>
