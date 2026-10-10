@@ -2,7 +2,7 @@
 -- TANDSMART — Initial Schema
 -- Second-opinion service for dental cost estimates (prisförslag),
 -- treatment plans (vårdplaner) and clinics, reviewed by a licensed
--- dentist. Runs in its OWN Supabase project (EU region) — never in
+-- dentist. Runs in its OWN Supabase project (eu-north-1, Stockholm) — never in
 -- Erfar's database: this one holds health data (känsliga
 -- personuppgifter, GDPR art. 9).
 -- ============================================================

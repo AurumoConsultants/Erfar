@@ -9,9 +9,10 @@ tandläkare) personally reviews the case — price, treatment plan and clinic
 It lives in this monorepo for convenience but shares **nothing** with Erfar at
 runtime: own Supabase project, own deploy, own env.
 
-## 1. Supabase (separate project, EU region)
+## 1. Supabase (separate project, Stockholm region)
 
-1. Create a new Supabase project, region **West EU / Stockholm** — this app stores health data.
+1. Create a new Supabase project, region **North EU (Stockholm), `eu-north-1`** — this app stores
+   health data, and the Vercel functions run in Stockholm (`arn1`) too, so data stays in Sweden.
 2. SQL Editor → run `apps/tandsmart/supabase/migrations/00001_tandsmart_schema.sql`.
    It creates tables, RLS, the private `case-files` storage bucket and a verified
    subset of 2026 referenspriser.
@@ -30,7 +31,15 @@ pnpm --filter tandsmart dev          # http://localhost:3040
 pnpm --filter tandsmart test         # pricing / tandvårdsstöd unit tests
 ```
 
-## 4. First-time data
+## 4. Deploy (Vercel)
+
+The Vercel project `tandsmart` (team Aurumo Consultants) builds this app from the same repo:
+root directory `apps/tandsmart`, function region **Stockholm (`arn1`)**, unaffected-project builds
+skipped, so Erfar and Tandsmart only rebuild when their own code changes. Add the variables from
+`.env.example` under Settings → Environment Variables before the first production deploy —
+`NEXT_PUBLIC_*` values are inlined at build time.
+
+## 5. First-time data
 
 ```bash
 # Sylvia's reviewer account
@@ -42,7 +51,7 @@ pnpm --filter tandsmart import-referenspriser ~/Downloads/referenspriser-2026.xl
 
 Re-import every January when TLV publishes the new list.
 
-## 5. How it works
+## 6. How it works
 
 | Who | Where | What |
 |---|---|---|
@@ -65,7 +74,7 @@ Re-import every January when TLV publishes the new list.
 - **Security**: RLS everywhere; triggers stop patients editing review fields, editing a case after
   review has started, or promoting themselves; every case view is written to `case_access_log`.
 
-## 6. Before launch — not code, but required
+## 7. Before launch — not code, but required
 
 - **Vårdgivare**: giving second opinions as leg. tandläkare is hälso- och sjukvård → register the
   business in IVO's vårdgivarregister, take out patientförsäkring, and keep journals under
