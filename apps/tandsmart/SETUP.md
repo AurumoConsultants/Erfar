@@ -11,12 +11,17 @@ runtime: own Supabase project, own deploy, own env.
 
 ## 1. Supabase (separate project, Stockholm region)
 
+The production project is **Tandsmart** (`nqveapbflmirytibdlis`, org Aurumo Consultants AB,
+`eu-north-1`), already migrated and wired to Vercel. To set up another one (e.g. staging):
+
 1. Create a new Supabase project, region **North EU (Stockholm), `eu-north-1`** — this app stores
    health data, and the Vercel functions run in Stockholm (`arn1`) too, so data stays in Sweden.
-2. SQL Editor → run `apps/tandsmart/supabase/migrations/00001_tandsmart_schema.sql`.
-   It creates tables, RLS, the private `case-files` storage bucket and a verified
-   subset of 2026 referenspriser.
-3. Auth → URL configuration: set the site URL to the deployed domain.
+2. SQL Editor → run every file in `apps/tandsmart/supabase/migrations/` in order. `00001` creates
+   tables, RLS, the private `case-files` storage bucket and a verified subset of 2026
+   referenspriser; `00002` hardens and consolidates the RLS policies per Supabase's advisors.
+3. Auth → URL configuration: set the site URL to the deployed domain and add redirect URLs for
+   Vercel previews (`https://tandsmart-*-aurumoconsultants.vercel.app/**`) and local dev
+   (`http://localhost:3040/**`).
 
 ## 2. Environment
 
@@ -35,9 +40,10 @@ pnpm --filter tandsmart test         # pricing / tandvårdsstöd unit tests
 
 The Vercel project `tandsmart` (team Aurumo Consultants) builds this app from the same repo:
 root directory `apps/tandsmart`, function region **Stockholm (`arn1`)**, unaffected-project builds
-skipped, so Erfar and Tandsmart only rebuild when their own code changes. Add the variables from
-`.env.example` under Settings → Environment Variables before the first production deploy —
-`NEXT_PUBLIC_*` values are inlined at build time.
+skipped, so Erfar and Tandsmart only rebuild when their own code changes. The Supabase URL and
+keys and `NEXT_PUBLIC_APP_URL` are already set there; add the optional variables from
+`.env.example` under Settings → Environment Variables and redeploy — `NEXT_PUBLIC_*` values are
+inlined at build time.
 
 ## 5. First-time data
 
