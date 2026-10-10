@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getProfile } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import HideOnClinicLink from '@/components/HideOnClinicLink'
 
 export default async function Header() {
   const profile = await getProfile()
@@ -20,6 +21,7 @@ export default async function Header() {
           <Image src="/tandsmart-logo.png" alt="Tandsmart" width={1284} height={332} priority
             className="h-8 sm:h-9 w-auto" />
         </Link>
+        <HideOnClinicLink>
         <nav className="flex items-center gap-4 text-sm font-brand font-semibold">
           <Link href="/priser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Priser</Link>
           {profile?.role !== 'tandlakare' && (
@@ -51,6 +53,7 @@ export default async function Header() {
             <Link href="/auth/login" className="font-semibold text-accent-700">Logga in</Link>
           )}
         </nav>
+        </HideOnClinicLink>
       </div>
     </header>
   )
