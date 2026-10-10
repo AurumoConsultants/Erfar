@@ -7,7 +7,7 @@ import Icon, { type IconName } from '@/components/Icon'
 const STEPS: { title: string; text: string; icon: IconName }[] = [
   { title: 'Ladda upp', text: 'Fotografera eller ladda upp prisförslaget och vårdplanen. Det tar två minuter.', icon: 'upload' },
   { title: 'Direkt prisanalys', text: 'Varje åtgärd jämförs med TLV:s referenspriser och vi räknar ut ditt tandvårdsstöd.', icon: 'chart' },
-  { title: 'Sylvia granskar', text: 'En legitimerad tandläkare går igenom ditt ärende personligen — ingen robot.', icon: 'doctor' },
+  { title: 'Doktor Sylvia granskar', text: 'En legitimerad tandläkare går igenom ditt ärende personligen — ingen robot.', icon: 'doctor' },
   { title: 'Du får ett klart svar', text: 'Är priset rimligt? Finns bättre alternativ? Vad ska du fråga din klinik?', icon: 'chat' },
 ]
 
@@ -23,7 +23,7 @@ const SERVICES: { title: string; lead: string; text: string; icon: IconName; cta
   {
     title: 'Granskning av vårdplan',
     lead: 'Är behandlingen rätt för dig?',
-    text: 'Sylvia bedömer om behandlingen är motiverad utifrån underlaget — och om det finns enklare, mer hållbara eller billigare alternativ.',
+    text: 'Doktor Sylvia bedömer om behandlingen är motiverad utifrån underlaget — och om det finns enklare, mer hållbara eller billigare alternativ.',
     icon: 'clipboard',
     cta: 'Få vårdplanen granskad',
   },
@@ -129,12 +129,12 @@ export default async function HomePage() {
 
       <section className="relative mt-24 rounded-2xl border border-accent-200 bg-accent-50 grid grid-cols-1 md:grid-cols-5">
         <div className="relative z-10 md:col-span-3 p-6 sm:p-10 md:pr-24 flex flex-col justify-center space-y-5">
-          <p className="font-brand font-semibold text-accent-600 uppercase tracking-wider text-sm">Om Sylvia</p>
+          <p className="font-brand font-semibold text-accent-600 uppercase tracking-wider text-sm">Om Doktor Sylvia</p>
           <h2 className="font-brand font-bold text-brand-navy text-3xl sm:text-4xl leading-tight">
             En tandläkare på din sida — inte på klinikens.
           </h2>
           <p className="text-lg text-gray-700">
-            Bakom varje svar står Sylvia, legitimerad tandläkare. Hon läser ditt prisförslag, din vårdplan och
+            Bakom varje svar står Doktor Sylvia, legitimerad tandläkare. Hon läser ditt prisförslag, din vårdplan och
             ditt underlag personligen och säger rakt ut vad hon tycker — som hon hade gjort till en vän.
           </p>
           <ul className="space-y-2 font-brand font-semibold text-brand-navy">
@@ -150,7 +150,7 @@ export default async function HomePage() {
             ))}
           </ul>
           <div className="flex flex-col sm:flex-row gap-3 pt-1">
-            <Link href={startHref} className={buttonClassName('primary')}>Låt Sylvia granska ditt förslag</Link>
+            <Link href={startHref} className={buttonClassName('primary')}>Låt Doktor Sylvia granska ditt förslag</Link>
             <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white')}>Gör en gratis snabbkoll</Link>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default async function HomePage() {
           {/* Cut-out portrait (transparent background) taller than its panel so the head rises
               above the box. On mobile it spans the panel's exact width; on desktop it is anchored
               to the right edge and the pointing arm reaches over the text column's background. */}
-          <Image src="/sylvia.webp" alt="Sylvia, legitimerad tandläkare" width={800} height={1071}
+          <Image src="/sylvia.webp" alt="Doktor Sylvia, legitimerad tandläkare" width={800} height={1071}
             sizes="(min-width: 768px) 420px, 340px"
             className="absolute bottom-0 left-0 w-full h-auto md:left-auto md:right-0 md:h-[118%] md:w-auto md:max-w-none" />
         </div>

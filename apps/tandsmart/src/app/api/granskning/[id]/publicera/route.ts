@@ -23,6 +23,6 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   if (error) return NextResponse.json({ error: 'Kunde inte publicera.' }, { status: 500 })
 
   const { data: patient } = await supabase.from('profiles').select('email').eq('id', c.patient_id).maybeSingle()
-  const mail = await sendNotification(patient?.email, 'Din bedömning från Tandsmart är klar', 'Sylvia har granskat ditt ärende. Logga in för att läsa bedömningen.', `/arenden/${id}`)
+  const mail = await sendNotification(patient?.email, 'Din bedömning från Tandsmart är klar', 'Doktor Sylvia har granskat ditt ärende. Logga in för att läsa bedömningen.', `/arenden/${id}`)
   return NextResponse.json({ ok: true, emailed: mail.sent })
 }

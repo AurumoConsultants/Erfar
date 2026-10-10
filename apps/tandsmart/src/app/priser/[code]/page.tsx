@@ -91,7 +91,7 @@ export default async function CodePage({ params }: Props) {
         <Card className="bg-accent-50 border-accent-200">
           <CardTitle icon="doctor" className="mb-3">Tandläkaren förklarar</CardTitle>
           <p className="text-sm whitespace-pre-wrap">{ref.patient_note}</p>
-          <p className="text-xs text-gray-500 mt-2">Sylvia, leg. tandläkare</p>
+          <p className="text-xs text-gray-500 mt-2">Doktor Sylvia, leg. tandläkare</p>
         </Card>
       )}
 

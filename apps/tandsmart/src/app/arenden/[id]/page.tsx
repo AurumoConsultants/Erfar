@@ -71,17 +71,17 @@ export default async function CasePage({
           <ReviewSection title="Frågor att ställa till din klinik" text={c.review_questions} />
           {clinicReview && <ClinicReviewView review={clinicReview} />}
           <p className="text-xs text-gray-400">
-            Besvarat {c.answered_at && new Date(c.answered_at).toLocaleDateString('sv-SE')} av Sylvia, leg. tandläkare.
+            Besvarat {c.answered_at && new Date(c.answered_at).toLocaleDateString('sv-SE')} av Doktor Sylvia, leg. tandläkare.
             Bedömningen bygger på det underlag du skickat in och ersätter inte en undersökning.
           </p>
         </Card>
       ) : (
         <Card className="bg-accent-50 border-accent-200 text-sm text-gray-700">
           {c.status === 'inskickat'
-            ? 'Ditt ärende är mottaget. Sylvia går igenom det och du får ett mejl när bedömningen är klar.'
+            ? 'Ditt ärende är mottaget. Doktor Sylvia går igenom det och du får ett mejl när bedömningen är klar.'
             : c.info_answered_at
-              ? 'Tack för kompletteringen! Sylvia fortsätter granskningen och du får ett mejl när bedömningen är klar.'
-              : 'Sylvia granskar ditt ärende just nu. Du får ett mejl när bedömningen är klar.'}
+              ? 'Tack för kompletteringen! Doktor Sylvia fortsätter granskningen och du får ett mejl när bedömningen är klar.'
+              : 'Doktor Sylvia granskar ditt ärende just nu. Du får ett mejl när bedömningen är klar.'}
         </Card>
       )}
 

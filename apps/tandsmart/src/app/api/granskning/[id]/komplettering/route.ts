@@ -34,7 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const mail = await sendNotification(
     patient?.email,
     'Tandläkaren behöver mer underlag i ditt ärende',
-    'Sylvia behöver kompletterande underlag, till exempel röntgenbilder eller journaluppgifter, för att kunna bedöma ditt ärende. Logga in för att se vad som behövs och ladda upp det.',
+    'Doktor Sylvia behöver kompletterande underlag, till exempel röntgenbilder eller journaluppgifter, för att kunna bedöma ditt ärende. Logga in för att se vad som behövs och ladda upp det.',
     `/arenden/${id}`,
   )
   return NextResponse.json({ ok: true, emailed: mail.sent })
