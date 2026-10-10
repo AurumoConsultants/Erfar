@@ -53,7 +53,7 @@ export default function QuickCheck({ references, initialCode }: { references: Re
       </Card>
 
       <CtaBand actions={<Link href="/arenden/nytt" className={buttonClassName('primary', 'bg-accent-500! hover:bg-accent-400!')}>Skapa ett ärende</Link>}>
-        Siffrorna säger inte om behandlingen behövs. Låt en legitimerad tandläkare gå igenom vårdplanen och kliniken.
+        Låt Dr Sylvia gå igenom och hjälpa dig med din vårdplan samt kontrollera din klinik.
       </CtaBand>
     </div>
   )
