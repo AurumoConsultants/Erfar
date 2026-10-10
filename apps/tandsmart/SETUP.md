@@ -17,8 +17,8 @@ The production project is **Tandsmart** (`nqveapbflmirytibdlis`, org Aurumo Cons
 1. Create a new Supabase project, region **North EU (Stockholm), `eu-north-1`** — this app stores
    health data, and the Vercel functions run in Stockholm (`arn1`) too, so data stays in Sweden.
 2. SQL Editor → run every file in `apps/tandsmart/supabase/migrations/` in order. `00001` creates
-   tables, RLS, the private `case-files` storage bucket and a verified subset of 2026
-   referenspriser; `00002` hardens and consolidates the RLS policies per Supabase's advisors.
+   tables, RLS and the private `case-files` storage bucket; `00002` hardens and consolidates the
+   RLS policies per Supabase's advisors; `00003` loads all 200 TLV referenspriser for 2026.
 3. Auth → URL configuration: set the site URL to the deployed domain and add redirect URLs for
    Vercel previews (`https://tandsmart-*-aurumoconsultants.vercel.app/**`) and local dev
    (`http://localhost:3040/**`).
@@ -45,17 +45,18 @@ keys and `NEXT_PUBLIC_APP_URL` are already set there; add the optional variables
 `.env.example` under Settings → Environment Variables and redeploy — `NEXT_PUBLIC_*` values are
 inlined at build time.
 
-## 5. First-time data
+## 5. Accounts and yearly data
 
 ```bash
 # Sylvia's reviewer account
 pnpm --filter tandsmart create-dentist sylvia@example.se 'lösenord' 'Sylvia Efternamn'
 
-# Full TLV referensprislista (download the xlsx from tlv.se/tandvard/referenspriser.html)
-pnpm --filter tandsmart import-referenspriser ~/Downloads/referenspriser-2026.xlsx 2026
+# Next year's TLV referensprislista (download the xlsx from tlv.se/tandvard/referenspriser.html)
+pnpm --filter tandsmart import-referenspriser ~/Downloads/referenspriser-2027.xlsx 2027
 ```
 
-Re-import every January when TLV publishes the new list.
+The 2026 list is already in the database (migration `00003`). Re-import every January when TLV
+publishes the new list, and check the högkostnadsskydd thresholds in `src/lib/pricing.ts`.
 
 ## 6. How it works
 
