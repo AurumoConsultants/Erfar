@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { BANKID_COOKIE, BANKID_SESSION_SECONDS, OIDC_COOKIE, completeLogin, signBankIdSession } from '@/lib/bankid'
+import {
+  BANKID_COOKIE, BANKID_PENDING_COOKIE, BANKID_SESSION_SECONDS, OIDC_COOKIE, PENDING_SECONDS,
+  completeLogin, signBankIdSession, signPendingIdentity,
+} from '@/lib/bankid'
 
 // Back from the e-ID broker. Verifies the ID token, then either links BankID
 // to the signed-in account or signs in the account that already has this
-// personnummer. Accounts are still created with e-mail first (registrera).
+// personnummer. Unknown personnummer → new-account step.
 export async function GET(request: Request) {
   const url = new URL(request.url)
   const cookieStore = await cookies()
@@ -43,7 +46,13 @@ export async function GET(request: Request) {
     if (error) return fail('fel')
     userId = user.id
   } else {
-    if (!owner) return NextResponse.redirect(new URL('/auth/login?bankid=saknas', url))
+    if (!owner) {
+      // New patient: finish the account on /auth/registrera/bankid.
+      cookieStore.set(BANKID_PENDING_COOKIE, signPendingIdentity(identity), {
+        httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: PENDING_SECONDS,
+      })
+      return NextResponse.redirect(new URL('/auth/registrera/bankid', url))
+    }
     // Sign in that account: mint a one-time magic-link token server-side and
     // redeem it here, which sets the Supabase session cookies.
     const { data: link, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email: owner.email })

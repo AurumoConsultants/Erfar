@@ -112,3 +112,28 @@ export function verifyBankIdSession(value: string | undefined, userId: string, n
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return false
   return uid === userId && now / 1000 - Number(ts) < BANKID_SESSION_SECONDS
 }
+
+// --- Pending BankID signup --------------------------------------------------
+// When BankID succeeds but no account has this personnummer, the verified
+// identity is parked in a short-lived signed cookie while the patient adds an
+// e-mail address and consents on /auth/registrera/bankid.
+
+export const BANKID_PENDING_COOKIE = 'ts_bankid_pending'
+export const PENDING_SECONDS = 15 * 60
+
+export function signPendingIdentity(identity: BankIdIdentity, now = Date.now()) {
+  const body = Buffer.from(JSON.stringify({ ...identity, exp: Math.floor(now / 1000) + PENDING_SECONDS })).toString('base64url')
+  return `${body}.${createHmac('sha256', sessionKey()).update(`pending.${body}`).digest('base64url')}`
+}
+
+export function readPendingIdentity(value: string | undefined, now = Date.now()): BankIdIdentity | null {
+  if (!value || !process.env.CRIIPTO_CLIENT_SECRET) return null
+  const [body, sig] = value.split('.')
+  if (!body || !sig) return null
+  const expected = createHmac('sha256', sessionKey()).update(`pending.${body}`).digest()
+  const given = Buffer.from(sig, 'base64url')
+  if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null
+  const data = JSON.parse(Buffer.from(body, 'base64url').toString()) as BankIdIdentity & { exp: number }
+  if (now / 1000 > data.exp) return null
+  return { personnummer: data.personnummer, name: data.name, subject: data.subject }
+}

@@ -88,8 +88,9 @@ publishes the new list, and check the högkostnadsskydd thresholds in `src/lib/p
 
 - **BankID** goes through an OpenID Connect e-ID broker (Criipto/Idura). Create an application in the broker's
   test tenant, register `https://tandsmart.vercel.app/auth/bankid/callback` (and preview URLs) as redirect URIs,
-  and set `CRIIPTO_DOMAIN`, `CRIIPTO_CLIENT_ID`, `CRIIPTO_CLIENT_SECRET` in Vercel. Patients and dentists link
-  BankID under **Min profil**; afterwards "Logga in med BankID" signs them straight in. The personnummer is only
+  and set `CRIIPTO_DOMAIN`, `CRIIPTO_CLIENT_ID`, `CRIIPTO_CLIENT_SECRET` in Vercel. New patients can sign up with BankID
+  (they add an e-mail address and consent on `/auth/registrera/bankid`); existing accounts link BankID under
+  **Min profil**; afterwards "Logga in med BankID" signs them straight in. The personnummer is only
   ever written by the server after verifying the broker's signed ID token. Check the claim name for the
   personnummer on the first test login (`src/lib/bankid.ts` accepts the common ones).
 - **Video** uses Whereby Embedded. Set `WHEREBY_API_KEY`. The dentist books a time on the case (**Videosamtal**),

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import Button from '@/components/ui/Button'
+import Button, { buttonClassName } from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Field, { fieldInputClassName } from '@/components/ui/Field'
 
@@ -55,6 +55,13 @@ export default function SignupPage() {
       {info ? (
         <p className="text-sm text-gray-700">{info}</p>
       ) : (
+        <>
+        <a href="/auth/bankid?next=/arenden/nytt"
+          className={buttonClassName('primary', 'w-full mb-2 bg-brand-navy! hover:opacity-90')}>
+          Skapa konto med BankID
+        </a>
+        <p className="text-center text-xs text-gray-500 mb-4">Snabbast — namn och personnummer hämtas från BankID.</p>
+        <p className="text-center text-xs text-gray-400 mb-4">eller med e-post och lösenord</p>
         <form onSubmit={onSubmit} className="space-y-4">
           <Field label="Namn" htmlFor="name">
             <input id="name" required autoComplete="name" value={fullName}
@@ -83,6 +90,7 @@ export default function SignupPage() {
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" disabled={loading} className="w-full">{loading ? 'Skapar konto…' : 'Skapa konto'}</Button>
         </form>
+        </>
       )}
       <p className="text-sm text-gray-500 mt-4">
         Har du redan ett konto? <Link href="/auth/login" className="text-accent-700 font-medium">Logga in</Link>

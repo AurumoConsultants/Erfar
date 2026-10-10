@@ -10,6 +10,7 @@ import Field, { fieldInputClassName } from '@/components/ui/Field'
 
 const BANKID_MESSAGES: Record<string, string> = {
   saknas: 'Det finns inget konto kopplat till ditt BankID än. Logga in med e-post (eller skapa ett konto) och koppla sedan BankID under Min profil.',
+  'konto-skapat': 'Ditt konto är skapat. Logga in med BankID.',
   'ej-aktiverat': 'Inloggning med BankID är inte aktiverad än.',
   'annat-konto': 'Det här BankID:t är redan kopplat till ett annat konto.',
   avbrutet: 'BankID-inloggningen avbröts.',
