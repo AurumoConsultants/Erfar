@@ -10,16 +10,9 @@ import QuoteItemsEditor, { emptyItem, toQuoteItems, type EditableItem } from '@/
 import PriceAnalysisView from '@/components/PriceAnalysisView'
 import { analyzeQuote, type ReferencePrice } from '@/lib/pricing'
 import { formatOrgNumberInput, normalizeOrgNumber } from '@/lib/orgNumber'
-import {
-  ACCEPTED_FILE_TYPES, FILE_KIND_LABELS, MAX_FILE_BYTES, SERVICES,
-  type CaseFileKind, type CaseService,
-} from '@/lib/cases'
-
-interface PendingFile {
-  key: string
-  file: File
-  kind: CaseFileKind
-}
+import CaseFilePicker from '@/components/CaseFilePicker'
+import { uploadCaseFiles, type PendingCaseFile } from '@/lib/uploadCaseFiles'
+import { SERVICES, type CaseService } from '@/lib/cases'
 
 interface Props {
   userId: string
@@ -40,7 +33,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
   const [isSpecialist, setIsSpecialist] = useState(false)
   const [priorCosts, setPriorCosts] = useState('')
   const [items, setItems] = useState<EditableItem[]>([emptyItem()])
-  const [files, setFiles] = useState<PendingFile[]>([])
+  const [files, setFiles] = useState<PendingCaseFile[]>([])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -51,21 +44,6 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
 
   function toggleService(service: CaseService) {
     setServices(prev => prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service])
-  }
-
-  function addFiles(list: FileList | null) {
-    if (!list) return
-    const tooBig = Array.from(list).filter(f => f.size > MAX_FILE_BYTES)
-    if (tooBig.length) setError(`${tooBig.map(f => f.name).join(', ')} är större än 20 MB.`)
-    const accepted = Array.from(list).filter(f => f.size <= MAX_FILE_BYTES)
-    setFiles(prev => [
-      ...prev,
-      ...accepted.map(file => ({
-        key: crypto.randomUUID(),
-        file,
-        kind: (file.type === 'application/pdf' ? 'prisforslag' : 'foto') as CaseFileKind,
-      })),
-    ])
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -120,17 +98,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
       }
     }
 
-    const failedUploads: string[] = []
-    for (const { file, kind } of files) {
-      const safeName = file.name.replace(/[^\w.\-]+/g, '_')
-      const path = `${userId}/${created.id}/${crypto.randomUUID()}-${safeName}`
-      const { error: uploadError } = await supabase.storage.from('case-files').upload(path, file, { contentType: file.type })
-      if (uploadError) { failedUploads.push(file.name); continue }
-      const { error: rowError } = await supabase.from('case_files').insert({
-        case_id: created.id, path, file_name: file.name, mime_type: file.type || 'application/octet-stream', kind,
-      })
-      if (rowError) failedUploads.push(file.name)
-    }
+    const failedUploads = await uploadCaseFiles(supabase, userId, created.id, files)
 
     // Best effort — the case is saved either way; this only emails the dentist.
     await fetch(`/api/arenden/${created.id}/inskickat`, { method: 'POST' }).catch(() => {})
@@ -195,23 +163,9 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
 
       <Card className="space-y-4">
         <h2 className="font-semibold">3. Underlag</h2>
-        <div>
-          <input type="file" multiple accept={ACCEPTED_FILE_TYPES} onChange={e => { addFiles(e.target.files); e.target.value = '' }}
-            className="block text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-100 file:text-accent-800 file:font-medium" />
-          <p className="text-xs text-gray-400 mt-1">PDF eller bild, max 20 MB per fil. Fota gärna kostnadsförslaget med mobilen.</p>
-        </div>
-        {files.map(f => (
-          <div key={f.key} className="flex items-center gap-3 text-sm">
-            <span className="flex-1 truncate">{f.file.name}</span>
-            <select value={f.kind} aria-label={`Typ av dokument för ${f.file.name}`}
-              onChange={e => setFiles(prev => prev.map(p => p.key === f.key ? { ...p, kind: e.target.value as CaseFileKind } : p))}
-              className={fieldInputClassName('w-auto')}>
-              {Object.entries(FILE_KIND_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
-            <button type="button" onClick={() => setFiles(prev => prev.filter(p => p.key !== f.key))}
-              className="text-gray-400 hover:text-red-600" aria-label={`Ta bort ${f.file.name}`}>✕</button>
-          </div>
-        ))}
+        <CaseFilePicker files={files} onChange={setFiles} onError={setError}
+          defaultKind={file => (file.type === 'application/pdf' ? 'prisforslag' : 'foto')}
+          hint="PDF eller bild, max 20 MB per fil. Fota gärna kostnadsförslaget med mobilen." />
       </Card>
 
       <Card className="space-y-4">

@@ -11,6 +11,7 @@ import { SERVICE_LABELS, clinicSourceLinks } from '@/lib/cases'
 import { AiDraftSchema } from '@/lib/ai/draftSchema'
 import ReviewWorkspace from './ReviewWorkspace'
 import ClinicReviewForm from './ClinicReviewForm'
+import RequestComplement from './RequestComplement'
 
 export default async function ReviewCasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -56,6 +57,9 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
           <PriceAnalysisView analysis={analysis} />
         </Card>
       </div>
+
+      <RequestComplement caseId={c.id} status={c.status} request={c.info_request}
+        requestedAt={c.info_requested_at} answeredAt={c.info_answered_at} />
 
       <ReviewWorkspace
         caseId={c.id}

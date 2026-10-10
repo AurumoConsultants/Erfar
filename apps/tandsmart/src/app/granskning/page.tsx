@@ -2,11 +2,12 @@ import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import { buttonClassName } from '@/components/ui/Button'
 import StatusBadge from '@/components/StatusBadge'
+import Badge from '@/components/ui/Badge'
 import { requireDentist } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { SERVICE_LABELS, STATUS_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
 
-const TABS: CaseStatus[] = ['inskickat', 'under_granskning', 'besvarat', 'avslutat']
+const TABS: CaseStatus[] = ['inskickat', 'under_granskning', 'komplettering', 'besvarat', 'avslutat']
 
 export default async function ReviewQueuePage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   await requireDentist()
@@ -17,12 +18,13 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
   const supabase = await createClient()
   const { data: all } = await supabase
     .from('cases')
-    .select('id, title, status, services, clinic_name, created_at, patient:profiles!cases_patient_id_fkey(full_name)')
+    .select('id, title, status, services, clinic_name, created_at, info_requested_at, info_answered_at, patient:profiles!cases_patient_id_fkey(full_name)')
     .order('created_at', { ascending: true })
 
   const cases = (all ?? []) as unknown as {
     id: string; title: string; status: CaseStatus; services: CaseService[]; clinic_name: string | null
-    created_at: string; patient: { full_name: string } | null
+    created_at: string; info_requested_at: string | null; info_answered_at: string | null
+    patient: { full_name: string } | null
   }[]
   const open = cases.filter(c => c.status === 'inskickat' || c.status === 'under_granskning')
   // Open cases oldest first (work queue); "Alla" newest first (archive view).
@@ -68,8 +70,10 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   <div className="text-right">
-                    <StatusBadge status={c.status} />
-                    <p className={`text-xs mt-1 ${days >= 3 && c.status !== 'besvarat' && c.status !== 'avslutat' ? 'text-red-600' : 'text-gray-400'}`}>
+                    {c.status === 'under_granskning' && c.info_answered_at && c.info_requested_at && c.info_answered_at >= c.info_requested_at
+                      ? <Badge tone="success">Komplettering inkommen</Badge>
+                      : <StatusBadge status={c.status} />}
+                    <p className={`text-xs mt-1 ${days >= 3 && (c.status === 'inskickat' || c.status === 'under_granskning') ? 'text-red-600' : 'text-gray-400'}`}>
                       {days === 0 ? 'idag' : `${days} d sedan`}
                     </p>
                   </div>

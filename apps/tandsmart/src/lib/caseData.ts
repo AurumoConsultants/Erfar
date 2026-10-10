@@ -26,6 +26,9 @@ export interface CaseRow {
   review_clinic: string | null
   review_questions: string | null
   answered_at: string | null
+  info_request: string | null
+  info_requested_at: string | null
+  info_answered_at: string | null
   created_at: string
 }
 

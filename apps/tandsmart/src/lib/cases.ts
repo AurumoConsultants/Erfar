@@ -1,9 +1,9 @@
 import type { BadgeTone } from '@/components/ui/Badge'
 
 export type CaseService = 'pris' | 'vardplan' | 'klinik'
-export type CaseStatus = 'inskickat' | 'under_granskning' | 'besvarat' | 'avslutat'
+export type CaseStatus = 'inskickat' | 'under_granskning' | 'komplettering' | 'besvarat' | 'avslutat'
 export type CaseVerdict = 'rimligt' | 'delvis_rimligt' | 'ifragasatt'
-export type CaseFileKind = 'prisforslag' | 'vardplan' | 'rontgen' | 'foto' | 'ovrigt'
+export type CaseFileKind = 'prisforslag' | 'vardplan' | 'rontgen' | 'journal' | 'foto' | 'ovrigt'
 export type ClinicRating = 'ok' | 'observera' | 'varning' | 'okand'
 
 export const SERVICES: { value: CaseService; label: string; description: string }[] = [
@@ -21,6 +21,7 @@ export const SERVICE_LABELS: Record<CaseService, string> = {
 export const STATUS_LABELS: Record<CaseStatus, { label: string; tone: BadgeTone }> = {
   inskickat: { label: 'Inskickat', tone: 'info' },
   under_granskning: { label: 'Under granskning', tone: 'warning' },
+  komplettering: { label: 'Väntar på komplettering', tone: 'accent' },
   besvarat: { label: 'Besvarat', tone: 'success' },
   avslutat: { label: 'Avslutat', tone: 'neutral' },
 }
@@ -35,6 +36,7 @@ export const FILE_KIND_LABELS: Record<CaseFileKind, string> = {
   prisforslag: 'Prisförslag / kostnadsförslag',
   vardplan: 'Vårdplan / behandlingsförslag',
   rontgen: 'Röntgenbild',
+  journal: 'Journalkopia / journaluppgifter',
   foto: 'Foto',
   ovrigt: 'Övrigt',
 }

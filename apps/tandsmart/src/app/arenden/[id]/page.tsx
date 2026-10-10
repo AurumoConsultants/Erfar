@@ -9,6 +9,7 @@ import ClinicReviewView from '@/components/ClinicReviewView'
 import { requireProfile } from '@/lib/auth'
 import { loadCase } from '@/lib/caseData'
 import { SERVICE_LABELS, VERDICT_LABELS } from '@/lib/cases'
+import ComplementForm from './ComplementForm'
 
 function ReviewSection({ title, text }: { title: string; text: string | null }) {
   if (!text) return null
@@ -56,7 +57,9 @@ export default async function CasePage({
         </Card>
       )}
 
-      {answered ? (
+      {c.status === 'komplettering' && c.info_request ? (
+        <ComplementForm caseId={c.id} patientId={profile.id} request={c.info_request} requestedAt={c.info_requested_at} />
+      ) : answered ? (
         <Card className="space-y-4 border-accent-300">
           <div className="flex items-center gap-3 flex-wrap">
             <h2 className="font-semibold text-lg">Tandläkarens bedömning</h2>
@@ -79,7 +82,9 @@ export default async function CasePage({
         <Card className="bg-accent-50 border-accent-200 text-sm text-gray-700">
           {c.status === 'inskickat'
             ? 'Ditt ärende är mottaget. Sylvia går igenom det och du får ett mejl när bedömningen är klar.'
-            : 'Sylvia granskar ditt ärende just nu. Du får ett mejl när bedömningen är klar.'}
+            : c.info_answered_at
+              ? 'Tack för kompletteringen! Sylvia fortsätter granskningen och du får ett mejl när bedömningen är klar.'
+              : 'Sylvia granskar ditt ärende just nu. Du får ett mejl när bedömningen är klar.'}
         </Card>
       )}
 
