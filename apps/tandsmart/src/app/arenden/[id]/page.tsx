@@ -44,9 +44,10 @@ export default async function CasePage({
   const { case: c, analysis, files, messages, clinicReview, clinicRequests } = bundle
   const answered = c.status === 'besvarat' || c.status === 'avslutat'
   const supabase = await createClient()
-  const [{ data: meetings }, bankIdSession] = await Promise.all([
+  const [{ data: meetings }, bankIdSession, { data: identity }] = await Promise.all([
     supabase.from('video_meetings').select(MEETING_COLUMNS).eq('case_id', id).order('scheduled_at'),
     hasBankIdSession(profile.id),
+    supabase.from('profiles').select('personnummer').eq('id', profile.id).single(),
   ])
 
   return (
@@ -105,7 +106,7 @@ export default async function CasePage({
       )}
 
       <ClinicRequestPanel caseId={c.id} defaultClinicName={c.clinic_name ?? ''} requests={clinicRequests}
-        canRequest={!answered} />
+        canRequest={!answered} verifiedPersonnummer={identity?.personnummer ?? null} />
 
       {analysis.lines.length > 0 && (
         <Card>

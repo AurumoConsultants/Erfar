@@ -17,7 +17,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body = await req.json().catch(() => ({}))
   const clinicName = String(body.clinicName ?? '').trim()
   const clinicEmail = String(body.clinicEmail ?? '').trim().toLowerCase()
-  const personnummer = normalizePersonnummer(String(body.personnummer ?? ''))
+  // A BankID-verified personnummer always wins over what the form sent.
+  const { data: profile } = await supabase.from('profiles').select('full_name, personnummer').eq('id', user.id).single()
+  const personnummer = profile?.personnummer ?? normalizePersonnummer(String(body.personnummer ?? ''))
   const items: string[] = Array.isArray(body.items) ? body.items.filter((i: unknown) => REQUESTABLE_ITEMS.some(r => r.value === i)) : []
   const period = String(body.period ?? '').trim().slice(0, 100) || null
 
@@ -32,7 +34,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (c.status === 'besvarat' || c.status === 'avslutat') {
     return NextResponse.json({ error: 'Ärendet är redan besvarat.' }, { status: 400 })
   }
-  const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
   const patientName = profile?.full_name || 'Patienten'
 
   const consentText = buildConsentText({ patientName, personnummer, clinicName, items, period })

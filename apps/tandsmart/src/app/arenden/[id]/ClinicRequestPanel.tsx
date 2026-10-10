@@ -22,15 +22,16 @@ interface Props {
   defaultClinicName: string
   requests: ClinicRequestRow[]
   canRequest: boolean
+  verifiedPersonnummer: string | null // from BankID; locks the field
 }
 
 // Lets the patient have their clinic send journal/röntgen straight to the case.
-export default function ClinicRequestPanel({ caseId, defaultClinicName, requests, canRequest }: Props) {
+export default function ClinicRequestPanel({ caseId, defaultClinicName, requests, canRequest, verifiedPersonnummer }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [clinicName, setClinicName] = useState(defaultClinicName)
   const [clinicEmail, setClinicEmail] = useState('')
-  const [personnummer, setPersonnummer] = useState('')
+  const [personnummer, setPersonnummer] = useState(verifiedPersonnummer ?? '')
   const [items, setItems] = useState<string[]>(['journal', 'rontgen'])
   const [period, setPeriod] = useState('')
   const [consent, setConsent] = useState(false)
@@ -129,10 +130,15 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
             <Field label="Klinikens e-post" htmlFor="cr-email" hint="Finns ofta på klinikens webbplats eller kostnadsförslaget.">
               <input id="cr-email" type="email" required value={clinicEmail} onChange={e => setClinicEmail(e.target.value)} className={fieldInputClassName()} />
             </Field>
-            <Field label="Ditt personnummer" htmlFor="cr-pnr" hint="Så att kliniken hittar rätt journal. Visas bara för kliniken via länken.">
+            <Field label="Ditt personnummer" htmlFor="cr-pnr"
+              hint={verifiedPersonnummer
+                ? 'Hämtat från BankID. Visas bara för kliniken via länken.'
+                : 'Så att kliniken hittar rätt journal. Visas bara för kliniken via länken.'}>
               <input id="cr-pnr" required inputMode="numeric" placeholder="ÅÅÅÅMMDD-XXXX" value={personnummer}
+                readOnly={!!verifiedPersonnummer}
                 onChange={e => setPersonnummer(formatPersonnummerInput(e.target.value))}
-                onBlur={() => setPersonnummer(p => normalizePersonnummer(p) ?? p)} className={fieldInputClassName()} />
+                onBlur={() => setPersonnummer(p => normalizePersonnummer(p) ?? p)}
+                className={fieldInputClassName(verifiedPersonnummer ? 'bg-gray-50 text-gray-700 cursor-not-allowed' : '')} />
             </Field>
             <Field label="Period (valfritt)" htmlFor="cr-period" hint="T.ex. ”2024–2026” eller ”senaste besöket”.">
               <input id="cr-period" value={period} maxLength={100} onChange={e => setPeriod(e.target.value)} className={fieldInputClassName()} />
