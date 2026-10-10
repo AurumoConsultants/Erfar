@@ -1,22 +1,46 @@
 import type { BadgeTone } from '@/components/ui/Badge'
 
-export type CaseService = 'pris' | 'vardplan' | 'klinik'
+export type CaseService = 'pris' | 'vardplan' | 'klinik' | 'omfattande' | 'video'
 export type CaseStatus = 'inskickat' | 'under_granskning' | 'komplettering' | 'besvarat' | 'avslutat'
 export type CaseVerdict = 'rimligt' | 'delvis_rimligt' | 'ifragasatt'
 export type CaseFileKind = 'prisforslag' | 'vardplan' | 'rontgen' | 'journal' | 'foto' | 'ovrigt'
 export type ClinicRating = 'ok' | 'observera' | 'varning' | 'okand'
 
-export const SERVICES: { value: CaseService; label: string; description: string }[] = [
-  { value: 'pris', label: 'Prisbedömning', description: 'Är priset rimligt jämfört med referenspriser och andra kliniker?' },
-  { value: 'vardplan', label: 'Granskning av vårdplan', description: 'Är behandlingen motiverad, finns alternativ, kan den delas upp eller vänta?' },
-  { value: 'klinik', label: 'Klinikkoll', description: 'Ekonomisk stabilitet, IVO-ärenden och rykte för kliniken.' },
+// What the patient orders: one package plus optional add-ons. Each maps to
+// the services stored on the case; prices are shown to the patient (SEK, incl. VAT).
+export type PackageId = 'prisbedomning' | 'second_opinion' | 'omfattande'
+
+export const PACKAGES: { id: PackageId; label: string; description: string; price: number; services: CaseService[] }[] = [
+  { id: 'prisbedomning', label: 'Prisbedömning', price: 495, services: ['pris'],
+    description: 'Är priset rimligt jämfört med referenspriserna? Vad driver kostnaden och vad bör du fråga kliniken?' },
+  { id: 'second_opinion', label: 'Second opinion', price: 1295, services: ['pris', 'vardplan'],
+    description: 'Prisbedömning plus granskning av vårdplanen: är behandlingen motiverad, finns alternativ, kan den delas upp eller vänta?' },
+  { id: 'omfattande', label: 'Second opinion omfattande', price: 1995, services: ['pris', 'vardplan', 'omfattande'],
+    description: 'För implantat, broar och proteser, fler än 4 tänder eller prisförslag över 40 000 kr.' },
 ]
 
-export const SERVICE_LABELS: Record<CaseService, string> = {
-  pris: 'Prisbedömning',
-  vardplan: 'Vårdplan',
-  klinik: 'Klinikkoll',
+export const ADDONS: { service: CaseService; label: string; description: string; price: number }[] = [
+  { service: 'klinik', label: 'Klinikkoll', price: 295,
+    description: 'Klinikens ekonomiska stabilitet, IVO-ärenden och omdömen.' },
+  { service: 'video', label: 'Videosamtal med Doktor Sylvia', price: 795,
+    description: '20 minuter där ni går igenom bedömningen tillsammans.' },
+]
+
+export function packageOf(services: CaseService[]): PackageId | null {
+  if (services.includes('omfattande')) return 'omfattande'
+  if (services.includes('vardplan')) return 'second_opinion'
+  if (services.includes('pris')) return 'prisbedomning'
+  return null
 }
+
+// Human summary of what was ordered, e.g. "Second opinion · Klinikkoll".
+export function serviceSummary(services: CaseService[]): string {
+  const pkg = PACKAGES.find(p => p.id === packageOf(services))
+  const addons = ADDONS.filter(a => services.includes(a.service)).map(a => a.label)
+  return [pkg?.label, ...addons].filter(Boolean).join(' · ')
+}
+
+export const formatPrice = (kr: number) => `${kr.toLocaleString('sv-SE')} kr`
 
 export const STATUS_LABELS: Record<CaseStatus, { label: string; tone: BadgeTone }> = {
   inskickat: { label: 'Inskickat', tone: 'info' },

@@ -3,7 +3,7 @@ import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { CaseBundle } from '@/lib/caseData'
 import { formatKr } from '@/lib/pricing'
-import { SERVICE_LABELS } from '@/lib/cases'
+import { serviceSummary } from '@/lib/cases'
 import { AiDraftSchema, type AiDraft } from './draftSchema'
 
 const MODEL = 'claude-opus-5-5'
@@ -29,7 +29,7 @@ function caseToPrompt(bundle: CaseBundle): string {
   )
   return [
     `Ärende: ${c.title}`,
-    `Patienten vill ha: ${c.services.map(s => SERVICE_LABELS[s]).join(', ')}`,
+    `Patienten vill ha: ${serviceSummary(c.services)}`,
     age != null ? `Patientens ålder: ca ${age} år` : 'Patientens ålder: okänd',
     `Klinik: ${c.clinic_name ?? 'okänd'}${c.clinic_city ? `, ${c.clinic_city}` : ''}${c.is_specialist ? ' (specialisttandvård)' : ''}`,
     '',

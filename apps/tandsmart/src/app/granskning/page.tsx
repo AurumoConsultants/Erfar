@@ -5,7 +5,7 @@ import StatusBadge from '@/components/StatusBadge'
 import Badge from '@/components/ui/Badge'
 import { requireDentist } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { SERVICE_LABELS, STATUS_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
+import { serviceSummary, STATUS_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
 import PageHeader from '@/components/ui/PageHeader'
 import Icon from '@/components/Icon'
 
@@ -101,7 +101,7 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                     )}
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {c.patient?.full_name} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
+                    {c.patient?.full_name} · {serviceSummary(c.services)}
                     {c.clinic_name && ` — ${c.clinic_name}`}
                   </p>
                 </div>

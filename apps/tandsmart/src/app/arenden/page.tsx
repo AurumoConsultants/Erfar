@@ -5,7 +5,7 @@ import { buttonClassName } from '@/components/ui/Button'
 import StatusBadge from '@/components/StatusBadge'
 import { requireProfile } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { SERVICE_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
+import { serviceSummary, type CaseService, type CaseStatus } from '@/lib/cases'
 import PageHeader from '@/components/ui/PageHeader'
 
 export default async function MyCasesPage() {
@@ -33,7 +33,7 @@ export default async function MyCasesPage() {
               <div>
                 <p className="font-brand font-semibold text-brand-navy">{c.title}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {(c.services as CaseService[]).map(s => SERVICE_LABELS[s]).join(' · ')}
+                  {serviceSummary(c.services as CaseService[])}
                   {c.clinic_name && ` — ${c.clinic_name}`}
                   {' · '}{new Date(c.created_at).toLocaleDateString('sv-SE')}
                 </p>

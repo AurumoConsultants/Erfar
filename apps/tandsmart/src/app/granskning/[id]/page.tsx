@@ -8,7 +8,7 @@ import { requireDentist } from '@/lib/auth'
 import { loadCase } from '@/lib/caseData'
 import { createClient } from '@/lib/supabase/server'
 import { normalizeOrgNumber } from '@/lib/orgNumber'
-import { SERVICE_LABELS, clinicSourceLinks } from '@/lib/cases'
+import { serviceSummary, clinicSourceLinks } from '@/lib/cases'
 import { AiDraftSchema } from '@/lib/ai/draftSchema'
 import ReviewWorkspace from './ReviewWorkspace'
 import ClinicReviewForm from './ClinicReviewForm'
@@ -35,7 +35,7 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
   return (
     <div className="space-y-6">
       <PageHeader icon="clipboard" eyebrow="Granskning" title={c.title} badge={<StatusBadge status={c.status} />}>
-        {patient?.full_name}{age != null && `, ${age} år`} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
+        {patient?.full_name}{age != null && `, ${age} år`} · {serviceSummary(c.services)}
         {' · '}Inkom {new Date(c.created_at).toLocaleDateString('sv-SE')}
       </PageHeader>
 

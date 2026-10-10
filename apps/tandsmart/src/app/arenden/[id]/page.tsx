@@ -8,7 +8,7 @@ import CaseFilesList from '@/components/CaseFilesList'
 import ClinicReviewView from '@/components/ClinicReviewView'
 import { requireProfile } from '@/lib/auth'
 import { loadCase } from '@/lib/caseData'
-import { SERVICE_LABELS, VERDICT_LABELS } from '@/lib/cases'
+import { serviceSummary, VERDICT_LABELS } from '@/lib/cases'
 import ComplementForm from './ComplementForm'
 import ClinicRequestPanel from './ClinicRequestPanel'
 import CardTitle from '@/components/ui/CardTitle'
@@ -44,7 +44,7 @@ export default async function CasePage({
   return (
     <div className="space-y-6">
       <PageHeader icon="clipboard" eyebrow="Ditt ärende" title={c.title} badge={<StatusBadge status={c.status} />}>
-        {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
+        {serviceSummary(c.services)}
         {c.clinic_name && ` — ${c.clinic_name}`} · Skapat {new Date(c.created_at).toLocaleDateString('sv-SE')}
       </PageHeader>
 
