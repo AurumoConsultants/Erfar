@@ -22,7 +22,9 @@ export default async function Header() {
         </Link>
         <nav className="flex items-center gap-4 text-sm font-brand font-semibold">
           <Link href="/priser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Priser</Link>
-          <Link href="/snabbkoll" className="text-brand-navy/80 hover:text-accent-600">Snabbkoll</Link>
+          {profile?.role !== 'tandlakare' && (
+            <Link href="/snabbkoll" className="text-brand-navy/80 hover:text-accent-600">Snabbkoll</Link>
+          )}
           {profile?.role === 'tandlakare' && (
             <>
               <Link href={unreadCases ? '/granskning?status=olasta' : '/granskning'} className="text-brand-navy/80 hover:text-accent-600 inline-flex items-center gap-1.5">
