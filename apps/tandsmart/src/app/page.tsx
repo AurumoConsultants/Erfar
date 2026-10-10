@@ -127,8 +127,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-accent-200 bg-accent-50 grid grid-cols-1 md:grid-cols-5">
-        <div className="md:col-span-3 p-6 sm:p-10 flex flex-col justify-center space-y-5">
+      <section className="relative mt-24 rounded-2xl border border-accent-200 bg-accent-50 grid grid-cols-1 md:grid-cols-5">
+        <div className="relative z-10 md:col-span-3 p-6 sm:p-10 md:pr-24 flex flex-col justify-center space-y-5">
           <p className="font-brand font-semibold text-accent-600 uppercase tracking-wider text-sm">Om Sylvia</p>
           <h2 className="font-brand font-bold text-brand-navy text-3xl sm:text-4xl leading-tight">
             En tandläkare på din sida — inte på klinikens.
@@ -154,11 +154,15 @@ export default async function HomePage() {
             <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white')}>Gör en gratis snabbkoll</Link>
           </div>
         </div>
-        <div className="md:col-span-2 relative min-h-96 md:min-h-full order-first md:order-last overflow-hidden bg-gradient-to-br from-accent-100 via-accent-200 to-accent-400">
-          {/* Cut-out portrait (transparent background) standing on the brand gradient. */}
-          <div aria-hidden className="absolute -right-10 top-10 h-64 w-64 rounded-full bg-white/40 blur-2xl" />
-          <Image src="/sylvia.webp" alt="Sylvia, legitimerad tandläkare" fill priority={false}
-            sizes="(min-width: 768px) 40vw, 100vw" className="object-contain object-bottom pt-6" />
+        <div className="md:col-span-2 relative z-20 min-h-96 md:min-h-full order-first md:order-last">
+          <div aria-hidden className="absolute inset-0 overflow-hidden rounded-t-2xl md:rounded-none md:rounded-r-2xl bg-gradient-to-br from-accent-100 via-accent-200 to-accent-400">
+            <div className="absolute -right-10 top-10 h-64 w-64 rounded-full bg-white/40 blur-2xl" />
+          </div>
+          {/* Cut-out portrait (transparent background), larger than its panel: the head rises
+              above the box and the pointing arm reaches over the text column's background. */}
+          <Image src="/sylvia.webp" alt="Sylvia, legitimerad tandläkare" width={800} height={1071}
+            sizes="(min-width: 768px) 420px, 340px"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 h-[118%] w-auto max-w-none drop-shadow-xl" />
         </div>
       </section>
     </div>
