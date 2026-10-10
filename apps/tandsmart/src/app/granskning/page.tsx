@@ -12,7 +12,7 @@ import Icon from '@/components/Icon'
 const TABS: CaseStatus[] = ['inskickat', 'under_granskning', 'komplettering', 'besvarat', 'avslutat']
 
 export default async function ReviewQueuePage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  await requireDentist()
+  const dentist = await requireDentist()
   const { status: statusParam } = await searchParams
   const showAll = statusParam === 'alla'
   const showUnread = statusParam === 'olasta'
@@ -25,6 +25,18 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
     .order('created_at', { ascending: true })
   const { data: unreadRows } = await supabase.rpc('unread_message_counts')
   const unread = new Map(((unreadRows ?? []) as { case_id: string; unread: number }[]).map(r => [r.case_id, r.unread]))
+  // Files the patient's clinic uploaded since this dentist last opened the case.
+  const [{ data: clinicFiles }, { data: reads }] = await Promise.all([
+    supabase.from('case_files').select('case_id, created_at').eq('source', 'klinik'),
+    supabase.from('case_message_reads').select('case_id, last_read_at').eq('profile_id', dentist.id),
+  ])
+  const lastRead = new Map((reads ?? []).map(r => [r.case_id, new Date(r.last_read_at).getTime()]))
+  const newClinicFiles = new Map<string, number>()
+  for (const f of clinicFiles ?? []) {
+    if (new Date(f.created_at).getTime() > (lastRead.get(f.case_id) ?? 0)) {
+      newClinicFiles.set(f.case_id, (newClinicFiles.get(f.case_id) ?? 0) + 1)
+    }
+  }
 
   const cases = (all ?? []) as unknown as {
     id: string; title: string; status: CaseStatus; services: CaseService[]; clinic_name: string | null
@@ -97,6 +109,12 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                       <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
                         <Icon name="chat" className="h-3.5 w-3.5" />
                         {unreadCount} {unreadCount === 1 ? 'oläst meddelande' : 'olästa meddelanden'}
+                      </span>
+                    )}
+                    {(newClinicFiles.get(c.id) ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-navy px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+                        <Icon name="building" className="h-3.5 w-3.5" />
+                        Underlag från kliniken ({newClinicFiles.get(c.id)} {newClinicFiles.get(c.id) === 1 ? 'fil' : 'filer'})
                       </span>
                     )}
                   </div>
