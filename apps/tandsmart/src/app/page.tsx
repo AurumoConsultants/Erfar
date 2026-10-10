@@ -154,15 +154,16 @@ export default async function HomePage() {
             <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white')}>Gör en gratis snabbkoll</Link>
           </div>
         </div>
-        <div className="md:col-span-2 relative z-20 min-h-96 md:min-h-full order-first md:order-last">
+        <div className="md:col-span-2 relative z-20 aspect-[800/920] md:aspect-auto md:min-h-full order-first md:order-last">
           <div aria-hidden className="absolute inset-0 overflow-hidden rounded-t-2xl md:rounded-none md:rounded-r-2xl bg-gradient-to-br from-accent-100 via-accent-200 to-accent-400">
             <div className="absolute -right-10 top-10 h-64 w-64 rounded-full bg-white/40 blur-2xl" />
           </div>
-          {/* Cut-out portrait (transparent background), larger than its panel: the head rises
-              above the box and the pointing arm reaches over the text column's background. */}
+          {/* Cut-out portrait (transparent background) taller than its panel so the head rises
+              above the box. On mobile it spans the panel's exact width; on desktop it is anchored
+              to the right edge and the pointing arm reaches over the text column's background. */}
           <Image src="/sylvia.webp" alt="Sylvia, legitimerad tandläkare" width={800} height={1071}
             sizes="(min-width: 768px) 420px, 340px"
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 h-[118%] w-auto max-w-none drop-shadow-xl" />
+            className="absolute bottom-0 left-0 w-full h-auto md:left-auto md:right-0 md:h-[118%] md:w-auto md:max-w-none" />
         </div>
       </section>
     </div>
