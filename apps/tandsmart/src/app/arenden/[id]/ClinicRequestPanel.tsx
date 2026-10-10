@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -36,6 +36,20 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ emailed: boolean; link: string } | null>(null)
+  const [copied, setCopied] = useState<'ok' | 'failed' | null>(null)
+  const linkInput = useRef<HTMLInputElement>(null)
+
+  async function copyLink(link: string) {
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopied('ok')
+      setTimeout(() => setCopied(c => (c === 'ok' ? null : c)), 2500)
+    } catch {
+      // Clipboard blocked (permissions, older browser): select it for manual copy.
+      linkInput.current?.select()
+      setCopied('failed')
+    }
+  }
 
   async function send(e: React.FormEvent) {
     e.preventDefault()
@@ -82,16 +96,25 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
             ? <p>Begäran är skickad till kliniken. Du får ett mejl när de har laddat upp.</p>
             : <p>Begäran är skapad, men mejlet kunde inte skickas automatiskt. Skicka den här länken till kliniken:</p>}
           {!result.emailed && (
-            <div className="flex gap-2">
-              <input readOnly value={result.link} aria-label="Länk till kliniken" className={fieldInputClassName('text-xs bg-white')} />
-              <Button type="button" variant="secondary" onClick={() => navigator.clipboard.writeText(result.link)}>Kopiera</Button>
-            </div>
+            <>
+              <div className="flex gap-2">
+                <input ref={linkInput} readOnly value={result.link} aria-label="Länk till kliniken"
+                  onFocus={e => e.target.select()} className={fieldInputClassName('text-xs bg-white')} />
+                <Button type="button" onClick={() => copyLink(result.link)} className="shrink-0 min-w-28">
+                  {copied === 'ok' ? '✓ Kopierad' : 'Kopiera'}
+                </Button>
+              </div>
+              <p role="status" className={`text-xs ${copied === 'failed' ? 'text-red-600' : 'text-accent-700'}`}>
+                {copied === 'ok' && 'Länken är kopierad — klistra in den i ett mejl till kliniken.'}
+                {copied === 'failed' && 'Kunde inte kopiera automatiskt. Länken är markerad — kopiera den med Ctrl+C (⌘+C på Mac).'}
+              </p>
+            </>
           )}
         </div>
       )}
 
       {canRequest && !open && (
-        <Button variant="secondary" onClick={() => { setOpen(true); setResult(null) }}>
+        <Button variant="secondary" onClick={() => { setOpen(true); setResult(null); setCopied(null) }}>
           {requests.length ? 'Skicka en ny begäran' : 'Be kliniken skicka underlag'}
         </Button>
       )}

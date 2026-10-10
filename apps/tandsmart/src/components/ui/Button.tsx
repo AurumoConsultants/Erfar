@@ -11,7 +11,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 // Exported so non-<button> elements needing the same look (e.g. a Next.js
 // <Link> acting as a button) can apply it directly.
 export function buttonClassName(variant: ButtonVariant = 'primary', className = '') {
-  return `inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`
+  return `inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-lg text-sm font-semibold transition duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
