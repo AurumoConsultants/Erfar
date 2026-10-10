@@ -58,16 +58,23 @@ export default function QuoteItemsEditor({ items, onChange, references, showToot
       <datalist id="reference-codes">
         {references.map(r => <option key={r.code} value={r.code}>{r.description}</option>)}
       </datalist>
+      <div aria-hidden className="hidden sm:grid grid-cols-12 gap-2 text-xs font-medium text-gray-500">
+        <span className="col-span-2">Kod</span>
+        <span className={showTooth ? 'col-span-4' : 'col-span-6'}>Åtgärd</span>
+        {showTooth && <span className="col-span-2">Tand <span className="font-normal">(valfritt)</span></span>}
+        <span className="col-span-1">Antal</span>
+        <span className="col-span-2">Pris/st (kr)</span>
+      </div>
       {items.map((item, index) => (
         <div key={item.key} className="grid grid-cols-12 gap-2 items-start">
           <input aria-label={`Åtgärdskod rad ${index + 1}`} placeholder="Kod" list="reference-codes" value={item.code}
             onChange={e => update(item.key, { code: e.target.value })}
             className={fieldInputClassName('col-span-3 sm:col-span-2')} />
-          <input aria-label={`Beskrivning rad ${index + 1}`} placeholder="Beskrivning" value={item.description}
+          <input aria-label={`Beskrivning rad ${index + 1}`} placeholder="Åtgärd" value={item.description}
             onChange={e => update(item.key, { description: e.target.value })}
             className={fieldInputClassName(showTooth ? 'col-span-9 sm:col-span-4' : 'col-span-9 sm:col-span-6')} />
           {showTooth && (
-            <input aria-label={`Tand rad ${index + 1}`} placeholder="Tand" value={item.tooth}
+            <input aria-label={`Tandnummer rad ${index + 1} (valfritt)`} placeholder="Tand t.ex. 36" value={item.tooth}
               onChange={e => update(item.key, { tooth: e.target.value })}
               className={fieldInputClassName('col-span-3 sm:col-span-2')} />
           )}
@@ -84,6 +91,14 @@ export default function QuoteItemsEditor({ items, onChange, references, showToot
       ))}
       <button type="button" onClick={() => onChange([...items, emptyItem()])}
         className="text-sm font-medium text-accent-700 hover:underline">+ Lägg till rad</button>
+      {showTooth && (
+        <p className="text-xs text-gray-500">
+          <span className="font-medium">Tand</span> är tandnumret som står vid åtgärden på kostnadsförslaget, t.ex. 36.
+          Första siffran är käkhalvan (1 = överkäke höger, 2 = överkäke vänster, 3 = underkäke vänster,
+          4 = underkäke höger), andra siffran tanden räknat från framtanden (1) bakåt till visdomstanden (8).
+          Lämna tomt för åtgärder som gäller hela munnen, som undersökning.
+        </p>
+      )}
     </div>
   )
 }
