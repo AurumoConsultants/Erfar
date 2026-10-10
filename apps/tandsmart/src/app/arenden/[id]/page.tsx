@@ -12,6 +12,9 @@ import { serviceSummary, VERDICT_LABELS } from '@/lib/cases'
 import ComplementForm from './ComplementForm'
 import ClinicRequestPanel from './ClinicRequestPanel'
 import CardTitle from '@/components/ui/CardTitle'
+import VideoMeetingList from '@/components/video/VideoMeetingList'
+import { createClient } from '@/lib/supabase/server'
+import { MEETING_COLUMNS, hasBankIdSession, type VideoMeeting } from '@/lib/video'
 import PageHeader from '@/components/ui/PageHeader'
 
 function ReviewSection({ title, text }: { title: string; text: string | null }) {
@@ -40,6 +43,11 @@ export default async function CasePage({
   if (!bundle) notFound()
   const { case: c, analysis, files, messages, clinicReview, clinicRequests } = bundle
   const answered = c.status === 'besvarat' || c.status === 'avslutat'
+  const supabase = await createClient()
+  const [{ data: meetings }, bankIdSession] = await Promise.all([
+    supabase.from('video_meetings').select(MEETING_COLUMNS).eq('case_id', id).order('scheduled_at'),
+    hasBankIdSession(profile.id),
+  ])
 
   return (
     <div className="space-y-6">
@@ -82,6 +90,17 @@ export default async function CasePage({
             : c.info_answered_at
               ? 'Tack för kompletteringen! Doktor Sylvia fortsätter granskningen och du får ett mejl när bedömningen är klar.'
               : 'Doktor Sylvia granskar ditt ärende just nu. Du får ett mejl när bedömningen är klar.'}
+        </Card>
+      )}
+
+      {(c.services.includes('video') || (meetings ?? []).length > 0) && (
+        <Card className="space-y-4">
+          <CardTitle icon="chat">Videosamtal med Doktor Sylvia</CardTitle>
+          {(meetings ?? []).length === 0 && (
+            <p className="text-sm text-gray-600">Doktor Sylvia bokar en tid med dig. Du får ett mejl, och samtalet syns här och under Min profil.
+              Du ansluter med BankID och samtalet spelas in så att du kan se det igen.</p>
+          )}
+          <VideoMeetingList meetings={(meetings ?? []) as unknown as VideoMeeting[]} canPlay={bankIdSession} />
         </Card>
       )}
 

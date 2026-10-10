@@ -14,6 +14,9 @@ import ReviewWorkspace from './ReviewWorkspace'
 import ClinicReviewForm from './ClinicReviewForm'
 import RequestComplement from './RequestComplement'
 import ClinicRequestList from '@/components/ClinicRequestList'
+import VideoPanel from './VideoPanel'
+import { MEETING_COLUMNS, type VideoMeeting } from '@/lib/video'
+import { wherebyConfigured } from '@/lib/whereby'
 import CardTitle from '@/components/ui/CardTitle'
 import PageHeader from '@/components/ui/PageHeader'
 
@@ -26,6 +29,7 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
   const supabase = await createClient()
   await supabase.from('case_message_reads')
     .upsert({ case_id: id, profile_id: dentist.id, last_read_at: new Date().toISOString() })
+  const { data: meetings } = await supabase.from('video_meetings').select(MEETING_COLUMNS).eq('case_id', id).order('scheduled_at')
   const { case: c, patient, analysis, files, messages, clinicReview, clinicRequests } = bundle
 
   const parsedDraft = AiDraftSchema.safeParse(c.ai_draft)
@@ -102,6 +106,11 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
           )}
         </Card>
       ) : null}
+
+      {(c.services.includes('video') || (meetings ?? []).length > 0 || wherebyConfigured()) && (
+        <VideoPanel caseId={c.id} meetings={(meetings ?? []) as unknown as VideoMeeting[]}
+          requested={c.services.includes('video')} configured={wherebyConfigured()} />
+      )}
 
       <Card>
         <CardTitle icon="chat" className="mb-4">Meddelanden med patienten</CardTitle>

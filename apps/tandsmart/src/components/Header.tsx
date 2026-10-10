@@ -40,6 +40,9 @@ export default async function Header() {
           {profile?.role === 'patient' && (
             <Link href="/arenden" className="text-brand-navy/80 hover:text-accent-600">Mina ärenden</Link>
           )}
+          {profile && (
+            <Link href="/profil" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Min profil</Link>
+          )}
           {profile ? (
             <form action="/auth/logout" method="post">
               <button className="text-gray-500 hover:text-accent-600 font-brand font-semibold">Logga ut</button>

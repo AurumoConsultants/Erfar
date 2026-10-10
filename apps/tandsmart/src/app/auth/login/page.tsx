@@ -4,13 +4,23 @@ import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import Button from '@/components/ui/Button'
+import Button, { buttonClassName } from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Field, { fieldInputClassName } from '@/components/ui/Field'
 
+const BANKID_MESSAGES: Record<string, string> = {
+  saknas: 'Det finns inget konto kopplat till ditt BankID än. Logga in med e-post (eller skapa ett konto) och koppla sedan BankID under Min profil.',
+  'ej-aktiverat': 'Inloggning med BankID är inte aktiverad än.',
+  'annat-konto': 'Det här BankID:t är redan kopplat till ett annat konto.',
+  avbrutet: 'BankID-inloggningen avbröts.',
+  fel: 'BankID-inloggningen misslyckades. Försök igen.',
+}
+
 function LoginForm() {
   const router = useRouter()
-  const next = useSearchParams().get('next')
+  const params = useSearchParams()
+  const next = params.get('next')
+  const bankid = params.get('bankid')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -35,6 +45,16 @@ function LoginForm() {
   return (
     <Card className="max-w-md mx-auto">
       <h1 className="text-xl font-bold mb-4">Logga in</h1>
+      {bankid && (
+        <p className="text-sm rounded-lg bg-amber-50 border border-amber-200 p-3 mb-4">
+          {BANKID_MESSAGES[bankid] ?? BANKID_MESSAGES.fel}
+        </p>
+      )}
+      <a href={`/auth/bankid?next=${encodeURIComponent(next?.startsWith('/') && !next.startsWith('//') ? next : '/arenden')}`}
+        className={buttonClassName('primary', 'w-full mb-4 bg-brand-navy! hover:opacity-90')}>
+        Logga in med BankID
+      </a>
+      <p className="text-center text-xs text-gray-400 mb-4">eller med e-post</p>
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="E-post" htmlFor="email">
           <input id="email" type="email" required autoComplete="email" value={email}
