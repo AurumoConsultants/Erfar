@@ -62,8 +62,8 @@ export default function ComplementForm({ caseId, patientId, request, requestedAt
       </div>
       <p className="text-sm whitespace-pre-wrap bg-white rounded-lg p-3 border border-accent-200">{request}</p>
       <p className="text-sm text-gray-600">
-        Röntgenbilder och journalkopior kan du begära från din klinik — du har rätt att få ut din journal.
-        Ofta går det också att se den via 1177 eller klinikens app.
+        Har du inte underlaget själv kan du låta kliniken skicka det direkt — se "Låt kliniken skicka journal och
+        röntgen" längre ner. Du kan också begära ut journalen själv; du har rätt att få en kopia.
       </p>
       <form onSubmit={onSubmit} className="space-y-4">
         <CaseFilePicker files={files} onChange={setFiles} onError={setError}

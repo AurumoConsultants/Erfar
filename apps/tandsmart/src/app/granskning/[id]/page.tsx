@@ -12,13 +12,14 @@ import { AiDraftSchema } from '@/lib/ai/draftSchema'
 import ReviewWorkspace from './ReviewWorkspace'
 import ClinicReviewForm from './ClinicReviewForm'
 import RequestComplement from './RequestComplement'
+import ClinicRequestList from '@/components/ClinicRequestList'
 
 export default async function ReviewCasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const dentist = await requireDentist()
   const bundle = await loadCase(id, dentist.id)
   if (!bundle) notFound()
-  const { case: c, patient, analysis, files, messages, clinicReview } = bundle
+  const { case: c, patient, analysis, files, messages, clinicReview, clinicRequests } = bundle
 
   const parsedDraft = AiDraftSchema.safeParse(c.ai_draft)
   const orgNumber = normalizeOrgNumber(c.clinic_org_number)
@@ -51,6 +52,12 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
             <p className="text-sm whitespace-pre-wrap"><span className="font-medium">Frågor: </span>{c.patient_questions}</p>
           )}
           <CaseFilesList files={files} />
+          {clinicRequests.length > 0 && (
+            <div className="pt-2 space-y-2">
+              <p className="text-sm font-medium">Patientens begäran till kliniken</p>
+              <ClinicRequestList requests={clinicRequests} />
+            </div>
+          )}
         </Card>
         <Card>
           <h2 className="font-semibold mb-3">Prisjämförelse</h2>

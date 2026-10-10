@@ -10,6 +10,7 @@ import { requireProfile } from '@/lib/auth'
 import { loadCase } from '@/lib/caseData'
 import { SERVICE_LABELS, VERDICT_LABELS } from '@/lib/cases'
 import ComplementForm from './ComplementForm'
+import ClinicRequestPanel from './ClinicRequestPanel'
 
 function ReviewSection({ title, text }: { title: string; text: string | null }) {
   if (!text) return null
@@ -35,7 +36,7 @@ export default async function CasePage({
 
   const bundle = await loadCase(id, profile.id)
   if (!bundle) notFound()
-  const { case: c, analysis, files, messages, clinicReview } = bundle
+  const { case: c, analysis, files, messages, clinicReview, clinicRequests } = bundle
   const answered = c.status === 'besvarat' || c.status === 'avslutat'
 
   return (
@@ -87,6 +88,9 @@ export default async function CasePage({
               : 'Sylvia granskar ditt ärende just nu. Du får ett mejl när bedömningen är klar.'}
         </Card>
       )}
+
+      <ClinicRequestPanel caseId={c.id} defaultClinicName={c.clinic_name ?? ''} requests={clinicRequests}
+        canRequest={!answered} />
 
       {analysis.lines.length > 0 && (
         <Card>

@@ -19,7 +19,7 @@ The production project is **Tandsmart** (`nqveapbflmirytibdlis`, org Aurumo Cons
 2. SQL Editor → run every file in `apps/tandsmart/supabase/migrations/` in order. `00001` creates
    tables, RLS and the private `case-files` storage bucket; `00002` hardens and consolidates the
    RLS policies per Supabase's advisors; `00003` loads all 200 TLV referenspriser for 2026;
-   `00004` adds requests for more material (komplettering); `00005` adds a patient-facing note per code.
+   `00004` adds requests for more material (komplettering); `00005` adds a patient-facing note per code; `00006` adds clinic requests (journal/röntgen sent by the patient's clinic).
 3. Auth → URL configuration: set the site URL to the deployed domain and add redirect URLs for
    Vercel previews (`https://tandsmart-*-aurumoconsultants.vercel.app/**`) and local dev
    (`http://localhost:3040/**`).
@@ -66,6 +66,7 @@ publishes the new list, and check the högkostnadsskydd thresholds in `src/lib/p
 | Anyone | `/priser`, `/priser/[kod]`, `/guider/[slug]` | Public SEO pages: every TLV åtgärdskod with referenspris, patient-cost examples and the dentist's optional explanation (edited under Referenspriser); price guides in `src/lib/guides.ts`. Listed in `/sitemap.xml`. |
 | Anyone | `/snabbkoll` | Free price check: codes + prices → comparison with referenspris and estimated högkostnadsskydd / tiotandvård. No account. |
 | Patient | `/arenden/nytt` | Creates a case: services (pris / vårdplan / klinik), situation, questions, clinic + org.nr, uploads, line items. |
+| Clinic | `/klinik/[token]` | Time-limited (30 days) upload link the patient's clinic receives by email after the patient consents. Shows the consent, uploads go straight to storage via signed URLs; only the token's SHA-256 is stored. |
 | Patient | `/arenden/[id]` | Status, automatic price comparison, Sylvia's published answer, message thread. |
 | Sylvia | `/granskning` | Queue of open cases, oldest first, red after 3 days. |
 | Sylvia | `/granskning/[id]` | AI pre-analysis (optional), request more material (komplettering), review form, publish, clinic review with source links, messages. |

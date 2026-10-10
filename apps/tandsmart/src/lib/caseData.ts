@@ -47,7 +47,22 @@ export interface CaseFileRow {
   file_name: string
   mime_type: string
   kind: CaseFileKind
+  source: 'patient' | 'klinik'
   signedUrl: string | null
+}
+
+export interface ClinicRequestRow {
+  id: string
+  clinic_name: string
+  clinic_email: string
+  requested_items: string[]
+  status: 'skickad' | 'uppladdad' | 'aterkallad'
+  email_sent: boolean
+  expires_at: string
+  uploaded_at: string | null
+  uploaded_files: number
+  uploaded_by_name: string | null
+  created_at: string
 }
 
 export interface CaseMessageRow {
@@ -76,6 +91,7 @@ export interface CaseBundle {
   items: CaseItemRow[]
   files: CaseFileRow[]
   messages: CaseMessageRow[]
+  clinicRequests: ClinicRequestRow[]
   clinicReview: ClinicReviewRow | null
   references: ReferencePrice[]
   analysis: QuoteAnalysis
@@ -91,15 +107,18 @@ export async function loadCase(caseId: string, viewerId: string): Promise<CaseBu
   const c = caseRow as CaseRow
 
   const orgNumber = normalizeOrgNumber(c.clinic_org_number)
-  const [patientRes, itemsRes, filesRes, messagesRes, clinicRes, refsRes] = await Promise.all([
+  const [patientRes, itemsRes, filesRes, messagesRes, clinicRes, refsRes, requestsRes] = await Promise.all([
     supabase.from('profiles').select('full_name, email, birth_year').eq('id', c.patient_id).maybeSingle(),
     supabase.from('case_items').select('id, code, description, tooth, quantity, unit_price').eq('case_id', caseId).order('sort'),
-    supabase.from('case_files').select('id, path, file_name, mime_type, kind').eq('case_id', caseId).order('created_at'),
+    supabase.from('case_files').select('id, path, file_name, mime_type, kind, source').eq('case_id', caseId).order('created_at'),
     supabase.from('case_messages').select('id, author_id, body, created_at, author:profiles(full_name, role)').eq('case_id', caseId).order('created_at'),
     orgNumber
       ? supabase.from('clinic_reviews').select('*').eq('org_number', orgNumber).maybeSingle()
       : Promise.resolve({ data: null }),
     supabase.from('reference_prices').select('code, description, price_general, price_specialist').order('code'),
+    supabase.from('clinic_requests')
+      .select('id, clinic_name, clinic_email, requested_items, status, email_sent, expires_at, uploaded_at, uploaded_files, uploaded_by_name, created_at')
+      .eq('case_id', caseId).order('created_at', { ascending: false }),
     supabase.from('case_access_log').insert({ case_id: caseId, profile_id: viewerId, action: 'view' }),
   ])
 
@@ -125,6 +144,7 @@ export async function loadCase(caseId: string, viewerId: string): Promise<CaseBu
     items,
     files,
     messages: (messagesRes.data ?? []) as unknown as CaseMessageRow[],
+    clinicRequests: (requestsRes.data ?? []) as ClinicRequestRow[],
     clinicReview: clinicRes.data as ClinicReviewRow | null,
     references,
     analysis,

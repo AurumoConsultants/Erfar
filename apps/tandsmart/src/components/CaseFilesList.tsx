@@ -10,7 +10,10 @@ export default function CaseFilesList({ files }: { files: CaseFileRow[] }) {
           {f.signedUrl
             ? <a href={f.signedUrl} target="_blank" rel="noreferrer" className="text-accent-700 hover:underline truncate">{f.file_name}</a>
             : <span className="truncate">{f.file_name}</span>}
-          <span className="text-xs text-gray-500 shrink-0">{FILE_KIND_LABELS[f.kind]}</span>
+          <span className="text-xs text-gray-500 shrink-0">
+            {f.source === 'klinik' && <span className="mr-2 px-1.5 py-0.5 rounded bg-green-100 text-green-700">från kliniken</span>}
+            {FILE_KIND_LABELS[f.kind]}
+          </span>
         </li>
       ))}
     </ul>
