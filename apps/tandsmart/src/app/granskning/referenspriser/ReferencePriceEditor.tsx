@@ -61,29 +61,31 @@ export default function ReferencePriceEditor({ initial }: { initial: Row[] }) {
 
       <Card>
         <input placeholder="Filtrera på kod eller text…" aria-label="Filtrera" value={filter} onChange={e => setFilter(e.target.value)} className={fieldInputClassName('mb-3')} />
+        {/* Description wraps and prices never do, so the table fits a phone; the
+            scroll wrapper is only a fallback for very narrow screens. */}
+        <div className="-mx-5 px-5 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-500 border-b border-gray-200">
-              <th className="py-2 pr-3 font-medium">Kod</th>
-              <th className="py-2 pr-3 font-medium">Beskrivning</th>
-              <th className="py-2 pr-3 font-medium text-right">Allmän</th>
-              <th className="py-2 pr-3 font-medium text-right">Specialist</th>
-              <th className="py-2 font-medium text-right">År</th>
+            <tr className="text-left text-gray-500 border-b-2 border-accent-200">
+              <th className="py-2 pr-2 sm:pr-3 font-medium">Kod</th>
+              <th className="py-2 pr-2 sm:pr-3 font-medium">Beskrivning</th>
+              <th className="py-2 pr-2 sm:pr-3 font-medium text-right">Allmän</th>
+              <th className="py-2 font-medium text-right">Spec.</th>
             </tr>
           </thead>
           <tbody>
             {shown.map(r => (
-              <tr key={r.code} className="border-b border-gray-100 cursor-pointer hover:bg-gray-50"
+              <tr key={r.code} className="border-b border-gray-100 align-top cursor-pointer hover:bg-accent-50/60"
                 onClick={() => setDraft({ code: r.code, description: r.description, general: r.price_general?.toString() ?? '', specialist: r.price_specialist?.toString() ?? '', note: r.patient_note ?? '' })}>
-                <td className="py-1.5 pr-3 font-mono">{r.code}</td>
-                <td className="py-1.5 pr-3">{r.description}{r.patient_note && <span className="ml-2 text-xs text-accent-700" title="Har förklaring">✎</span>}</td>
-                <td className="py-1.5 pr-3 text-right">{r.price_general ?? '—'}</td>
-                <td className="py-1.5 pr-3 text-right">{r.price_specialist ?? '—'}</td>
-                <td className="py-1.5 text-right text-gray-500">{r.valid_year}</td>
+                <td className="py-1.5 pr-2 sm:pr-3 font-mono">{r.code}</td>
+                <td className="py-1.5 pr-2 sm:pr-3 [overflow-wrap:anywhere]">{r.description}{r.patient_note && <span className="ml-2 text-xs text-accent-700" title="Har förklaring">✎</span>}</td>
+                <td className="py-1.5 pr-2 sm:pr-3 text-right whitespace-nowrap font-semibold text-brand-navy">{r.price_general ?? '—'}</td>
+                <td className="py-1.5 text-right whitespace-nowrap text-gray-600">{r.price_specialist ?? '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       </Card>
     </div>
   )
