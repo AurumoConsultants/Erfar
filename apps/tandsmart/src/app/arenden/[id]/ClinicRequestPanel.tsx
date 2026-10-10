@@ -7,6 +7,7 @@ import Card from '@/components/ui/Card'
 import Field, { fieldInputClassName } from '@/components/ui/Field'
 import ClinicRequestList from '@/components/ClinicRequestList'
 import type { ClinicRequestRow } from '@/lib/caseData'
+import { formatPersonnummerInput, normalizePersonnummer } from '@/lib/clinicRequest'
 
 const ITEMS = [
   { value: 'journal', label: 'Journalanteckningar' },
@@ -106,7 +107,8 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
             </Field>
             <Field label="Ditt personnummer" htmlFor="cr-pnr" hint="Så att kliniken hittar rätt journal. Visas bara för kliniken via länken.">
               <input id="cr-pnr" required inputMode="numeric" placeholder="ÅÅÅÅMMDD-XXXX" value={personnummer}
-                onChange={e => setPersonnummer(e.target.value)} className={fieldInputClassName()} />
+                onChange={e => setPersonnummer(formatPersonnummerInput(e.target.value))}
+                onBlur={() => setPersonnummer(p => normalizePersonnummer(p) ?? p)} className={fieldInputClassName()} />
             </Field>
             <Field label="Period (valfritt)" htmlFor="cr-period" hint="T.ex. ”2024–2026” eller ”senaste besöket”.">
               <input id="cr-period" value={period} maxLength={100} onChange={e => setPeriod(e.target.value)} className={fieldInputClassName()} />

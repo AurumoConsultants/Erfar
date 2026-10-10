@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildConsentText, normalizePersonnummer } from './clinicRequest'
+import { buildConsentText, formatPersonnummerInput, normalizePersonnummer } from './clinicRequest'
 import { hashToken, newToken } from './clinicRequestServer'
 
 const now = new Date('2026-10-10')
@@ -40,5 +40,24 @@ describe('buildConsentText', () => {
     })
     expect(text).toContain('Anna Andersson (19811218-9876)')
     expect(text).toContain('Happident lämnar ut kopior av journalanteckningar, röntgenbilder för perioden 2025–2026')
+  })
+})
+
+describe('formatPersonnummerInput', () => {
+  it('inserts the dash in the twelve-digit form', () => {
+    expect(formatPersonnummerInput('197301315078')).toBe('19730131-5078')
+    expect(formatPersonnummerInput('19730131')).toBe('19730131')
+    expect(formatPersonnummerInput('197301315')).toBe('19730131-5')
+  })
+  it('inserts the dash in the ten-digit form', () => {
+    expect(formatPersonnummerInput('7301315078')).toBe('730131-5078')
+    expect(formatPersonnummerInput('730131')).toBe('730131')
+  })
+  it('keeps an existing dash in place and drops extra digits', () => {
+    expect(formatPersonnummerInput('19730131-5078')).toBe('19730131-5078')
+    expect(formatPersonnummerInput('1973013150789')).toBe('19730131-5078')
+  })
+  it('keeps the plus sign for people 100 or older', () => {
+    expect(formatPersonnummerInput('201231+1234')).toBe('201231+1234')
   })
 })

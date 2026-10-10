@@ -47,6 +47,18 @@ export function normalizePersonnummer(input: string, now = new Date()): string |
   return `${full.slice(0, 8)}-${full.slice(8)}`
 }
 
+// As-you-type formatting: inserts the dash before the last four digits.
+// A value starting with 19/20 is read as ÅÅÅÅMMDD-XXXX, anything else as
+// ÅÅMMDD-XXXX; a typed "+" (100 years or older) is kept as the separator.
+export function formatPersonnummerInput(value: string): string {
+  const plus = value.includes('+')
+  const raw = value.replace(/\D/g, '')
+  const long = !plus && /^(19|20)/.test(raw)
+  const digits = raw.slice(0, long ? 12 : 10)
+  const split = long ? 8 : 6
+  return digits.length > split ? `${digits.slice(0, split)}${plus ? '+' : '-'}${digits.slice(split)}` : digits
+}
+
 export function buildConsentText(o: {
   patientName: string
   personnummer: string
