@@ -1,9 +1,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { getProfile } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function Header() {
   const profile = await getProfile()
+  // Dentists see how many cases have unread messages next to "Granskning".
+  let unreadCases = 0
+  if (profile?.role === 'tandlakare') {
+    const supabase = await createClient()
+    const { data } = await supabase.rpc('unread_message_counts')
+    unreadCases = data?.length ?? 0
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
@@ -17,7 +25,13 @@ export default async function Header() {
           <Link href="/snabbkoll" className="text-brand-navy/80 hover:text-accent-600">Snabbkoll</Link>
           {profile?.role === 'tandlakare' && (
             <>
-              <Link href="/granskning" className="text-brand-navy/80 hover:text-accent-600">Granskning</Link>
+              <Link href={unreadCases ? '/granskning?status=olasta' : '/granskning'} className="text-brand-navy/80 hover:text-accent-600 inline-flex items-center gap-1.5">
+                Granskning
+                {unreadCases > 0 && (
+                  <span className="rounded-full bg-red-600 text-white text-xs font-bold min-w-5 h-5 px-1.5 inline-flex items-center justify-center"
+                    aria-label={`${unreadCases} ärenden med olästa meddelanden`}>{unreadCases}</span>
+                )}
+              </Link>
               <Link href="/granskning/referenspriser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Referenspriser</Link>
             </>
           )}

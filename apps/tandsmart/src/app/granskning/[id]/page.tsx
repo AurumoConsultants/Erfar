@@ -6,6 +6,7 @@ import CaseMessages from '@/components/CaseMessages'
 import CaseFilesList from '@/components/CaseFilesList'
 import { requireDentist } from '@/lib/auth'
 import { loadCase } from '@/lib/caseData'
+import { createClient } from '@/lib/supabase/server'
 import { normalizeOrgNumber } from '@/lib/orgNumber'
 import { SERVICE_LABELS, clinicSourceLinks } from '@/lib/cases'
 import { AiDraftSchema } from '@/lib/ai/draftSchema'
@@ -21,6 +22,10 @@ export default async function ReviewCasePage({ params }: { params: Promise<{ id:
   const dentist = await requireDentist()
   const bundle = await loadCase(id, dentist.id)
   if (!bundle) notFound()
+  // Opening the case marks its messages as read for this dentist.
+  const supabase = await createClient()
+  await supabase.from('case_message_reads')
+    .upsert({ case_id: id, profile_id: dentist.id, last_read_at: new Date().toISOString() })
   const { case: c, patient, analysis, files, messages, clinicReview, clinicRequests } = bundle
 
   const parsedDraft = AiDraftSchema.safeParse(c.ai_draft)

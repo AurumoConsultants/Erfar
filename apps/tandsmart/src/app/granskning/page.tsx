@@ -7,6 +7,7 @@ import { requireDentist } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { SERVICE_LABELS, STATUS_LABELS, type CaseService, type CaseStatus } from '@/lib/cases'
 import PageHeader from '@/components/ui/PageHeader'
+import Icon from '@/components/Icon'
 
 const TABS: CaseStatus[] = ['inskickat', 'under_granskning', 'komplettering', 'besvarat', 'avslutat']
 
@@ -14,6 +15,7 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
   await requireDentist()
   const { status: statusParam } = await searchParams
   const showAll = statusParam === 'alla'
+  const showUnread = statusParam === 'olasta'
   const status = TABS.includes(statusParam as CaseStatus) ? (statusParam as CaseStatus) : null
 
   const supabase = await createClient()
@@ -21,6 +23,8 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
     .from('cases')
     .select('id, title, status, services, clinic_name, created_at, info_requested_at, info_answered_at, patient:profiles!cases_patient_id_fkey(full_name)')
     .order('created_at', { ascending: true })
+  const { data: unreadRows } = await supabase.rpc('unread_message_counts')
+  const unread = new Map(((unreadRows ?? []) as { case_id: string; unread: number }[]).map(r => [r.case_id, r.unread]))
 
   const cases = (all ?? []) as unknown as {
     id: string; title: string; status: CaseStatus; services: CaseService[]; clinic_name: string | null
@@ -29,7 +33,11 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
   }[]
   const open = cases.filter(c => c.status === 'inskickat' || c.status === 'under_granskning')
   // Open cases oldest first (work queue); "Alla" newest first (archive view).
-  const shown = showAll ? [...cases].reverse() : status ? cases.filter(c => c.status === status) : open
+  const withUnread = cases.filter(c => unread.has(c.id))
+  const shown = showAll ? [...cases].reverse()
+    : showUnread ? withUnread
+    : status ? cases.filter(c => c.status === status)
+    : open
   const tabClass = (active: boolean) =>
     `px-3 py-1.5 rounded-full ${active ? 'bg-accent-600 text-white' : 'bg-white border border-gray-200 hover:border-accent-300'}`
 
@@ -37,7 +45,9 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
     <div className="space-y-6">
       <PageHeader icon="inbox" eyebrow="Tandläkarvy" title="Granskning"
         actions={<Link href="/granskning/referenspriser" className={buttonClassName('secondary', 'bg-white')}>Referenspriser</Link>}>
-        {showAll ? `${cases.length} ärenden totalt, nyast först.` : `${open.length} öppna ärenden, äldst först.`} Klicka på ett ärende för att öppna det.
+        {showAll ? `${cases.length} ärenden totalt, nyast först.`
+          : showUnread ? `${withUnread.length} ärenden med olästa meddelanden.`
+          : `${open.length} öppna ärenden, äldst först.`} Klicka på ett ärende för att öppna det.
       </PageHeader>
 
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -55,8 +65,13 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
       </dl>
 
       <nav className="flex gap-2 flex-wrap text-sm">
-        <Link href="/granskning" className={tabClass(!status && !showAll)}>
+        <Link href="/granskning" className={tabClass(!status && !showAll && !showUnread)}>
           Öppna ({open.length})
+        </Link>
+        <Link href="/granskning?status=olasta"
+          className={`${tabClass(showUnread)} inline-flex items-center gap-1.5 ${!showUnread && withUnread.length ? 'border-red-300! text-red-700' : ''}`}>
+          {withUnread.length > 0 && <span aria-hidden className={`h-2 w-2 rounded-full ${showUnread ? 'bg-white' : 'bg-red-500'}`} />}
+          Olästa meddelanden ({withUnread.length})
         </Link>
         <Link href="/granskning?status=alla" className={tabClass(showAll)}>
           Alla ärenden ({cases.length})
@@ -71,11 +86,20 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
       <div className="space-y-2">
         {shown.map(c => {
           const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / 86_400_000)
+          const unreadCount = unread.get(c.id) ?? 0
           return (
             <Link key={c.id} href={`/granskning/${c.id}`} className="block">
               <Card className={`px-4 py-3 border-l-4 ${days >= 3 && (c.status === 'inskickat' || c.status === 'under_granskning') ? 'border-l-red-500' : 'border-l-accent-500'} hover:border-accent-300 hover:shadow-md transition flex items-center justify-between gap-3`}>
                 <div className="min-w-0">
-                  <p className="font-brand font-semibold text-brand-navy">{c.title}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-brand font-semibold text-brand-navy">{c.title}</p>
+                    {unreadCount > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+                        <Icon name="chat" className="h-3.5 w-3.5" />
+                        {unreadCount} {unreadCount === 1 ? 'oläst meddelande' : 'olästa meddelanden'}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {c.patient?.full_name} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
                     {c.clinic_name && ` — ${c.clinic_name}`}
