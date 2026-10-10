@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { analyzeQuote, type QuoteAnalysis, type ReferencePrice } from '@/lib/pricing'
+import { normalizeOrgNumber } from '@/lib/orgNumber'
 import type { CaseFileKind, CaseService, CaseStatus, CaseVerdict, ClinicRating } from '@/lib/cases'
 
 export interface CaseRow {
@@ -75,11 +76,6 @@ export interface CaseBundle {
   clinicReview: ClinicReviewRow | null
   references: ReferencePrice[]
   analysis: QuoteAnalysis
-}
-
-export function normalizeOrgNumber(value: string | null) {
-  const digits = (value ?? '').replace(/\D/g, '')
-  return digits.length === 10 ? `${digits.slice(0, 6)}-${digits.slice(6)}` : null
 }
 
 // Loads everything a case page needs, under the caller's own RLS — a

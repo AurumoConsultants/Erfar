@@ -9,6 +9,7 @@ import Field, { fieldInputClassName } from '@/components/ui/Field'
 import QuoteItemsEditor, { emptyItem, toQuoteItems, type EditableItem } from '@/components/QuoteItemsEditor'
 import PriceAnalysisView from '@/components/PriceAnalysisView'
 import { analyzeQuote, type ReferencePrice } from '@/lib/pricing'
+import { formatOrgNumberInput, normalizeOrgNumber } from '@/lib/orgNumber'
 import {
   ACCEPTED_FILE_TYPES, FILE_KIND_LABELS, MAX_FILE_BYTES, SERVICES,
   type CaseFileKind, type CaseService,
@@ -87,7 +88,7 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
         patient_description: description.trim() || null,
         patient_questions: questions.trim() || null,
         clinic_name: clinicName.trim() || null,
-        clinic_org_number: clinicOrgNumber.trim() || null,
+        clinic_org_number: normalizeOrgNumber(clinicOrgNumber) ?? (clinicOrgNumber.trim() || null),
         clinic_city: clinicCity.trim() || null,
         treating_dentist: treatingDentist.trim() || null,
         is_specialist: isSpecialist,
@@ -176,8 +177,8 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
             <input id="cn" value={clinicName} onChange={e => setClinicName(e.target.value)} className={fieldInputClassName()} />
           </Field>
           <Field label="Organisationsnummer" htmlFor="org" hint="Står ofta på kostnadsförslaget. Behövs för klinikkoll.">
-            <input id="org" placeholder="556xxx-xxxx" value={clinicOrgNumber}
-              onChange={e => setClinicOrgNumber(e.target.value)} className={fieldInputClassName()} />
+            <input id="org" placeholder="556xxx-xxxx" inputMode="numeric" value={clinicOrgNumber}
+              onChange={e => setClinicOrgNumber(formatOrgNumberInput(e.target.value))} className={fieldInputClassName()} />
           </Field>
           <Field label="Ort" htmlFor="city">
             <input id="city" value={clinicCity} onChange={e => setClinicCity(e.target.value)} className={fieldInputClassName()} />
