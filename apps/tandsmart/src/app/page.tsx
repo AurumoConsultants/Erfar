@@ -154,9 +154,11 @@ export default async function HomePage() {
             <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white')}>Gör en gratis snabbkoll</Link>
           </div>
         </div>
-        <div className="md:col-span-2 relative min-h-80 md:min-h-full order-first md:order-last">
+        <div className="md:col-span-2 relative min-h-96 md:min-h-full order-first md:order-last overflow-hidden bg-gradient-to-br from-accent-100 via-accent-200 to-accent-400">
+          {/* Cut-out portrait (transparent background) standing on the brand gradient. */}
+          <div aria-hidden className="absolute -right-10 top-10 h-64 w-64 rounded-full bg-white/40 blur-2xl" />
           <Image src="/sylvia.webp" alt="Sylvia, legitimerad tandläkare" fill priority={false}
-            sizes="(min-width: 768px) 40vw, 100vw" className="object-cover object-top" />
+            sizes="(min-width: 768px) 40vw, 100vw" className="object-contain object-bottom pt-6" />
         </div>
       </section>
     </div>
