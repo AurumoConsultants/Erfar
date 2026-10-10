@@ -44,6 +44,9 @@ export default async function CasePage({
   const { case: c, analysis, files, messages, clinicReview, clinicRequests } = bundle
   const answered = c.status === 'besvarat' || c.status === 'avslutat'
   const supabase = await createClient()
+  // Opening the case marks the dentist's messages and answer as seen.
+  await supabase.from('case_message_reads')
+    .upsert({ case_id: id, profile_id: profile.id, last_read_at: new Date().toISOString() })
   const [{ data: meetings }, bankIdSession, { data: identity }] = await Promise.all([
     supabase.from('video_meetings').select(MEETING_COLUMNS).eq('case_id', id).order('scheduled_at'),
     hasBankIdSession(profile.id),
