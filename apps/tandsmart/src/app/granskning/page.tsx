@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
+import { buttonClassName } from '@/components/ui/Button'
 import StatusBadge from '@/components/StatusBadge'
 import { requireDentist } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -10,6 +11,7 @@ const TABS: CaseStatus[] = ['inskickat', 'under_granskning', 'besvarat', 'avslut
 export default async function ReviewQueuePage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   await requireDentist()
   const { status: statusParam } = await searchParams
+  const showAll = statusParam === 'alla'
   const status = TABS.includes(statusParam as CaseStatus) ? (statusParam as CaseStatus) : null
 
   const supabase = await createClient()
@@ -23,22 +25,29 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
     created_at: string; patient: { full_name: string } | null
   }[]
   const open = cases.filter(c => c.status === 'inskickat' || c.status === 'under_granskning')
-  const shown = status ? cases.filter(c => c.status === status) : open
+  // Open cases oldest first (work queue); "Alla" newest first (archive view).
+  const shown = showAll ? [...cases].reverse() : status ? cases.filter(c => c.status === status) : open
+  const tabClass = (active: boolean) =>
+    `px-3 py-1.5 rounded-full ${active ? 'bg-accent-600 text-white' : 'bg-white border border-gray-200 hover:border-accent-300'}`
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Granskning</h1>
-        <p className="text-sm text-gray-500 mt-1">{open.length} öppna ärenden, äldst först.</p>
+        <p className="text-sm text-gray-500 mt-1">
+          {showAll ? `${cases.length} ärenden totalt, nyast först.` : `${open.length} öppna ärenden, äldst först.`} Klicka på ett ärende för att öppna det.
+        </p>
       </div>
 
       <nav className="flex gap-2 flex-wrap text-sm">
-        <Link href="/granskning" className={`px-3 py-1.5 rounded-full ${!status ? 'bg-accent-600 text-white' : 'bg-white border border-gray-200'}`}>
+        <Link href="/granskning" className={tabClass(!status && !showAll)}>
           Öppna ({open.length})
         </Link>
+        <Link href="/granskning?status=alla" className={tabClass(showAll)}>
+          Alla ärenden ({cases.length})
+        </Link>
         {TABS.map(t => (
-          <Link key={t} href={`/granskning?status=${t}`}
-            className={`px-3 py-1.5 rounded-full ${status === t ? 'bg-accent-600 text-white' : 'bg-white border border-gray-200'}`}>
+          <Link key={t} href={`/granskning?status=${t}`} className={tabClass(status === t)}>
             {STATUS_LABELS[t].label} ({cases.filter(c => c.status === t).length})
           </Link>
         ))}
@@ -49,19 +58,22 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
           const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / 86_400_000)
           return (
             <Link key={c.id} href={`/granskning/${c.id}`} className="block">
-              <Card className="px-4 py-3 hover:border-accent-300 transition flex items-center justify-between gap-3">
-                <div>
+              <Card className="px-4 py-3 hover:border-accent-300 hover:shadow-sm transition flex items-center justify-between gap-3">
+                <div className="min-w-0">
                   <p className="font-medium">{c.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {c.patient?.full_name} · {c.services.map(s => SERVICE_LABELS[s]).join(' · ')}
                     {c.clinic_name && ` — ${c.clinic_name}`}
                   </p>
                 </div>
-                <div className="text-right shrink-0">
-                  <StatusBadge status={c.status} />
-                  <p className={`text-xs mt-1 ${days >= 3 && c.status !== 'besvarat' && c.status !== 'avslutat' ? 'text-red-600' : 'text-gray-400'}`}>
-                    {days === 0 ? 'idag' : `${days} d sedan`}
-                  </p>
+                <div className="flex items-center gap-4 shrink-0">
+                  <div className="text-right">
+                    <StatusBadge status={c.status} />
+                    <p className={`text-xs mt-1 ${days >= 3 && c.status !== 'besvarat' && c.status !== 'avslutat' ? 'text-red-600' : 'text-gray-400'}`}>
+                      {days === 0 ? 'idag' : `${days} d sedan`}
+                    </p>
+                  </div>
+                  <span className={buttonClassName('secondary', 'hidden sm:inline-flex')}>Öppna ärende →</span>
                 </div>
               </Card>
             </Link>
