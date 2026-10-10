@@ -8,6 +8,8 @@ import { buttonClassName } from '@/components/ui/Button'
 import QuoteItemsEditor, { emptyItem, toQuoteItems, type EditableItem } from '@/components/QuoteItemsEditor'
 import PriceAnalysisView from '@/components/PriceAnalysisView'
 import { analyzeQuote, type ReferencePrice } from '@/lib/pricing'
+import CtaBand from '@/components/ui/CtaBand'
+import CardTitle from '@/components/ui/CardTitle'
 
 export default function QuickCheck({ references, initialCode }: { references: ReferencePrice[]; initialCode?: string }) {
   const [items, setItems] = useState<EditableItem[]>(() => {
@@ -27,7 +29,7 @@ export default function QuickCheck({ references, initialCode }: { references: Re
   return (
     <div className="space-y-6">
       <Card className="space-y-4">
-        <h2 className="font-semibold">Åtgärder i prisförslaget</h2>
+        <CardTitle icon="clipboard">Åtgärder i prisförslaget</CardTitle>
         <QuoteItemsEditor items={items} onChange={setItems} references={references} showTooth={false} />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
           <Field label="Ditt födelseår" htmlFor="by">
@@ -46,17 +48,13 @@ export default function QuickCheck({ references, initialCode }: { references: Re
       </Card>
 
       <Card>
-        <h2 className="font-semibold mb-3">Resultat</h2>
+        <CardTitle icon="chart" className="mb-4">Resultat</CardTitle>
         <PriceAnalysisView analysis={analysis} />
       </Card>
 
-      <Card className="bg-accent-50 border-accent-200 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-        <p className="text-sm text-gray-700">
-          Siffrorna säger inte om behandlingen behövs. Vill du att en legitimerad tandläkare går igenom
-          vårdplanen och kliniken?
-        </p>
-        <Link href="/arenden/nytt" className={buttonClassName('primary', 'shrink-0')}>Skapa ett ärende</Link>
-      </Card>
+      <CtaBand actions={<Link href="/arenden/nytt" className={buttonClassName('primary', 'bg-accent-500! hover:bg-accent-400!')}>Skapa ett ärende</Link>}>
+        Siffrorna säger inte om behandlingen behövs. Låt en legitimerad tandläkare gå igenom vårdplanen och kliniken.
+      </CtaBand>
     </div>
   )
 }

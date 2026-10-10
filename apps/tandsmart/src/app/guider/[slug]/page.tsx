@@ -6,6 +6,9 @@ import { buttonClassName } from '@/components/ui/Button'
 import CodePriceTable from '@/components/CodePriceTable'
 import { getGuide } from '@/lib/guides'
 import { getReferencePrices, siteUrl } from '@/lib/publicPrices'
+import CtaBand from '@/components/ui/CtaBand'
+import CardTitle from '@/components/ui/CardTitle'
+import PageHeader from '@/components/ui/PageHeader'
 
 
 type Props = { params: Promise<{ slug: string }> }
@@ -40,42 +43,38 @@ export default async function GuidePage({ params }: Props) {
     <article className="space-y-6 max-w-3xl">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <nav className="text-sm text-gray-500"><Link href="/guider" className="hover:underline">Prisguider</Link></nav>
-      <header className="space-y-3">
-        <h1 className="text-3xl font-bold">{guide.title}</h1>
-        <p className="text-lg text-gray-600">{guide.intro}</p>
-      </header>
+      <PageHeader icon="book" eyebrow="Prisguide" title={guide.title}>
+        <p className="text-base">{guide.intro}</p>
+      </PageHeader>
 
       {rows.length > 0 && (
         <Card className="space-y-3">
-          <h2 className="font-semibold">Referenspriser{year ? ` ${year}` : ''}</h2>
+          <CardTitle icon="table">Referenspriser{year ? ` ${year}` : ''}</CardTitle>
           <CodePriceTable rows={rows} />
           <p className="text-xs text-gray-500">Källa: TLV. Kliniken sätter sitt eget pris — tandvårdsstödet räknas på referenspriset.</p>
         </Card>
       )}
 
       {guide.sections.map(s => (
-        <section key={s.heading} className="space-y-2">
-          <h2 className="text-xl font-semibold">{s.heading}</h2>
+        <section key={s.heading} className="space-y-2 border-l-4 border-accent-300 pl-4">
+          <h2 className="text-xl font-bold">{s.heading}</h2>
           {s.paragraphs.map((p, i) => <p key={i} className="text-gray-700">{p}</p>)}
         </section>
       ))}
 
       {guide.questions.length > 0 && (
         <Card className="bg-accent-50 border-accent-200">
-          <h2 className="font-semibold mb-2">Frågor att ställa till din tandläkare</h2>
+          <CardTitle icon="question" className="mb-3">Frågor att ställa till din tandläkare</CardTitle>
           <ul className="list-disc pl-5 space-y-1 text-sm">{guide.questions.map(q => <li key={q}>{q}</li>)}</ul>
         </Card>
       )}
 
-      <Card className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-        <p className="text-sm text-gray-700">
-          Har du fått ett kostnadsförslag? Jämför det gratis, eller låt en legitimerad tandläkare granska hela vårdplanen.
-        </p>
-        <div className="flex gap-2 shrink-0">
-          <Link href="/snabbkoll" className={buttonClassName('secondary')}>Snabbkoll</Link>
-          <Link href="/arenden/nytt" className={buttonClassName('primary')}>Få en bedömning</Link>
-        </div>
-      </Card>
+      <CtaBand actions={<>
+        <Link href="/snabbkoll" className={buttonClassName('secondary', 'bg-white/10! text-white! border-white/30! hover:bg-white/20!')}>Snabbkoll</Link>
+        <Link href="/arenden/nytt" className={buttonClassName('primary', 'bg-accent-500! hover:bg-accent-400!')}>Få en bedömning</Link>
+      </>}>
+        Har du fått ett kostnadsförslag? Jämför det gratis, eller låt en legitimerad tandläkare granska hela vårdplanen.
+      </CtaBand>
 
       <p className="text-xs text-gray-500">Informationen är allmän och ersätter inte en bedömning av din egen munhälsa.</p>
     </article>

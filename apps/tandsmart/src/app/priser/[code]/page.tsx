@@ -7,6 +7,9 @@ import CodePriceTable from '@/components/CodePriceTable'
 import { analyzeQuote, formatKr, HKS_LOWER, HKS_UPPER } from '@/lib/pricing'
 import { getReferencePrice, getReferencePrices, groupOf, siteUrl } from '@/lib/publicPrices'
 import { GUIDES } from '@/lib/guides'
+import CtaBand from '@/components/ui/CtaBand'
+import CardTitle from '@/components/ui/CardTitle'
+import PageHeader from '@/components/ui/PageHeader'
 
 
 type Props = { params: Promise<{ code: string }> }
@@ -69,25 +72,24 @@ export default async function CodePage({ params }: Props) {
         {group && <> / <Link href={`/priser#${group.slug}`} className="hover:underline">{group.title}</Link></>}
       </nav>
 
-      <header className="space-y-2">
-        <p className="font-mono text-accent-700 font-semibold">Åtgärd {ref.code}</p>
-        <h1 className="text-3xl font-bold">{ref.description}</h1>
-      </header>
+      <PageHeader icon="tag" eyebrow={`Åtgärd ${ref.code}`} title={ref.description}>
+        {group?.title}
+      </PageHeader>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card>
-          <p className="text-sm text-gray-500">Referenspris allmäntandvård {year}</p>
-          <p className="text-3xl font-bold mt-1">{ref.price_general != null ? formatKr(ref.price_general) : '—'}</p>
-        </Card>
+        <div className="rounded-2xl bg-accent-600 text-white p-5 shadow-md shadow-accent-600/20">
+          <p className="text-sm text-white/80">Referenspris allmäntandvård {year}</p>
+          <p className="font-brand font-bold text-4xl mt-1">{ref.price_general != null ? formatKr(ref.price_general) : '—'}</p>
+        </div>
         <Card>
           <p className="text-sm text-gray-500">Referenspris specialisttandvård {year}</p>
-          <p className="text-3xl font-bold mt-1">{ref.price_specialist != null ? formatKr(ref.price_specialist) : '—'}</p>
+          <p className="font-brand font-bold text-4xl text-brand-navy mt-1">{ref.price_specialist != null ? formatKr(ref.price_specialist) : '—'}</p>
         </Card>
       </div>
 
       {ref.patient_note && (
         <Card className="bg-accent-50 border-accent-200">
-          <h2 className="font-semibold mb-2">Tandläkaren förklarar</h2>
+          <CardTitle icon="doctor" className="mb-3">Tandläkaren förklarar</CardTitle>
           <p className="text-sm whitespace-pre-wrap">{ref.patient_note}</p>
           <p className="text-xs text-gray-500 mt-2">Sylvia, leg. tandläkare</p>
         </Card>
@@ -95,14 +97,14 @@ export default async function CodePage({ params }: Props) {
 
       {group && (
         <Card>
-          <h2 className="font-semibold mb-2">{group.title}</h2>
+          <CardTitle icon="folder" className="mb-3">{group.title}</CardTitle>
           <p className="text-sm text-gray-600">{group.text}</p>
         </Card>
       )}
 
       {examples.length > 0 && (
         <Card className="space-y-3">
-          <h2 className="font-semibold">Vad betalar du själv?</h2>
+          <CardTitle icon="calculator">Vad betalar du själv?</CardTitle>
           <p className="text-sm text-gray-600">
             Om kliniken tar referenspriset, {formatKr(price!)}, och åtgärden görs en gång. Tar kliniken mer betalar du
             skillnaden utöver detta.
@@ -111,7 +113,7 @@ export default async function CodePage({ params }: Props) {
             {examples.map(e => (
               <div key={e.label} className="flex justify-between gap-4 py-2">
                 <dt className="text-gray-600">{e.label}</dt>
-                <dd className="font-semibold whitespace-nowrap">{formatKr(e.cost)}</dd>
+                <dd className="font-brand font-bold text-brand-navy whitespace-nowrap">{formatKr(e.cost)}</dd>
               </div>
             ))}
           </dl>
@@ -122,16 +124,13 @@ export default async function CodePage({ params }: Props) {
         </Card>
       )}
 
-      <Card className="bg-accent-50 border-accent-200 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-        <p className="text-sm text-gray-700">
-          Står åtgärd {ref.code} på ditt kostnadsförslag? Jämför klinikens pris med referenspriset — gratis.
-        </p>
-        <Link href={`/snabbkoll?kod=${ref.code}`} className={buttonClassName('primary', 'shrink-0')}>Jämför ditt pris</Link>
-      </Card>
+      <CtaBand actions={<Link href={`/snabbkoll?kod=${ref.code}`} className={buttonClassName('primary', 'bg-accent-500! hover:bg-accent-400!')}>Jämför ditt pris</Link>}>
+        Står åtgärd {ref.code} på ditt kostnadsförslag? Jämför klinikens pris med referenspriset — gratis.
+      </CtaBand>
 
       {guides.length > 0 && (
         <Card>
-          <h2 className="font-semibold mb-2">Läs mer</h2>
+          <CardTitle icon="book" className="mb-3">Läs mer</CardTitle>
           <ul className="text-sm space-y-1">
             {guides.map(g => <li key={g.slug}><Link href={`/guider/${g.slug}`} className="text-accent-700 hover:underline">{g.title}</Link></li>)}
           </ul>
@@ -140,7 +139,7 @@ export default async function CodePage({ params }: Props) {
 
       {related.length > 0 && (
         <Card className="space-y-3">
-          <h2 className="font-semibold">Närliggande åtgärder</h2>
+          <CardTitle icon="table">Närliggande åtgärder</CardTitle>
           <CodePriceTable rows={related} />
         </Card>
       )}

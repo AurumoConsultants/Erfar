@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import QuickCheck from './QuickCheck'
 import type { ReferencePrice } from '@/lib/pricing'
+import PageHeader from '@/components/ui/PageHeader'
 
 export const metadata = { title: 'Snabbkoll av tandvårdspris — Tandsmart' }
 
@@ -14,13 +15,10 @@ export default async function QuickCheckPage({ searchParams }: { searchParams: P
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Snabbkoll av ditt prisförslag</h1>
-        <p className="text-gray-600 mt-1">
-          Skriv in åtgärdskoderna och priserna från ditt kostnadsförslag. Du ser direkt hur de står sig mot
-          TLV:s referenspriser och ungefär vad du betalar efter tandvårdsstödet. Inget konto behövs.
-        </p>
-      </div>
+      <PageHeader icon="calculator" eyebrow="Gratis · inget konto behövs" title="Snabbkoll av ditt prisförslag">
+        Skriv in åtgärdskoderna och priserna från ditt kostnadsförslag. Du ser direkt hur de står sig mot
+        TLV:s referenspriser och ungefär vad du betalar efter tandvårdsstödet.
+      </PageHeader>
       <QuickCheck references={(data ?? []) as ReferencePrice[]} initialCode={kod?.replace(/\D/g, '').slice(0, 4) || undefined} />
     </div>
   )

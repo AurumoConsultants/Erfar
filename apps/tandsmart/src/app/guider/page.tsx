@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import { GUIDES } from '@/lib/guides'
+import PageHeader from '@/components/ui/PageHeader'
 
 export const metadata: Metadata = {
   title: 'Prisguider för tandvård | Tandsmart',
@@ -12,16 +13,16 @@ export const metadata: Metadata = {
 export default function GuidesPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Prisguider för tandvård</h1>
-        <p className="text-gray-600 mt-2">Förstå vad behandlingen kostar och vad du bör fråga om innan du säger ja.</p>
-      </div>
+      <PageHeader icon="book" eyebrow={`${GUIDES.length} guider`} title="Prisguider för tandvård">
+        Förstå vad behandlingen kostar och vad du bör fråga om innan du säger ja.
+      </PageHeader>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {GUIDES.map(g => (
           <Link key={g.slug} href={`/guider/${g.slug}`} className="block">
-            <Card className="h-full hover:border-accent-300 transition">
-              <h2 className="font-semibold">{g.title}</h2>
-              <p className="text-sm text-gray-600 mt-1">{g.description}</p>
+            <Card className="group h-full border-t-4 border-t-accent-500 hover:-translate-y-0.5 hover:shadow-lg hover:border-accent-300 transition">
+              <h2 className="text-lg font-bold">{g.title}</h2>
+              <p className="text-sm text-gray-600 mt-2">{g.description}</p>
+              <p className="font-brand font-semibold text-accent-700 text-sm mt-3">Läs guiden <span aria-hidden className="inline-block transition group-hover:translate-x-1">→</span></p>
             </Card>
           </Link>
         ))}
