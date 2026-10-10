@@ -114,7 +114,6 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
                       {days === 0 ? 'idag' : `${days} d sedan`}
                     </p>
                   </div>
-                  <span className={buttonClassName('secondary', 'hidden sm:inline-flex')}>Öppna ärende →</span>
                 </div>
               </Card>
             </Link>

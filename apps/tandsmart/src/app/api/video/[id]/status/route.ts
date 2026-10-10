@@ -13,6 +13,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   if (status === 'avbokad') await deleteMeeting(access.meeting.whereby_meeting_id).catch(e => console.error(e))
   await createAdminClient().from('video_meetings').update({ status }).eq('id', id)
-  const recordings = status === 'genomford' ? await syncRecordings(access.meeting).catch(() => 0) : 0
+  const recordings = status === 'genomford' ? await syncRecordings(access.meeting).catch(e => { console.error('whereby sync', e); return 0 }) : 0
   return NextResponse.json({ ok: true, recordings })
 }

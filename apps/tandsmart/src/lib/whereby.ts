@@ -42,19 +42,34 @@ export async function deleteMeeting(meetingId: string) {
 export interface WherebyRecording { recordingId: string; roomName: string; startDate?: string; endDate?: string }
 
 // Recordings for one room. The list endpoint is paged; tandsmart rooms are
-// one-off, so a handful of pages always covers them.
+// one-off, so a handful of pages always covers them. Tolerant of the exact
+// response shape, and logs it when nothing matches so a mismatch is visible.
 export async function listRecordings(roomName: string): Promise<WherebyRecording[]> {
+  const norm = (n: unknown) => String(n ?? '').replace(/^\//, '').toLowerCase()
+  const target = norm(roomName)
   const found: WherebyRecording[] = []
+  let seen = 0
   let cursor: string | undefined
   for (let page = 0; page < 10; page++) {
     const qs = new URLSearchParams({ limit: '100', ...(cursor ? { cursor } : {}) })
-    const res = await call<{ results: WherebyRecording[]; cursor?: string }>(`/recordings?${qs}`)
-    // roomName from the API may or may not carry the leading slash.
-    const norm = (n: string) => n.replace(/^\//, '')
-    found.push(...res.results.filter(r => norm(r.roomName) === norm(roomName)))
-    if (!res.cursor) break
-    cursor = res.cursor
+    const res = await call<Record<string, unknown>>(`/recordings?${qs}`)
+    const items = (Array.isArray(res) ? res : (res.results ?? res.data ?? res.recordings ?? [])) as Record<string, unknown>[]
+    seen += items.length
+    for (const r of items) {
+      const name = norm(r.roomName ?? r.room_name ?? r.roomUrl)
+      if (name === target || name.endsWith(`/${target}`)) {
+        found.push({
+          recordingId: String(r.recordingId ?? r.id),
+          roomName: String(r.roomName ?? ''),
+          startDate: (r.startDate ?? r.startedAt) as string | undefined,
+          endDate: (r.endDate ?? r.endedAt) as string | undefined,
+        })
+      }
+    }
+    cursor = (res as { cursor?: string }).cursor
+    if (!cursor || items.length === 0) break
   }
+  if (!found.length) console.warn('whereby: no recording for', target, `(${seen} recordings listed)`)
   return found
 }
 
