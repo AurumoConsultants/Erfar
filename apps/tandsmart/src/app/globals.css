@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/*
+ * Tandsmart palette: a calm teal-blue primary (trust, clinical) — shared
+ * UI primitives in components/ui use the `accent-*` alias only, exactly as
+ * in Erfar, Procere and Windowa, so they're copied over unchanged.
+ */
+@theme {
+  --color-accent-50: #effaf9;
+  --color-accent-100: #d7f2ef;
+  --color-accent-200: #b2e5df;
+  --color-accent-300: #7fd0c8;
+  --color-accent-400: #4bb3aa;
+  --color-accent-500: #2f978f;
+  --color-accent-600: #237a74;
+  --color-accent-700: #1f625e;
+  --color-accent-800: #1d4f4c;
+  --color-accent-900: #1b4240;
+}

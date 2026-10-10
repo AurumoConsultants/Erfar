@@ -5,7 +5,9 @@
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:mobile": "pnpm --filter mobile start",
+    "dev:tandsmart": "pnpm --filter tandsmart dev",
     "build:web": "pnpm --filter web build",
+    "build:tandsmart": "pnpm --filter tandsmart build",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset"
   },

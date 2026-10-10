@@ -1,0 +1,35 @@
+import Link from 'next/link'
+import { getProfile } from '@/lib/auth'
+
+export default async function Header() {
+  const profile = await getProfile()
+
+  return (
+    <header className="bg-white border-b border-gray-200">
+      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <Link href="/" className="font-bold text-lg text-accent-700">
+          tand<span className="text-gray-900">smart</span>
+        </Link>
+        <nav className="flex items-center gap-4 text-sm">
+          <Link href="/snabbkoll" className="text-gray-600 hover:text-gray-900">Snabbkoll av pris</Link>
+          {profile?.role === 'tandlakare' && (
+            <>
+              <Link href="/granskning" className="text-gray-600 hover:text-gray-900">Granskning</Link>
+              <Link href="/granskning/referenspriser" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Referenspriser</Link>
+            </>
+          )}
+          {profile?.role === 'patient' && (
+            <Link href="/arenden" className="text-gray-600 hover:text-gray-900">Mina ärenden</Link>
+          )}
+          {profile ? (
+            <form action="/auth/logout" method="post">
+              <button className="text-gray-500 hover:text-gray-900">Logga ut</button>
+            </form>
+          ) : (
+            <Link href="/auth/login" className="font-semibold text-accent-700">Logga in</Link>
+          )}
+        </nav>
+      </div>
+    </header>
+  )
+}
