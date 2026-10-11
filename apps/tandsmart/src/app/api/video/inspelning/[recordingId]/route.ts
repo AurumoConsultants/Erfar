@@ -4,7 +4,7 @@ import { meetingAccess } from '@/lib/video'
 import { recordingAccessLink } from '@/lib/whereby'
 
 // Plays a recording: checks access, logs it, then redirects to a short-lived
-// Whereby link. Patients must be signed in with BankID.
+// Whereby link. Patients and dentists must be signed in with BankID.
 export async function GET(_req: Request, { params }: { params: Promise<{ recordingId: string }> }) {
   const { recordingId } = await params
   const admin = createAdminClient()
@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ recordi
   if (!rec) return NextResponse.json({ error: 'Hittades inte.' }, { status: 404 })
   const access = await meetingAccess(rec.meeting_id)
   if (!access) return NextResponse.json({ error: 'Ingen åtkomst.' }, { status: 403 })
-  if (!access.isDentist && !access.bankId) return NextResponse.json({ error: 'Logga in med BankID för att se inspelningen.' }, { status: 401 })
+  if (!access.bankId) return NextResponse.json({ error: 'Logga in med BankID för att se inspelningen.' }, { status: 401 })
 
   await admin.from('case_access_log').insert({ case_id: access.meeting.case_id, profile_id: access.profile.id, action: 'video_recording' })
   try {

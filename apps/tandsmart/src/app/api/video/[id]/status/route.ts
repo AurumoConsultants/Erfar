@@ -8,6 +8,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
   const access = await meetingAccess(id)
   if (!access?.isDentist) return NextResponse.json({ error: 'Endast för granskande tandläkare.' }, { status: 403 })
+  if (!access.bankId) return NextResponse.json({ error: 'Logga in med BankID.' }, { status: 401 })
   const { status } = await req.json().catch(() => ({}))
   if (status !== 'genomford' && status !== 'avbokad') return NextResponse.json({ error: 'Ogiltig status.' }, { status: 400 })
 
