@@ -23,7 +23,7 @@ export default async function Header() {
         </Link>
         <HideOnClinicLink>
         <nav className="flex items-center gap-4 text-sm font-brand font-semibold">
-          <Link href="/priser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Priser</Link>
+          <Link href="/priser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Tandvårdspriser</Link>
           {profile?.role !== 'tandlakare' && (
             <Link href="/snabbkoll" className="text-brand-navy/80 hover:text-accent-600">Snabbkoll</Link>
           )}
