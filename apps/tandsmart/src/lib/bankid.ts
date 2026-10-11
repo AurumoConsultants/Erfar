@@ -19,6 +19,13 @@ export function bankIdConfigured() {
   return Boolean(process.env.CRIIPTO_DOMAIN && process.env.CRIIPTO_CLIENT_ID && process.env.CRIIPTO_CLIENT_SECRET)
 }
 
+// BankID is switched on with NEXT_PUBLIC_BANKID_ENABLED=true (also read by
+// the login pages). While it is off, everyone signs in with e-mail and
+// nothing requires BankID.
+export function bankIdEnabled() {
+  return process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true' && bankIdConfigured()
+}
+
 interface Discovery { authorization_endpoint: string; token_endpoint: string; jwks_uri: string; issuer: string }
 
 let discovery: Promise<Discovery> | null = null

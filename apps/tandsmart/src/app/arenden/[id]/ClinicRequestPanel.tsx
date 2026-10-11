@@ -8,6 +8,7 @@ import Field, { fieldInputClassName } from '@/components/ui/Field'
 import ClinicRequestList from '@/components/ClinicRequestList'
 import type { ClinicRequestRow } from '@/lib/caseData'
 import CardTitle from '@/components/ui/CardTitle'
+import { formatPersonnummerInput, normalizePersonnummer } from '@/lib/clinicRequest'
 
 const ITEMS = [
   { value: 'journal', label: 'Journalanteckningar' },
@@ -21,17 +22,21 @@ interface Props {
   defaultClinicName: string
   requests: ClinicRequestRow[]
   canRequest: boolean
-  // Personnummer from BankID, set only while the patient is signed in with
-  // BankID. Without it the patient is sent to BankID instead of the form.
+  // When BankID is on, the patient must be signed in with it: the
+  // personnummer then comes from BankID and is locked. When it is off, the
+  // patient types it.
+  bankIdRequired: boolean
   verifiedPersonnummer: string | null
 }
 
 // Lets the patient have their clinic send journal/röntgen straight to the case.
-export default function ClinicRequestPanel({ caseId, defaultClinicName, requests, canRequest, verifiedPersonnummer }: Props) {
+export default function ClinicRequestPanel({ caseId, defaultClinicName, requests, canRequest, bankIdRequired, verifiedPersonnummer }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [clinicName, setClinicName] = useState(defaultClinicName)
   const [clinicEmail, setClinicEmail] = useState('')
+  const [personnummer, setPersonnummer] = useState(verifiedPersonnummer ?? '')
+  const needsBankId = bankIdRequired && !verifiedPersonnummer
   const [items, setItems] = useState<string[]>(['journal', 'rontgen'])
   const [period, setPeriod] = useState('')
   const [consent, setConsent] = useState(false)
@@ -59,7 +64,7 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
     setError(null)
     const res = await fetch(`/api/arenden/${caseId}/klinikbegaran`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clinicName, clinicEmail, items, period, consent }),
+      body: JSON.stringify({ clinicName, clinicEmail, personnummer, items, period, consent }),
     })
     const json = await res.json().catch(() => ({}))
     setBusy(false)
@@ -115,7 +120,7 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
         </div>
       )}
 
-      {canRequest && !open && !verifiedPersonnummer && (
+      {canRequest && !open && needsBankId && (
         <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-2 text-sm">
           <p>
             Kliniken lämnar bara ut journal och röntgen när du har legitimerat dig. Logga in med BankID, så ser kliniken
@@ -127,13 +132,13 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
         </div>
       )}
 
-      {canRequest && !open && verifiedPersonnummer && (
+      {canRequest && !open && !needsBankId && (
         <Button variant="secondary" onClick={() => { setOpen(true); setResult(null); setCopied(null) }}>
           {requests.length ? 'Skicka en ny begäran' : 'Be kliniken skicka underlag'}
         </Button>
       )}
 
-      {open && verifiedPersonnummer && (
+      {open && !needsBankId && (
         <form onSubmit={send} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Klinikens namn" htmlFor="cr-name">
@@ -142,9 +147,15 @@ export default function ClinicRequestPanel({ caseId, defaultClinicName, requests
             <Field label="Klinikens e-post" htmlFor="cr-email" hint="Finns ofta på klinikens webbplats eller kostnadsförslaget.">
               <input id="cr-email" type="email" required value={clinicEmail} onChange={e => setClinicEmail(e.target.value)} className={fieldInputClassName()} />
             </Field>
-            <Field label="Ditt personnummer" htmlFor="cr-pnr" hint="Hämtat från BankID. Visas bara för kliniken via länken.">
-              <input id="cr-pnr" readOnly value={verifiedPersonnummer}
-                className={fieldInputClassName('bg-gray-50 text-gray-700 cursor-not-allowed')} />
+            <Field label="Ditt personnummer" htmlFor="cr-pnr"
+              hint={verifiedPersonnummer
+                ? 'Hämtat från BankID. Visas bara för kliniken via länken.'
+                : 'Så att kliniken hittar rätt journal. Visas bara för kliniken via länken.'}>
+              <input id="cr-pnr" required inputMode="numeric" placeholder="ÅÅÅÅMMDD-XXXX" value={personnummer}
+                readOnly={!!verifiedPersonnummer}
+                onChange={e => setPersonnummer(formatPersonnummerInput(e.target.value))}
+                onBlur={() => setPersonnummer(p => normalizePersonnummer(p) ?? p)}
+                className={fieldInputClassName(verifiedPersonnummer ? 'bg-gray-50 text-gray-700 cursor-not-allowed' : '')} />
             </Field>
             <Field label="Period (valfritt)" htmlFor="cr-period" hint="T.ex. ”2024–2026” eller ”senaste besöket”.">
               <input id="cr-period" value={period} maxLength={100} onChange={e => setPeriod(e.target.value)} className={fieldInputClassName()} />

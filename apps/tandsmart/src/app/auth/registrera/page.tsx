@@ -56,12 +56,16 @@ export default function SignupPage() {
         <p className="text-sm text-gray-700">{info}</p>
       ) : (
         <>
-        <a href="/auth/bankid?next=/arenden/nytt"
-          className={buttonClassName('primary', 'w-full mb-2 bg-brand-navy! hover:opacity-90')}>
-          Skapa konto med BankID
-        </a>
-        <p className="text-center text-xs text-gray-500 mb-4">Snabbast — namn och personnummer hämtas från BankID.</p>
-        <p className="text-center text-xs text-gray-400 mb-4">eller med e-post och lösenord</p>
+        {process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true' && (
+          <>
+            <a href="/auth/bankid?next=/arenden/nytt"
+              className={buttonClassName('primary', 'w-full mb-2 bg-brand-navy! hover:opacity-90')}>
+              Skapa konto med BankID
+            </a>
+            <p className="text-center text-xs text-gray-500 mb-4">Snabbast — namn och personnummer hämtas från BankID.</p>
+            <p className="text-center text-xs text-gray-400 mb-4">eller med e-post och lösenord</p>
+          </>
+        )}
         <form onSubmit={onSubmit} className="space-y-4">
           <Field label="Namn" htmlFor="name">
             <input id="name" required autoComplete="name" value={fullName}

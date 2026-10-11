@@ -6,7 +6,7 @@ import { buttonClassName } from '@/components/ui/Button'
 import VideoMeetingList from '@/components/video/VideoMeetingList'
 import { requireProfile } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { bankIdConfigured } from '@/lib/bankid'
+import { bankIdConfigured, bankIdEnabled } from '@/lib/bankid'
 import { MEETING_COLUMNS, hasBankIdSession, type VideoMeeting } from '@/lib/video'
 
 // The signed-in user's profile: BankID identity and video consultations
@@ -28,6 +28,7 @@ export default async function ProfilePage() {
     <div className="space-y-6">
       <PageHeader icon="doctor" eyebrow="Min profil" title={profile.full_name}>{profile.email}</PageHeader>
 
+      {bankIdEnabled() && (
       <Card className="space-y-4">
         <CardTitle icon="doctor">BankID</CardTitle>
         {identity?.bankid_verified_at ? (
@@ -50,6 +51,7 @@ export default async function ProfilePage() {
           </div>
         )}
       </Card>
+      )}
 
       {profile.role === 'patient' && (
         <Card className="space-y-4">

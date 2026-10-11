@@ -15,6 +15,7 @@ import CardTitle from '@/components/ui/CardTitle'
 import VideoMeetingList from '@/components/video/VideoMeetingList'
 import { createClient } from '@/lib/supabase/server'
 import { MEETING_COLUMNS, hasBankIdSession, type VideoMeeting } from '@/lib/video'
+import { bankIdEnabled } from '@/lib/bankid'
 import PageHeader from '@/components/ui/PageHeader'
 
 function ReviewSection({ title, text }: { title: string; text: string | null }) {
@@ -102,14 +103,15 @@ export default async function CasePage({
           <CardTitle icon="chat">Videosamtal med Doktor Sylvia</CardTitle>
           {(meetings ?? []).length === 0 && (
             <p className="text-sm text-gray-600">Doktor Sylvia bokar en tid med dig. Du får ett mejl, och samtalet syns här och under Min profil.
-              Du ansluter med BankID och samtalet spelas in så att du kan se det igen.</p>
+              {bankIdEnabled() ? 'Du ansluter med BankID och samtalet' : 'Samtalet'} spelas in så att du kan se det igen.</p>
           )}
           <VideoMeetingList meetings={(meetings ?? []) as unknown as VideoMeeting[]} canPlay={bankIdSession} />
         </Card>
       )}
 
       <ClinicRequestPanel caseId={c.id} defaultClinicName={c.clinic_name ?? ''} requests={clinicRequests}
-        canRequest={!answered} verifiedPersonnummer={bankIdSession ? identity?.personnummer ?? null : null} />
+        canRequest={!answered} bankIdRequired={bankIdEnabled()}
+        verifiedPersonnummer={bankIdEnabled() && bankIdSession ? identity?.personnummer ?? null : null} />
 
       {analysis.lines.length > 0 && (
         <Card>

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { BANKID_COOKIE, verifyBankIdSession } from '@/lib/bankid'
+import { BANKID_COOKIE, bankIdEnabled, verifyBankIdSession } from '@/lib/bankid'
 import { listRecordings } from '@/lib/whereby'
 
 export interface VideoMeeting {
@@ -19,8 +19,10 @@ export interface VideoMeeting {
 export const MEETING_COLUMNS =
   'id, case_id, patient_id, scheduled_at, duration_minutes, status, room_name, recording_consent_at, recordings:video_recordings(id, started_at, ended_at)'
 
-// Is the current request signed in with BankID (this session) as `userId`?
+// Does the current request meet the BankID requirement as `userId`? Always
+// true while BankID is switched off.
 export async function hasBankIdSession(userId: string) {
+  if (!bankIdEnabled()) return true
   return verifyBankIdSession((await cookies()).get(BANKID_COOKIE)?.value, userId)
 }
 

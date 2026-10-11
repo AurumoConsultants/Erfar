@@ -50,8 +50,8 @@ export default async function ClinicUploadPage({ params }: { params: Promise<{ t
         </Card>
       ) : (
         <Card className="text-sm border-amber-300 bg-amber-50">
-          Den här begäran skapades innan Tandsmart krävde BankID. Patientens identitet är inte verifierad med BankID —
-          kontrollera den enligt era rutiner innan ni lämnar ut uppgifter.
+          Patienten är inloggad i Tandsmart med e-post men har inte legitimerat sig med BankID. Kontrollera
+          patientens identitet enligt era rutiner innan ni lämnar ut uppgifter.
         </Card>
       )}
 

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { BANKID_COOKIE, bankIdConfigured, verifyBankIdSession } from '@/lib/bankid'
+import { BANKID_COOKIE, bankIdEnabled, verifyBankIdSession } from '@/lib/bankid'
 
 export interface Profile {
   id: string
@@ -29,7 +29,7 @@ export async function requireProfile(): Promise<Profile> {
 // Dentists read health data, so they need a BankID login on top of their
 // password (stark autentisering). The database enforces the same rule.
 export async function dentistHasBankId(userId: string) {
-  if (!bankIdConfigured()) return true
+  if (!bankIdEnabled()) return true
   return verifyBankIdSession((await cookies()).get(BANKID_COOKIE)?.value, userId)
 }
 

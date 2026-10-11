@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { OIDC_COOKIE, authorizeUrl, bankIdConfigured, randomToken } from '@/lib/bankid'
+import { OIDC_COOKIE, authorizeUrl, bankIdEnabled, randomToken } from '@/lib/bankid'
 
 // Starts a BankID login at the e-ID broker. `next` is where to land after,
 // e.g. /video/<id> or /profil.
 export async function GET(request: Request) {
   const url = new URL(request.url)
-  if (!bankIdConfigured()) {
+  if (!bankIdEnabled()) {
     return NextResponse.redirect(new URL('/auth/login?bankid=ej-aktiverat', url))
   }
   const nextParam = url.searchParams.get('next') ?? '/profil'

@@ -8,6 +8,8 @@ import Button, { buttonClassName } from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Field, { fieldInputClassName } from '@/components/ui/Field'
 
+const BANKID_ENABLED = process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true'
+
 const BANKID_MESSAGES: Record<string, string> = {
   saknas: 'Det finns inget konto kopplat till ditt BankID än. Logga in med e-post (eller skapa ett konto) och koppla sedan BankID under Min profil.',
   'konto-skapat': 'Ditt konto är skapat. Logga in med BankID.',
@@ -51,11 +53,15 @@ function LoginForm() {
           {BANKID_MESSAGES[bankid] ?? BANKID_MESSAGES.fel}
         </p>
       )}
-      <a href={`/auth/bankid?next=${encodeURIComponent(next?.startsWith('/') && !next.startsWith('//') ? next : '/arenden')}`}
-        className={buttonClassName('primary', 'w-full mb-4 bg-brand-navy! hover:opacity-90')}>
-        Logga in med BankID
-      </a>
-      <p className="text-center text-xs text-gray-400 mb-4">eller med e-post</p>
+      {BANKID_ENABLED && (
+        <>
+          <a href={`/auth/bankid?next=${encodeURIComponent(next?.startsWith('/') && !next.startsWith('//') ? next : '/arenden')}`}
+            className={buttonClassName('primary', 'w-full mb-4 bg-brand-navy! hover:opacity-90')}>
+            Logga in med BankID
+          </a>
+          <p className="text-center text-xs text-gray-400 mb-4">eller med e-post</p>
+        </>
+      )}
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="E-post" htmlFor="email">
           <input id="email" type="email" required autoComplete="email" value={email}

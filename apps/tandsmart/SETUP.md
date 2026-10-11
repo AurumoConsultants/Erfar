@@ -19,7 +19,7 @@ The production project is **Tandsmart** (`nqveapbflmirytibdlis`, org Aurumo Cons
 2. SQL Editor → run every file in `apps/tandsmart/supabase/migrations/` in order. `00001` creates
    tables, RLS and the private `case-files` storage bucket; `00002` hardens and consolidates the
    RLS policies per Supabase's advisors; `00003` loads all 200 TLV referenspriser for 2026;
-   `00004` adds requests for more material (komplettering); `00005` adds a patient-facing note per code; `00006` adds clinic requests (journal/röntgen sent by the patient's clinic); `00007` tracks read messages so the review queue can flag and filter unread ones; `00008` adds the service packages (omfattande, video); `00009` adds BankID identity on profiles and video meetings/recordings; `00010` requires BankID for clinic requests; `00011` requires a recent BankID login for dentists.
+   `00004` adds requests for more material (komplettering); `00005` adds a patient-facing note per code; `00006` adds clinic requests (journal/röntgen sent by the patient's clinic); `00007` tracks read messages so the review queue can flag and filter unread ones; `00008` adds the service packages (omfattande, video); `00009` adds BankID identity on profiles and video meetings/recordings; `00010` requires BankID for clinic requests; `00011` requires a recent BankID login for dentists; `00012` switches that off again while BankID is disabled (see BankID below).
 3. Auth → URL configuration: set the site URL to the deployed domain and add redirect URLs for
    Vercel previews (`https://tandsmart-*-aurumoconsultants.vercel.app/**`) and local dev
    (`http://localhost:3040/**`).
@@ -93,6 +93,10 @@ publishes the new list, and check the högkostnadsskydd thresholds in `src/lib/p
   **Min profil**; afterwards "Logga in med BankID" signs them straight in. The personnummer is only
   ever written by the server after verifying the broker's signed ID token. Check the claim name for the
   personnummer on the first test login (`src/lib/bankid.ts` accepts the common ones).
+- **BankID on/off.** BankID is only active when `NEXT_PUBLIC_BANKID_ENABLED=true` is also set. It is currently
+  **off**: everyone signs in with e-mail, and video calls, recordings, clinic requests and the dentist workspace do
+  not ask for BankID. To switch it on: set the variable, redeploy, and re-apply `00011_dentist_bankid.sql` so the
+  database again requires dentists to have signed in with BankID within 12 hours.
 - **Video** uses Whereby Embedded. Set `WHEREBY_API_KEY`. The dentist books a time on the case (**Videosamtal**),
   joins as host and starts the cloud recording; the patient joins at `/video/<id>` after signing in with BankID
   and consenting to the recording. Recordings stay in Whereby's EU storage and are streamed through short-lived
