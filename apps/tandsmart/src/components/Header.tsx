@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getProfile } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import HideOnClinicLink from '@/components/HideOnClinicLink'
+import MobileMenu, { type MenuLink } from '@/components/MobileMenu'
 
 export default async function Header() {
   const profile = await getProfile()
@@ -14,6 +15,19 @@ export default async function Header() {
     unreadCases = data?.length ?? 0
   }
 
+  const isDentist = profile?.role === 'tandlakare'
+  const links: MenuLink[] = [
+    { href: '/priser', label: 'Tandvårdspriser' },
+    ...(isDentist
+      ? [
+          { href: unreadCases ? '/granskning?status=olasta' : '/granskning', label: 'Granskning', badge: unreadCases },
+          { href: '/granskning/referenspriser', label: 'Referenspriser' },
+        ]
+      : [{ href: '/snabbkoll', label: 'Snabbkoll' }]),
+    ...(profile?.role === 'patient' ? [{ href: '/arenden', label: 'Mina ärenden' }] : []),
+    ...(profile ? [{ href: '/profil', label: 'Min profil' }] : []),
+  ]
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
@@ -22,37 +36,25 @@ export default async function Header() {
             className="h-8 sm:h-9 w-auto" />
         </Link>
         <HideOnClinicLink>
-        <nav className="flex items-center gap-4 text-sm font-brand font-semibold">
-          <Link href="/priser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Tandvårdspriser</Link>
-          {profile?.role !== 'tandlakare' && (
-            <Link href="/snabbkoll" className="text-brand-navy/80 hover:text-accent-600">Snabbkoll</Link>
-          )}
-          {profile?.role === 'tandlakare' && (
-            <>
-              <Link href={unreadCases ? '/granskning?status=olasta' : '/granskning'} className="text-brand-navy/80 hover:text-accent-600 inline-flex items-center gap-1.5">
-                Granskning
-                {unreadCases > 0 && (
+          <nav className="hidden md:flex items-center gap-5 text-sm font-brand font-semibold">
+            {links.map(l => (
+              <Link key={l.href} href={l.href} className="text-brand-navy/80 hover:text-accent-600 inline-flex items-center gap-1.5">
+                {l.label}
+                {!!l.badge && (
                   <span className="rounded-full bg-red-600 text-white text-xs font-bold min-w-5 h-5 px-1.5 inline-flex items-center justify-center"
-                    aria-label={`${unreadCases} ärenden med olästa meddelanden`}>{unreadCases}</span>
+                    aria-label={`${l.badge} ärenden med olästa meddelanden`}>{l.badge}</span>
                 )}
               </Link>
-              <Link href="/granskning/referenspriser" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Referenspriser</Link>
-            </>
-          )}
-          {profile?.role === 'patient' && (
-            <Link href="/arenden" className="text-brand-navy/80 hover:text-accent-600">Mina ärenden</Link>
-          )}
-          {profile && (
-            <Link href="/profil" className="text-brand-navy/80 hover:text-accent-600 hidden sm:inline">Min profil</Link>
-          )}
-          {profile ? (
-            <form action="/auth/logout" method="post">
-              <button className="text-gray-500 hover:text-accent-600 font-brand font-semibold">Logga ut</button>
-            </form>
-          ) : (
-            <Link href="/auth/login" className="font-semibold text-accent-700">Logga in</Link>
-          )}
-        </nav>
+            ))}
+            {profile ? (
+              <form action="/auth/logout" method="post">
+                <button className="text-gray-500 hover:text-accent-600 font-brand font-semibold">Logga ut</button>
+              </form>
+            ) : (
+              <Link href="/auth/login" className="font-semibold text-accent-700">Logga in</Link>
+            )}
+          </nav>
+          <MobileMenu links={links} signedIn={!!profile} />
         </HideOnClinicLink>
       </div>
     </header>
