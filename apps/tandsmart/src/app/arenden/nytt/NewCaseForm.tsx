@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
@@ -155,6 +156,19 @@ export default function NewCaseForm({ userId, birthYear, references }: Props) {
                 label={p.label} description={p.description} price={formatPrice(p.price)} />
             ))}
           </div>
+          <Link href="/startsamtal"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border-2 border-dashed border-accent-300 bg-accent-50/60 p-3 pr-4 text-sm transition hover:border-accent-500 hover:bg-accent-50">
+            <span>
+              <span className="block font-brand font-semibold text-brand-navy">Osäker? Boka ett gratis startsamtal</span>
+              <span className="block text-gray-500 mt-0.5">
+                5 minuter med Doktor Sylvia på video. Hon hjälper dig att välja tjänst och komma igång med ärendet.
+              </span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0">
+              <span className="rounded-full bg-accent-600 text-white px-2.5 py-0.5 text-xs font-bold">Gratis</span>
+              <span className="text-accent-700 font-semibold">Välj tid →</span>
+            </span>
+          </Link>
         </fieldset>
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium text-gray-700 mb-2">Tillägg (valfritt)</legend>

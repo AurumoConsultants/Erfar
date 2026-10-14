@@ -21,6 +21,7 @@ export default async function Header() {
     ...(isDentist
       ? [
           { href: unreadCases ? '/granskning?status=olasta' : '/granskning', label: 'Granskning', badge: unreadCases },
+          { href: '/granskning/startsamtal', label: 'Startsamtal' },
           { href: '/granskning/referenspriser', label: 'Referenspriser' },
         ]
       : [{ href: '/snabbkoll', label: 'Snabbkoll' }]),

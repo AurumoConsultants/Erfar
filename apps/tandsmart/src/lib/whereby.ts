@@ -19,9 +19,10 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export interface CreatedMeeting { meetingId: string; roomName: string; roomUrl: string; hostRoomUrl: string }
 
-// A one-to-one room open until `endDate`. Cloud recording is offered to the
-// host (the dentist), who starts it once the patient is in the room.
-export async function createMeeting(endDate: Date): Promise<CreatedMeeting> {
+// A one-to-one room open until `endDate`. Unless `record` is false, cloud
+// recording is offered to the host (the dentist), who starts it once the
+// patient is in the room.
+export async function createMeeting(endDate: Date, { record = true } = {}): Promise<CreatedMeeting> {
   const m = await call<{ meetingId: string; roomName: string; roomUrl: string; hostRoomUrl: string }>('/meetings', {
     method: 'POST',
     body: JSON.stringify({
@@ -29,7 +30,7 @@ export async function createMeeting(endDate: Date): Promise<CreatedMeeting> {
       roomMode: 'normal',
       roomNamePrefix: 'tandsmart',
       fields: ['hostRoomUrl'],
-      recording: { type: 'cloud', destination: { provider: 'whereby', fileFormat: 'mp4' }, startTrigger: 'prompt' },
+      ...(record ? { recording: { type: 'cloud', destination: { provider: 'whereby', fileFormat: 'mp4' }, startTrigger: 'prompt' } } : {}),
     }),
   })
   return { meetingId: m.meetingId, roomName: m.roomName, roomUrl: m.roomUrl, hostRoomUrl: m.hostRoomUrl }
