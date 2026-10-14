@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/*
+ * Tandsmart palette: a calm teal-blue primary (trust, clinical) — shared
+ * UI primitives in components/ui use the `accent-*` alias only, exactly as
+ * in Erfar, Procere and Windowa, so they're copied over unchanged.
+ */
+@theme {
+  --color-accent-50: #effaf9;
+  --color-accent-100: #d7f2ef;
+  --color-accent-200: #b2e5df;
+  --color-accent-300: #7fd0c8;
+  --color-accent-400: #4bb3aa;
+  --color-accent-500: #2f978f;
+  --color-accent-600: #237a74;
+  --color-accent-700: #1f625e;
+  --color-accent-800: #1d4f4c;
+  --color-accent-900: #1b4240;
+
+  /* Navy of the logo wordmark, and its typeface (set in layout.tsx). */
+  --color-brand-navy: #083865;
+  --font-brand: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Headings use the logo's typeface and navy everywhere; a utility class
+   (e.g. text-white on dark bands) still overrides the colour. */
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-brand);
+    color: var(--color-brand-navy);
+  }
+}
